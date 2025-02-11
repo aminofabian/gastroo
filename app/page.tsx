@@ -17,6 +17,9 @@ const font = Jost({
   weight: ["400", "500", "700"],
 });
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   return (
     <main className="relative">

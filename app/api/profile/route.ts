@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function PUT(request: Request) {
   try {
     const session = await auth();

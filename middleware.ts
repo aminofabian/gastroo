@@ -72,8 +72,14 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!.+\\.[\\w]+$|_next).*)", // exclude all files with extensions
-    "/",  // include root
-    "/(api/admin|api/auth)(.*)",  // only protect admin and auth API routes
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
   ],
 };

@@ -46,6 +46,9 @@ export const metadata: Metadata = {
   manifest: '/site.webmanifest',
 };
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export default function RootLayout({
   children,
 }: Readonly<{
