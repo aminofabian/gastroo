@@ -1,7 +1,29 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
-import { UserRole } from "@prisma/client";
+
+export const dynamic = 'force-dynamic';
+
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await auth();
+    if (!session?.user?.email) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const banner = await prisma.banner.findUnique({
+      where: { id: params.id },
+    });
+
+    return NextResponse.json(banner);
+  } catch (error) {
+    console.error("[BANNER_GET]", error);
+    return new NextResponse("Internal error", { status: 500 });
+  }
+}
 
 export async function PATCH(
   req: Request,
@@ -9,34 +31,27 @@ export async function PATCH(
 ) {
   try {
     const session = await auth();
-    if (!session || session.user.role !== UserRole.ADMIN) {
+    if (!session?.user?.email) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
     const body = await req.json();
-    const { title, image, link, cta, active } = body;
+    const { title, subtitle, imageUrl, link } = body;
 
-    if (!params.id) {
-      return new NextResponse("Banner ID required", { status: 400 });
-    }
-
-    const banner = await db.banner.update({
-      where: {
-        id: params.id
-      },
+    const banner = await prisma.banner.update({
+      where: { id: params.id },
       data: {
         title,
-        image,
+        subtitle,
+        imageUrl,
         link,
-        cta,
-        active,
-      }
+      },
     });
 
     return NextResponse.json(banner);
   } catch (error) {
     console.error("[BANNER_PATCH]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    return new NextResponse("Internal error", { status: 500 });
   }
 }
 
@@ -46,23 +61,17 @@ export async function DELETE(
 ) {
   try {
     const session = await auth();
-    if (!session || session.user.role !== UserRole.ADMIN) {
+    if (!session?.user?.email) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    if (!params.id) {
-      return new NextResponse("Banner ID required", { status: 400 });
-    }
-
-    const banner = await db.banner.delete({
-      where: {
-        id: params.id
-      }
+    const banner = await prisma.banner.delete({
+      where: { id: params.id },
     });
 
     return NextResponse.json(banner);
   } catch (error) {
     console.error("[BANNER_DELETE]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    return new NextResponse("Internal error", { status: 500 });
   }
 } 

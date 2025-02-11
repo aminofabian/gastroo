@@ -1,5 +1,5 @@
 import NextAuth from "next-auth";
-import authConfig from "@/auth.config";
+import { authConfig } from "./auth.config";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
 import { UserRole } from "@/auth.config";
@@ -10,12 +10,8 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
-  adapter: PrismaAdapter(db) as any, // temporary type assertion to resolve conflict
-  session: { 
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-    updateAge: 24 * 60 * 60, // 24 hours
-  },
+  adapter: PrismaAdapter(db) as any,
+  session: { strategy: "jwt" },
   events: {
     async linkAccount({ user }) {
       // Initialize OAuth user with default values
