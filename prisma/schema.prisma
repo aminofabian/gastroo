@@ -1,0 +1,412 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id                    String                  @id @default(cuid())
+  firstName             String?
+  lastName              String?
+  email                 String?                 @unique
+  phone                 String?
+  emailVerified         DateTime?               @map("email_verified")
+  image                 String?
+  password              String?
+  role                  UserRole                @default(USER)
+  isTwoFactorEnabled    Boolean                 @default(false)
+  bio                   String?
+  hospital              String?
+  profileSlug           String?                 @unique
+  specialization        String?
+  title                 String?
+  namePrefix            String?
+  fullName              String?
+  designation           String?
+  yearsOfExperience     Int?
+  languages             String[]
+  certifications        String[]
+  researchInterests     String[]
+  publicationCount      Int?                    @default(0)
+  lastActive            DateTime?
+  profileCompleteness   Int?                    @default(0)
+  isProfilePublic       Boolean                 @default(true)
+  hasActiveSubscription Boolean                 @default(false)
+  subscriptionEndDate   DateTime?
+  subscriptions         Subscription[]
+  accounts              Account[]
+  membershipApplication MembershipApplication[]
+  eventsAttending       Event[]                 @relation("EventAttendees")
+  eventsOrganizing      Event[]                 @relation("EventOrganizers")
+  socialLinks           SocialLink[]
+  achievements          Achievement[]
+  education             Education[]
+  publications          Publication[]
+  researchProjects      ResearchProject[]
+  payments              Payment[]
+  resources             Resource[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model VerificationToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+  @@map("verification_tokens")
+}
+
+model PasswordResetToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+  @@map("password_reset_tokens")
+}
+
+model MembershipApplication {
+  id             String   @id @default(cuid())
+  userId         String
+  phone          String
+  designation    String
+  specialization String
+  licenseNumber  String?
+  hospital       String
+  address        String
+  city           String
+  county         String
+  postalCode     String?
+  status         String   @default("PENDING")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("membership_applications")
+}
+
+model Event {
+  id                   String    @id @default(cuid())
+  title                String
+  description          String
+  type                 EventType
+  startDate            DateTime
+  endDate              DateTime
+  venue                String
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  capacity             Int?
+  cpdPoints            Int       @default(0)
+  materials            Json?     @default("{}")
+  moderators           String[]
+  objectives           String[]
+  registrationDeadline DateTime?
+  speakers             String[]
+  memberPrice          Float?    @default(0)
+  nonMemberPrice       Float?    @default(0)
+  attendees            User[]    @relation("EventAttendees")
+  organizers           User[]    @relation("EventOrganizers")
+
+  @@map("events")
+}
+
+model SocialLink {
+  id         String         @id @default(cuid())
+  platform   SocialPlatform
+  url        String
+  userId     String
+  isVerified Boolean        @default(false)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("social_links")
+}
+
+model Achievement {
+  id          String          @id @default(cuid())
+  title       String
+  description String?
+  year        Int?
+  type        AchievementType
+  issuer      String?
+  url         String?
+  userId      String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("achievements")
+}
+
+model Education {
+  id             String   @id @default(cuid())
+  institution    String
+  degree         String
+  field          String
+  specialization String?
+  startYear      Int
+  endYear        Int?
+  grade          String?
+  honors         String?
+  thesis         String?
+  supervisor     String?
+  isVerified     Boolean  @default(false)
+  userId         String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("education")
+}
+
+model Publication {
+  id        String          @id @default(cuid())
+  title     String
+  abstract  String?
+  authors   String[]
+  journal   String?
+  year      Int
+  doi       String?         @unique
+  url       String?
+  citations Int             @default(0)
+  type      PublicationType
+  userId    String
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("publications")
+}
+
+model ResearchProject {
+  id            String        @id @default(cuid())
+  title         String
+  description   String?
+  startDate     DateTime
+  endDate       DateTime?
+  status        ProjectStatus
+  fundingSource String?
+  collaborators String[]
+  userId        String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("research_projects")
+}
+
+model EventAttendees {
+  A String
+  B String
+
+  @@unique([A, B], map: "_EventAttendees_AB_unique")
+  @@index([B], map: "_EventAttendees_B_index")
+  @@map("_EventAttendees")
+}
+
+model EventOrganizers {
+  A String
+  B String
+
+  @@unique([A, B], map: "_EventOrganizers_AB_unique")
+  @@index([B], map: "_EventOrganizers_B_index")
+  @@map("_EventOrganizers")
+}
+
+model Subscription {
+  id              String        @id @default(cuid())
+  userId          String
+  planType        PlanType
+  amount          Float
+  currency        String        @default("USD")
+  status          PaymentStatus
+  startDate       DateTime      @default(now())
+  endDate         DateTime
+  isAutoRenew     Boolean       @default(true)
+  paymentMethod   String?
+  lastPaymentDate DateTime?
+  nextBillingDate DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("subscriptions")
+}
+
+model Banner {
+  id        String   @id @default(cuid())
+  title     String
+  image     String
+  link      String
+  cta       String
+  active    Boolean  @default(true)
+  order     Int     @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("banners")
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  amount        Float
+  status        PaymentStatus
+  transactionId String        @unique
+  phoneNumber   String
+  description   String
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([userId])
+  @@map("payments")
+}
+
+model SliderInfo {
+  id        String   @id @default(cuid())
+  text      String
+  link      String?
+  linkText  String?
+  active    Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("slider_info")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+  VERIFIED_USER
+}
+
+enum MembershipStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum Designation {
+  MD
+  PhD
+  OTHER
+}
+
+enum EventType {
+  CONFERENCE
+  WORKSHOP
+  SEMINAR
+  MEETING
+}
+
+enum SocialPlatform {
+  LINKEDIN
+  TWITTER
+  RESEARCHGATE
+  GOOGLESCHOLAR
+  ORCID
+  WEBSITE
+  OTHER
+}
+
+enum AchievementType {
+  AWARD
+  CERTIFICATION
+  FELLOWSHIP
+  GRANT
+  PATENT
+  RECOGNITION
+  OTHER
+}
+
+enum PublicationType {
+  JOURNAL_ARTICLE
+  CONFERENCE_PAPER
+  BOOK_CHAPTER
+  BOOK
+  THESIS
+  PATENT
+  OTHER
+}
+
+enum ProjectStatus {
+  PLANNED
+  ONGOING
+  COMPLETED
+  SUSPENDED
+  CANCELLED
+}
+
+enum PlanType {
+  MONTHLY
+  ANNUAL
+  LIFETIME
+}
+
+enum PaymentStatus {
+  ACTIVE
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+  EXPIRED
+}
+
+enum ResourceType {
+  PDF
+  VIDEO
+  ARTICLE
+  EBOOK
+}
+
+model Resource {
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  type        ResourceType
+  category    String
+  fileUrl     String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  user        User         @relation(fields: [userId], references: [id])
+  userId      String
+
+  @@index([userId])
+  @@map("resources")
+}
