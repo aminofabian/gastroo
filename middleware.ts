@@ -1,6 +1,6 @@
-import NextAuth from "next-auth";
-
-import authConfig from "@/auth.config";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { jwtDecode } from "jwt-decode";
 
 import {
   DEFAULT_LOGIN_REDIRECT,
@@ -9,70 +9,59 @@ import {
   publicRoutes,
 } from "@/routes";
 
-// List of allowed admin emails
+// Move this to a separate config file if needed
 const ALLOWED_ADMIN_EMAILS = [
   "fabianngaira@gmail.com",
   "aminofabian@gmail.com",
   // Add more admin emails here
 ];
 
-export const { auth } = NextAuth(authConfig);
-
-export default auth((req) => {
-  const { nextUrl } = req;
-  const isLoggedIn = !!req.auth;
-  const isAdminRoute = nextUrl.pathname.startsWith("/admin") || nextUrl.pathname.startsWith("/api/admin");
+export async function middleware(request: NextRequest) {
+  const { nextUrl } = request;
+  
+  // Get auth data from headers
+  const token = request.cookies.get("next-auth.session-token")?.value;
+  const isLoggedIn = !!token;
+  
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
-
-  // Debug logging
-  console.log("Auth Debug:", {
-    isLoggedIn,
-    user: req.auth?.user,
-    email: req.auth?.user?.email,
-    role: req.auth?.user?.role,
-    isAdminRoute,
-  });
+  const isAdminRoute = nextUrl.pathname.startsWith("/admin") || nextUrl.pathname.startsWith("/api/admin");
 
   if (isApiAuthRoute) {
-    return;
+    return NextResponse.next();
   }
 
   if (isAuthRoute) {
     if (isLoggedIn) {
-      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
     }
-    return;
+    return NextResponse.next();
   }
 
   if (!isLoggedIn && !isPublicRoute) {
-    let callbackUrl = nextUrl.pathname;
-    if (nextUrl.search) {
-      callbackUrl += nextUrl.search;
-    }
+    const callbackUrl = `${nextUrl.pathname}${nextUrl.search}`;
     const encodedCallbackUrl = encodeURIComponent(callbackUrl);
-    return Response.redirect(new URL(`/auth/login?callbackUrl=${encodedCallbackUrl}`, nextUrl));
+    return NextResponse.redirect(new URL(`/auth/login?callbackUrl=${encodedCallbackUrl}`, nextUrl));
   }
 
   // Check for admin route access
-  if (isAdminRoute) {
-    const userRole = req.auth?.user?.role;
+  if (isAdminRoute && token) {
+    const decodedToken = jwtDecode(token) as { role?: string; email?: string };
     
-    // Debug logging for admin check
     console.log("Admin Check:", {
-      userRole,
-      email: req.auth?.user?.email,
-      shouldRedirect: userRole !== "ADMIN"
+      userRole: decodedToken.role,
+      email: decodedToken.email,
+      shouldRedirect: decodedToken.role !== "ADMIN"
     });
     
-    if (userRole !== "ADMIN") {
-      return Response.redirect(new URL("/dashboard", nextUrl));
+    if (decodedToken.role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/dashboard", nextUrl));
     }
   }
 
-  return;
-});
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [
