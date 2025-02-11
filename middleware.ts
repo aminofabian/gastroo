@@ -2,12 +2,19 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtDecode } from "jwt-decode";
 
-import {
-  DEFAULT_LOGIN_REDIRECT,
-  apiAuthPrefix,
-  authRoutes,
-  publicRoutes,
-} from "@/routes";
+// Move routes directly into middleware to avoid Edge compatibility issues
+const publicRoutes = [
+  "/",
+  "/auth/verify",
+];
+
+const authRoutes = [
+  "/auth/login",
+  "/auth/register",
+];
+
+const apiAuthPrefix = "/api/auth";
+const DEFAULT_LOGIN_REDIRECT = "/dashboard";
 
 // Move this to a separate config file if needed
 const ALLOWED_ADMIN_EMAILS = [
