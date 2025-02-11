@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtDecode } from "jwt-decode";
 
+export const runtime = 'nodejs';
+
 // Move routes directly into middleware to avoid Edge compatibility issues
 const publicRoutes = [
   "/",
