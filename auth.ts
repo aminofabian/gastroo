@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import authConfig from "@/auth.config";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/auth.config";
 
 export const {
   handlers: { GET, POST },
@@ -23,7 +23,7 @@ export const {
         where: { id: user.id },
         data: { 
           emailVerified: new Date(),
-          role: UserRole.USER,
+          role: "USER" as UserRole,
           // Split name into firstName and lastName if available
           ...(user.name && {
             firstName: user.name.split(' ')[0],

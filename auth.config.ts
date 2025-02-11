@@ -5,8 +5,9 @@ import { getUserByEmail, getUserById } from "./data/user";
 import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
-import { UserRole } from "@prisma/client";
 import { Session } from "next-auth";
+
+export type UserRole = "ADMIN" | "USER";
 
 async function verifyPassword(password: string, hashedPassword: string) {
   return bcrypt.compare(password, hashedPassword);
