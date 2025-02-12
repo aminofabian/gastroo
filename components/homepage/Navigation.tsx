@@ -423,6 +423,7 @@ const Navigation = () => {
     } as StandardNavItem,
     { title: 'News', link: '/news' } as StandardNavItem,
     { title: 'Pricing', link: '/pricing' } as StandardNavItem,
+    { title: 'Payment Details', link: '/payment' } as StandardNavItem,
     {
       title: 'Membership',
       link: '/membership',
