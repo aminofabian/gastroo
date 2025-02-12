@@ -17,13 +17,14 @@ const font = Jost({
   weight: ["400", "500", "700"],
 });
 
-export const runtime = 'edge';
-export const dynamic = 'force-dynamic';
-
 export default function Home() {
   return (
-    <main>
-      <h1>Welcome to Your App</h1>
+    <main className="relative">
+      {/* Hero Section */}
+      <section className="relative">
+        <Hero />
+      </section>
+      {/* Rest of your components */}
     </main>
   );
 }
