@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
-import type { Event } from "@prisma/client";
 import { uploadToS3 } from "@/lib/s3";
 import { generateSlug } from "@/lib/utils";
 
-type EventType = Event["type"];
+type EventType = "CONFERENCE" | "WORKSHOP" | "SEMINAR" | "MEETING";
 
 const ACCEPTED_FILE_TYPES = [
   'application/pdf',
