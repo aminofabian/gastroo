@@ -120,6 +120,7 @@ model Event {
   startDate            DateTime
   endDate              DateTime
   venue                String
+  slug                 String    @unique
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
   capacity             Int?

@@ -118,6 +118,30 @@ export async function POST(req: Request) {
       materials[file.name] = fileUrl;
     }
 
+    // Generate a slug from the event title if not provided
+    const slug = title.toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
+    console.log('Creating event with data:', {
+      title,
+      description,
+      type,
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
+      venue,
+      objectives,
+      cpdPoints: cpdPoints || 0,
+      speakers: speakers || [],
+      moderators: moderators || [],
+      capacity,
+      registrationDeadline: registrationDeadline ? new Date(registrationDeadline) : null,
+      materials,
+      memberPrice,
+      nonMemberPrice,
+      slug,
+    });
+
     const event = await db.event.create({
       data: {
         title,
@@ -135,6 +159,7 @@ export async function POST(req: Request) {
         materials,
         memberPrice,
         nonMemberPrice,
+        slug,
       },
     });
 

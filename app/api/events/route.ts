@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
@@ -17,6 +18,11 @@ export async function GET() {
       throw new Error("Database connection failed");
     }
     
+    // First try to fetch all events without any filters
+    const allEvents = await db.event.findMany();
+    console.log("[EVENTS_API] All events (no filter):", allEvents);
+
+    // Then fetch events with the date filter
     const events = await db.event.findMany({
       include: {
         attendees: {
@@ -31,15 +37,10 @@ export async function GET() {
       orderBy: {
         startDate: 'asc',
       },
-      where: {
-        endDate: {
-          gte: new Date(),
-        },
-      },
     });
 
     console.log("[EVENTS_API] Found events:", events.length);
-    console.log("[EVENTS_API] First event (if any):", events[0]);
+    console.log("[EVENTS_API] Events with details:", JSON.stringify(events, null, 2));
 
     // Set proper headers and return response
     return new NextResponse(JSON.stringify(events), {

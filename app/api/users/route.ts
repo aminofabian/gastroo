@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
-import { UserRole } from "@prisma/client";
 
 export async function GET() {
   try {
@@ -18,7 +17,7 @@ export async function GET() {
       select: { role: true }
     });
 
-    if (currentUser?.role !== UserRole.ADMIN) {
+    if (currentUser?.role !== "ADMIN") {
       return new NextResponse("Forbidden", { status: 403 });
     }
 
