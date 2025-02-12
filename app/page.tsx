@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Button } from "@/components/ui/button";
 import { Jost } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -11,71 +12,94 @@ import Publications from "@/components/homepage/Publications";
 import Donation from "@/components/homepage/Donation";
 import Newsletter from "@/components/homepage/Newsletter";
 import Footer from '@/components/homepage/Footer';
+import { ErrorBoundary } from 'react-error-boundary';
 
 const font = Jost({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
 });
 
+// Add proper metadata
+export const metadata = {
+  title: 'GSK - Home',
+  description: 'Welcome to Gastroenterology Society of Kenya',
+};
+
+// Add proper error handling
+function ErrorFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <h1>Something went wrong. Please try again later.</h1>
+    </div>
+  );
+}
+
 export default function Home() {
   return (
     <main className="relative">
-      {/* Hero Section */}
-      <section className="relative">
-        <Hero />
-      </section>
+      <ErrorBoundary fallback={<ErrorFallback />}>
+        <Suspense fallback={<div>Loading...</div>}>
+          {/* Hero Section */}
+          <section className="relative">
+            <Hero />
+          </section>
 
-      {/* About GSK Section */}
-      <section className="relative">
-        <AboutGSK />
-      </section>
+          {/* About GSK Section */}
+          <section className="relative">
+            <AboutGSK />
+          </section>
 
-       {/* Membership Features with smooth transition */}
-       <section className="relative -mt-20">
-        <MembershipFeatures />
-      </section>
+          {/* Rest of your sections wrapped in Suspense */}
+          <Suspense fallback={<div>Loading features...</div>}>
+            {/* Membership Features with smooth transition */}
+            <section className="relative -mt-20">
+              <MembershipFeatures />
+            </section>
 
-      {/* Features Section with top wave separator */}
-      <section className="relative bg-white pt-20 pb-20">
-        <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-[#002347] to-transparent pointer-events-none" />
-        <div className="relative">
-          <Features />
-        </div>
-      </section>
+            {/* Features Section with top wave separator */}
+            <section className="relative bg-white pt-20 pb-20">
+              <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-[#002347] to-transparent pointer-events-none" />
+              <div className="relative">
+                <Features />
+              </div>
+            </section>
+          </Suspense>
 
-      {/* Partners Section with gradient background */}
-      <section className="relative bg-gradient-to-b from-gray-50 to-white py-10">
-        <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-[0.02]" />
-        <div className="relative">
-          <Partners />
-        </div>
-      </section>
+          {/* Partners Section with gradient background */}
+          <section className="relative bg-gradient-to-b from-gray-50 to-white py-10">
+            <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-[0.02]" />
+            <div className="relative">
+              <Partners />
+            </div>
+          </section>
 
-      {/* Publications Section with subtle separator */}
-      <section className="relative bg-white pt-5">
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-        <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-b from-transparent to-[#003366]" />
-        <div className="relative">
-          <Publications />
-        </div>
-      </section>
+          {/* Publications Section with subtle separator */}
+          <section className="relative bg-white pt-5">
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+            <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-b from-transparent to-[#003366]" />
+            <div className="relative">
+              <Publications />
+            </div>
+          </section>
 
-      {/* Donation Section with dark background */}
-      <section className="relative py-20">
-        <div className="relative">
-          <Donation />
-        </div>
-      </section>
+          {/* Donation Section with dark background */}
+          <section className="relative py-20">
+            <div className="relative">
+              <Donation />
+            </div>
+          </section>
 
-      {/* Newsletter Section */}
-      <section className="relative">
-        <Newsletter />
-      </section>
+          {/* Newsletter Section */}
+          <section className="relative">
+            <Newsletter />
+          </section>
 
-      {/* Footer */}
-      <section className="relative bg-[#003366]">
-        <Footer />
-      </section>
+          {/* Footer */}
+          <section className="relative bg-[#003366]">
+            <Footer />
+          </section>
+        </Suspense>
+      </ErrorBoundary>
     </main>
   );
 }

@@ -2,10 +2,12 @@
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
-    runtime: 'nodejs',
+    // Remove runtime configuration as it's causing issues
+    // runtime: 'nodejs',
   },
   images: {
     domains: ['...your-domains...'],
+    unoptimized: true, // Add this for static exports
   },
   typescript: {
     ignoreBuildErrors: true,
@@ -13,6 +15,9 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Add output configuration
+  output: 'standalone',
+  poweredByHeader: false,
   async headers() {
     return [
       {
