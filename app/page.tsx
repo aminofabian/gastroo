@@ -12,7 +12,7 @@ import Publications from "@/components/homepage/Publications";
 import Donation from "@/components/homepage/Donation";
 import Newsletter from "@/components/homepage/Newsletter";
 import Footer from '@/components/homepage/Footer';
-import { ErrorBoundary } from 'react-error-boundary';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 const font = Jost({
   subsets: ["latin"],
