@@ -4,6 +4,7 @@ import { Metadata } from "next";
 import ClientLayout from "@/components/ClientLayout";
 import Providers from "@/components/Providers";
 import { Toaster } from 'sonner';
+import { Inter } from 'next/font/google'
 
 const outfit = Outfit({ 
   subsets: ["latin"], 
@@ -20,6 +21,8 @@ const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair"
 });
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: "GSK - Gastroenterology Society of Kenya",
@@ -55,7 +58,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${outfit.variable} ${garamond.variable} ${playfair.variable} font-garamond antialiased`}>
+      <body className={`${outfit.variable} ${garamond.variable} ${playfair.variable} font-garamond antialiased ${inter.className}`}>
         <Providers>
           <ClientLayout>{children}</ClientLayout>
         </Providers>

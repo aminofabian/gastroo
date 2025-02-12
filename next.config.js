@@ -2,6 +2,7 @@
 const nextConfig = {
   experimental: {
     serverActions: true,
+    missingSuspenseWithCSRError: false,
   },
   images: {
     domains: ['...your-domains...'],
