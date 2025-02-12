@@ -12,6 +12,9 @@ interface Activity {
   time: string;
 }
 
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 export async function GET() {
   try {
     const session = await auth();
