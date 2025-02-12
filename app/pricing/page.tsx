@@ -190,6 +190,109 @@ export default function PricingPage() {
             ))}
           </div>
         </div>
+
+        {/* Payment Details Section */}
+        <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-12 mt-20">
+          <h2 className="text-3xl font-bold text-primary mb-8 text-center">Payment Details</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Bank Transfer Details */}
+            <div className="bg-card rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+              <h3 className="font-semibold text-xl mb-4 text-primary flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                Bank Transfer
+              </h3>
+              <div className="space-y-3 text-sm">
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-muted-foreground">Account Name:</span>
+                  <span className="font-medium">GASTROENTEROLOGY SOCIETY OF KENYA</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-muted-foreground">Account Number:</span>
+                  <span className="font-medium">7711630029</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-muted-foreground">Bank:</span>
+                  <span className="font-medium">NCBA</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-muted-foreground">Branch:</span>
+                  <span className="font-medium">YAYA Branch</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-muted-foreground">SWIFT Code:</span>
+                  <span className="font-medium">CBAFKENX</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-muted-foreground">Bank Code:</span>
+                  <span className="font-medium">07000</span>
+                </div>
+              </div>
+            </div>
+
+            {/* M-Pesa Details */}
+            <div className="bg-card rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+              <h3 className="font-semibold text-xl mb-4 text-primary flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                M-Pesa Payment
+              </h3>
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <span className="text-muted-foreground">Paybill Number:</span>
+                    <span className="font-medium">880100</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <span className="text-muted-foreground">Account Number:</span>
+                    <span className="font-medium">PAYGSK</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm">Steps:</h4>
+                  <ol className="list-decimal list-inside text-sm space-y-1 text-muted-foreground">
+                    <li>Go to M-Pesa</li>
+                    <li>Select Lipa Na M-Pesa</li>
+                    <li>Select Paybill</li>
+                    <li>Enter 880100 as business number</li>
+                    <li>Enter PAYGSK as account number</li>
+                    <li>Enter Amount</li>
+                    <li>Enter M-Pesa PIN and confirm</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Information */}
+          <div className="mt-8 text-center max-w-2xl mx-auto">
+            <div className="bg-card/50 rounded-lg p-6">
+              <h3 className="font-semibold text-lg mb-4 text-primary">Contact Information</h3>
+              <div className="space-y-2 text-sm">
+                <p>Gastroenterology Society of Kenya</p>
+                <p>ACS Plaza - 2nd floor, Lenana Road</p>
+                <div className="flex justify-center gap-4 mt-4">
+                  <span className="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    0704373746
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    secretarygsk@gmail.com
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <style jsx>{`
