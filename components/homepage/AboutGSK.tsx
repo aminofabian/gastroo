@@ -17,8 +17,8 @@ const AboutGSK = () => {
                 className="object-cover"
               />
               <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-sm px-6 py-3 GSK">
-                <span className="text-4xl font-bold text-[#003366]">500+</span>
-                <p className="text-[#003366]/80 font-medium">Active Members</p>
+                <span className="text-4xl font-bold text-[#c22f61]">500+</span>
+                <p className="text-[#c22f61]/80 font-medium">Active Members</p>
               </div>
             </div>
             
@@ -47,7 +47,7 @@ const AboutGSK = () => {
           <div className="lg:col-span-4 space-y-8">
             {/* Text Content */}
             <div className="bg-white p-8  border border-gray-100 shadow-sm">
-              <h2 className="text-3xl font-merriweather font-bold text-[#003366] mb-4">
+              <h2 className="text-3xl font-merriweather font-bold text-[#c22f61] mb-4">
                 Leading Gastroenterology Excellence in Kenya
               </h2>
               <p className="text-gray-600 mb-6">
@@ -55,19 +55,19 @@ const AboutGSK = () => {
               </p>
               <ul className="space-y-4">
                 <li className="flex items-center text-gray-700">
-                  <svg className="w-5 h-5 mr-3 text-[#003366]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 mr-3 text-[#c22f61]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   Professional Development Programs
                 </li>
                 <li className="flex items-center text-gray-700">
-                  <svg className="w-5 h-5 mr-3 text-[#003366]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 mr-3 text-[#c22f61]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   Research & Innovation Support
                 </li>
                 <li className="flex items-center text-gray-700">
-                  <svg className="w-5 h-5 mr-3 text-[#003366]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 mr-3 text-[#c22f61]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   Quality Healthcare Standards
@@ -75,7 +75,7 @@ const AboutGSK = () => {
               </ul>
               <a 
                 href="/about"
-                className="inline-flex items-center justify-center w-full px-6 py-3 mt-8 text-white bg-[#003366] GSK hover:bg-[#003366]/90 transition-colors duration-200"
+                className="inline-flex items-center justify-center w-full px-6 py-3 mt-8 text-white bg-[#c22f61] GSK hover:bg-[#c22f61]/90 transition-colors duration-200"
               >
                 Learn More About GSK
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -67,7 +67,7 @@ export default function DonationsManagement() {
           >
             <FaFilter />
           </button>
-          <button className="px-4 py-2 bg-[#003366] text-white  hover:bg-[#004488] transition-colors">
+          <button className="px-4 py-2 bg-[#c22f61] text-white  hover:bg-[#004488] transition-colors">
             <div className="flex items-center gap-2">
               <FaDownload />
               <span>Export</span>
@@ -85,7 +85,7 @@ export default function DonationsManagement() {
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="w-full px-4 py-2  border border-gray-200 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]"
+                className="w-full px-4 py-2  border border-gray-200 focus:border-[#c22f61] focus:ring-1 focus:ring-[#c22f61]"
               >
                 {statuses.map((status) => (
                   <option key={status} value={status}>
@@ -99,7 +99,7 @@ export default function DonationsManagement() {
               <select
                 value={selectedCampaign}
                 onChange={(e) => setSelectedCampaign(e.target.value)}
-                className="w-full px-4 py-2  border border-gray-200 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]"
+                className="w-full px-4 py-2  border border-gray-200 focus:border-[#c22f61] focus:ring-1 focus:ring-[#c22f61]"
               >
                 <option value="all">All Campaigns</option>
                 {campaigns.map((campaign) => (
@@ -116,7 +116,7 @@ export default function DonationsManagement() {
                 placeholder="Search by donor or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2  border border-gray-200 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]"
+                className="w-full px-4 py-2  border border-gray-200 focus:border-[#c22f61] focus:ring-1 focus:ring-[#c22f61]"
               />
             </div>
           </div>

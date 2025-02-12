@@ -126,7 +126,7 @@ export default function VolunteerPage() {
             </p>
             <a
               href="#apply"
-              className="inline-block bg-white text-[#003366] px-8 py-3 rounded-md font-semibold hover:bg-opacity-90 transition-all"
+              className="inline-block bg-white text-[#c22f61] px-8 py-3 rounded-md font-semibold hover:bg-opacity-90 transition-all"
             >
               Volunteer Now
             </a>
@@ -153,7 +153,7 @@ export default function VolunteerPage() {
                 <ul className="space-y-2">
                   {role.responsibilities.map((item, idx) => (
                     <li key={idx} className="text-sm text-gray-600 flex items-center">
-                      <span className="w-1.5 h-1.5 bg-[#003366] rounded-full mr-2"></span>
+                      <span className="w-1.5 h-1.5 bg-[#c22f61] rounded-full mr-2"></span>
                       {item}
                     </li>
                   ))}
@@ -203,7 +203,7 @@ export default function VolunteerPage() {
                     required
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#003366] focus:border-[#003366]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#c22f61] focus:border-[#c22f61]"
                   />
                 </div>
                 <div>
@@ -216,7 +216,7 @@ export default function VolunteerPage() {
                     required
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#003366] focus:border-[#003366]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#c22f61] focus:border-[#c22f61]"
                   />
                 </div>
               </div>
@@ -232,7 +232,7 @@ export default function VolunteerPage() {
                     required
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#003366] focus:border-[#003366]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#c22f61] focus:border-[#c22f61]"
                   />
                 </div>
                 <div>
@@ -245,7 +245,7 @@ export default function VolunteerPage() {
                     required
                     value={formData.profession}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#003366] focus:border-[#003366]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#c22f61] focus:border-[#c22f61]"
                   />
                 </div>
               </div>
@@ -259,7 +259,7 @@ export default function VolunteerPage() {
                   name="specialization"
                   value={formData.specialization}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#003366] focus:border-[#003366]"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#c22f61] focus:border-[#c22f61]"
                 />
               </div>
 
@@ -272,7 +272,7 @@ export default function VolunteerPage() {
                   required
                   value={formData.role}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#003366] focus:border-[#003366]"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#c22f61] focus:border-[#c22f61]"
                 >
                   <option value="">Select a role</option>
                   {volunteerRoles.map((role, index) => (
@@ -293,7 +293,7 @@ export default function VolunteerPage() {
                   value={formData.experience}
                   onChange={handleInputChange}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#003366] focus:border-[#003366]"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#c22f61] focus:border-[#c22f61]"
                   placeholder="Please describe your relevant experience..."
                 ></textarea>
               </div>
@@ -308,7 +308,7 @@ export default function VolunteerPage() {
                   value={formData.motivation}
                   onChange={handleInputChange}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#003366] focus:border-[#003366]"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#c22f61] focus:border-[#c22f61]"
                   placeholder="Why do you want to volunteer with GSK?"
                 ></textarea>
               </div>
@@ -322,7 +322,7 @@ export default function VolunteerPage() {
                   required
                   value={formData.availability}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#003366] focus:border-[#003366]"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#c22f61] focus:border-[#c22f61]"
                 >
                   <option value="part-time">Part-time</option>
                   <option value="full-time">Full-time</option>
@@ -337,7 +337,7 @@ export default function VolunteerPage() {
                 className={`w-full py-3 px-6 rounded-md text-white font-semibold transition-all ${
                   isSubmitting
                     ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-[#003366] hover:bg-[#002244]'
+                    : 'bg-[#c22f61] hover:bg-[#002244]'
                 }`}
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Application'}

@@ -140,7 +140,7 @@ export default function Sidebar() {
                 [...Array(4)].map((_, index) => (
                   <div 
                     key={index}
-                    className="bg-[#003366]/50 p-2.5 animate-pulse"
+                    className="bg-[#c22f61]/50 p-2.5 animate-pulse"
                   >
                     <div className="h-4 bg-white/20 rounded mb-2"></div>
                     <div className="h-3 bg-white/20 rounded w-2/3"></div>
@@ -150,7 +150,7 @@ export default function Sidebar() {
                 stats.map((stat, index) => (
                   <div 
                     key={index} 
-                    className="bg-[#003366]/50 hover:bg-[#003366] transition-all duration-200 p-2.5 group cursor-default"
+                    className="bg-[#c22f61]/50 hover:bg-[#c22f61] transition-all duration-200 p-2.5 group cursor-default"
                   >
                     <div className="flex items-center gap-1.5 text-white/60 mb-1">
                       <span className="text-base">{stat.icon}</span>
@@ -179,8 +179,8 @@ export default function Sidebar() {
                     href={item.href}
                     className={`flex items-center gap-3 px-4 py-2.5  transition-all duration-200 ${
                       pathname === item.href
-                        ? "bg-[#003366] text-white shadow-sm"
-                        : "text-white/60 hover:text-white hover:bg-[#003366]/50"
+                        ? "bg-[#c22f61] text-white shadow-sm"
+                        : "text-white/60 hover:text-white hover:bg-[#c22f61]/50"
                     }`}
                   >
                     <item.icon className={`text-xl transition-transform duration-200 ${
@@ -203,7 +203,7 @@ export default function Sidebar() {
                 <button
                   key="signout"
                   onClick={item.onClick}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-white/60 hover:text-white hover:bg-[#003366]/50 transition-all duration-200"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-white/60 hover:text-white hover:bg-[#c22f61]/50 transition-all duration-200"
                 >
                   <item.icon className="text-xl" />
                   <span className="font-medium text-sm">{item.label}</span>
@@ -212,7 +212,7 @@ export default function Sidebar() {
                 <Link
                   key={item.href}
                   href={item.href!}
-                  className="flex items-center gap-3 px-4 py-2.5 text-white/60 hover:text-white hover:bg-[#003366]/50 transition-all duration-200"
+                  className="flex items-center gap-3 px-4 py-2.5 text-white/60 hover:text-white hover:bg-[#c22f61]/50 transition-all duration-200"
                 >
                   <item.icon className="text-xl" />
                   <span className="font-medium text-sm">{item.label}</span>

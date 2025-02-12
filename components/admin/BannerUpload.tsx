@@ -111,7 +111,7 @@ export default function BannerUpload() {
   return (
     <div className="space-y-6">
       <div className="bg-white  p-6 border border-gray-200">
-        <h2 className="text-2xl font-merriweather font-bold text-[#003366] mb-6">Upload New Banner</h2>
+        <h2 className="text-2xl font-merriweather font-bold text-[#c22f61] mb-6">Upload New Banner</h2>
         
         {/* Upload Area */}
         <div className="space-y-4">
@@ -142,7 +142,7 @@ export default function BannerUpload() {
               className="block w-full p-4 border-2 border-dashed border-gray-300  text-center cursor-pointer hover:border-[#0f5a5e]/50 transition-colors"
             >
               <div className="space-y-2">
-                <div className="text-[#003366] font-medium">
+                <div className="text-[#c22f61] font-medium">
                   {preview ? 'Change Image' : 'Choose an image'}
                 </div>
                 <div className="text-sm text-gray-500">
@@ -181,7 +181,7 @@ export default function BannerUpload() {
             className={`w-full py-3 px-4  font-medium text-white transition-all duration-300 ${
               !selectedFile || uploading
                 ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-[#003366] hover:bg-[#003366]/90'
+                : 'bg-[#c22f61] hover:bg-[#c22f61]/90'
             }`}
           >
             {uploading ? (

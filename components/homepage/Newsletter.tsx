@@ -18,10 +18,10 @@ const NewsletterBanner = () => {
         className="absolute w-full h-full object-cover object-center brightness-75"
       />
       
-      <div className="absolute inset-0 bg-[#003366]/80" />
+      <div className="absolute inset-0 bg-[#c22f61]/80" />
       
       <div className="absolute inset-0 flex items-center justify-end px-4 sm:px-6 lg:px-8">
-        <div className="bg-[#003366]/90 p-8 max-w-md w-full mr-0 lg:mr-16">
+        <div className="bg-[#c22f61]/90 p-8 max-w-md w-full mr-0 lg:mr-16">
           <h2 className="text-white text-2xl font-merriweather font-bold mb-4">
             Stay Updated with GSK Newsletter
           </h2>
@@ -43,8 +43,8 @@ const NewsletterBanner = () => {
             />
             <button
               type="submit"
-              className="w-full bg-[#003366] text-white px-6 py-3 font-merriweather
-                       font-medium hover:bg-[#003366]/90 transition-all duration-300
+              className="w-full bg-[#c22f61] text-white px-6 py-3 font-merriweather
+                       font-medium hover:bg-[#c22f61]/90 transition-all duration-300
                        flex items-center justify-center gap-2 group"
             >
               Subscribe

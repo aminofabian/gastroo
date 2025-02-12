@@ -173,7 +173,7 @@ const Features = () => {
       title: "Member Directory",
       description: "Access our network of gastroenterology professionals",
       link: "/members",
-      color: "bg-[#003366]"
+      color: "bg-[#c22f61]"
     },
     {
       icon: (
@@ -184,7 +184,7 @@ const Features = () => {
       title: "Certification",
       description: "Professional certification and accreditation",
       link: "/certification",
-      color: "bg-[#003366]"
+      color: "bg-[#c22f61]"
     },
     {
       icon: (
@@ -195,7 +195,7 @@ const Features = () => {
       title: "Clinical Guidelines",
       description: "Latest gastroenterology practice guidelines",
       link: "/guidelines",
-      color: "bg-[#003366]"
+      color: "bg-[#c22f61]"
     },
     {
       icon: (
@@ -206,7 +206,7 @@ const Features = () => {
       title: "Research Access",
       description: "Member-exclusive research database",
       link: "/research",
-      color: "bg-[#003366]"
+      color: "bg-[#c22f61]"
     },
     {
       icon: (
@@ -217,7 +217,7 @@ const Features = () => {
       title: "CPD Points",
       description: "Track your continuing professional development",
       link: "/cpd",
-      color: "bg-[#003366]"
+      color: "bg-[#c22f61]"
     },
     {
       icon: (
@@ -228,7 +228,7 @@ const Features = () => {
       title: "Join GSK",
       description: "Become a member today",
       link: "/join",
-      color: "bg-[#003366]"
+      color: "bg-[#c22f61]"
     }
   ];
 
@@ -275,7 +275,7 @@ const Features = () => {
     <>
       <div className="flex flex-col lg:flex-row justify-center gap-8 p-4 sm:p-8 bg-white">
         {/* Why Join GSK Card */}
-        <div className="w-full lg:w-[500px] bg-[#003366] GSK p-6 sm:p-8">
+        <div className="w-full lg:w-[500px] bg-[#c22f61] GSK p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
             <h2 className="text-xl sm:text-2xl text-white">Why Join GSK?</h2>
             <span className="text-sm text-white bg-white/10 px-3 py-1 rounded inline-block">Premium Benefits</span>
@@ -301,8 +301,8 @@ const Features = () => {
         {/* Upcoming Events Card */}
         <div className="w-full lg:w-[500px] bg-white GSK p-6 sm:p-8 shadow-lg">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-            <h2 className="text-xl sm:text-2xl text-[#003366]">Upcoming CPD Events</h2>
-            <span className="text-sm text-[#003366] bg-[#003366]/10 px-3 py-1 rounded inline-block">Earn Points</span>
+            <h2 className="text-xl sm:text-2xl text-[#c22f61]">Upcoming CPD Events</h2>
+            <span className="text-sm text-[#c22f61] bg-[#c22f61]/10 px-3 py-1 rounded inline-block">Earn Points</span>
           </div>
           <div className="space-y-6">
             {loading ? (
@@ -340,17 +340,17 @@ const Features = () => {
                 return (
                   <div key={event.id} className="flex items-start gap-4">
                     <div className="text-center w-14 sm:w-16 flex-shrink-0">
-                      <div className="text-xl sm:text-2xl font-bold text-[#003366]">{date}</div>
-                      <div className="text-sm text-[#003366]/70">{month}</div>
+                      <div className="text-xl sm:text-2xl font-bold text-[#c22f61]">{date}</div>
+                      <div className="text-sm text-[#c22f61]/70">{month}</div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-base sm:text-lg font-medium text-[#003366] break-words">{event.title}</h3>
-                      <p className="text-[#003366]/70 text-sm mb-2 break-words">{event.venue}</p>
+                      <h3 className="text-base sm:text-lg font-medium text-[#c22f61] break-words">{event.title}</h3>
+                      <p className="text-[#c22f61]/70 text-sm mb-2 break-words">{event.venue}</p>
                       <div className="flex flex-wrap gap-2 mb-2">
-                        <span className="text-xs px-2 py-1 bg-[#003366]/10 text-[#003366]/70 rounded">
+                        <span className="text-xs px-2 py-1 bg-[#c22f61]/10 text-[#c22f61]/70 rounded">
                           {event.type}
                         </span>
-                        <span className="text-xs px-2 py-1 bg-[#003366]/10 text-[#003366]/70 rounded">
+                        <span className="text-xs px-2 py-1 bg-[#c22f61]/10 text-[#c22f61]/70 rounded">
                           {event.cpdPoints} CPD Points
                         </span>
                       </div>
@@ -362,7 +362,7 @@ const Features = () => {
                             ? "bg-green-600 text-white hover:bg-green-700"
                             : isRegistrationClosed || isFull
                             ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                            : "bg-[#40e0d0]/20 text-[#003366] hover:bg-[#40e0d0]/30"
+                            : "bg-[#40e0d0]/20 text-[#c22f61] hover:bg-[#40e0d0]/30"
                         }`}
                       >
                         {isLoading === event.id ? (
@@ -383,7 +383,7 @@ const Features = () => {
               })
             )}
           </div>
-          <Link href="/events" className="inline-block mt-4 text-[#003366] hover:underline">
+          <Link href="/events" className="inline-block mt-4 text-[#c22f61] hover:underline">
             View All Events →
           </Link>
         </div>

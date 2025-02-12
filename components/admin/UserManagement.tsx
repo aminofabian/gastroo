@@ -63,7 +63,7 @@ export default function UserManagement() {
         <p className="text-red-500">Error: {error}</p>
         <button 
           onClick={() => window.location.reload()}
-          className="mt-4 px-4 py-2 bg-[#003366] text-white hover:bg-[#004488] transition-colors"
+          className="mt-4 px-4 py-2 bg-[#c22f61] text-white hover:bg-[#004488] transition-colors"
         >
           Try Again
         </button>
@@ -82,7 +82,7 @@ export default function UserManagement() {
             </p>
           )}
         </div>
-        <button className="px-4 py-2 bg-[#003366] text-white hover:bg-[#004488] transition-colors">
+        <button className="px-4 py-2 bg-[#c22f61] text-white hover:bg-[#004488] transition-colors">
           Add New User
         </button>
       </div>
@@ -94,14 +94,14 @@ export default function UserManagement() {
           placeholder="Search users..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full max-w-md px-4 py-2 border border-gray-200 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]"
+          className="w-full max-w-md px-4 py-2 border border-gray-200 focus:border-[#c22f61] focus:ring-1 focus:ring-[#c22f61]"
         />
       </div>
 
       {/* Loading State */}
       {isLoading ? (
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#003366] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#c22f61] mx-auto"></div>
           <p className="text-gray-500 mt-4">Loading users...</p>
         </div>
       ) : (

@@ -156,11 +156,11 @@ export default function MembershipForm() {
               <div
                 className={`group flex flex-col border-l-4 py-2 pl-4 md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4 ${
                   index <= currentStep
-                    ? "border-[#003366]"
+                    ? "border-[#c22f61]"
                     : "border-gray-200"
                 }`}
               >
-                <span className="text-sm font-medium text-[#003366]">
+                <span className="text-sm font-medium text-[#c22f61]">
                   Step {index + 1}
                 </span>
                 <span className="text-sm font-medium">{step.title}</span>
@@ -439,7 +439,7 @@ export default function MembershipForm() {
               <Button 
                 type="submit"
                 disabled={isSubmitting}
-                className="h-12 bg-[#003366] hover:bg-[#004488] text-white font-display font-bold transition-colors"
+                className="h-12 bg-[#c22f61] hover:bg-[#004488] text-white font-display font-bold transition-colors"
               >
                 {isSubmitting ? "Submitting..." : "Submit Application"}
               </Button>
@@ -447,7 +447,7 @@ export default function MembershipForm() {
               <Button
                 type="button"
                 onClick={next}
-                className="h-12 bg-[#003366] hover:bg-[#004488] text-white font-display font-bold transition-colors"
+                className="h-12 bg-[#c22f61] hover:bg-[#004488] text-white font-display font-bold transition-colors"
               >
                 Next
               </Button>

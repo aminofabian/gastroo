@@ -70,14 +70,14 @@ export default function BottomNav() {
                   whileTap={{ scale: 0.95 }}
                   className={`flex flex-col items-center justify-center w-16 h-16  shadow-lg transition-all duration-200 ${
                     isActive 
-                      ? "bg-[#003366] text-white" 
-                      : "bg-white text-[#003366] hover:bg-gray-50"
+                      ? "bg-[#c22f61] text-white" 
+                      : "bg-white text-[#c22f61] hover:bg-gray-50"
                   }`}
                 >
                   <item.icon className="text-2xl" />
                 </motion.div>
                 <span className={`mt-2 text-[10px] font-medium transition-all duration-200 ${
-                  isActive ? "text-[#003366] opacity-100" : "text-gray-500 opacity-70"
+                  isActive ? "text-[#c22f61] opacity-100" : "text-gray-500 opacity-70"
                 }`}>
                   {item.label}
                 </span>
@@ -94,7 +94,7 @@ export default function BottomNav() {
               <div
                 className={`flex flex-col items-center transition-all duration-200 ${
                   isActive 
-                    ? "text-[#003366]" 
+                    ? "text-[#c22f61]" 
                     : "text-gray-400 hover:text-gray-600"
                 }`}
               >
@@ -123,7 +123,7 @@ export default function BottomNav() {
               {isActive && !isHome && (
                 <motion.div
                   layoutId="bottomNavIndicator"
-                  className="absolute -top-0.5 left-1/2 w-1 h-1  bg-[#003366]"
+                  className="absolute -top-0.5 left-1/2 w-1 h-1  bg-[#c22f61]"
                   initial={{ x: "-50%" }}
                   animate={{ x: "-50%" }}
                   transition={{

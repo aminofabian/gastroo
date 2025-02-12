@@ -104,7 +104,7 @@ export default function PublicProfile({ params }: { params: { slug: string } }) 
               <div className="relative">
                 <Avatar className="h-40 w-40 ring-4 ring-white shadow-xl">
                   <AvatarImage src={profile.image || ""} className="object-cover" />
-                  <AvatarFallback className="bg-gradient-to-br from-[#003366] to-[#004488] text-3xl text-white">
+                  <AvatarFallback className="bg-gradient-to-br from-[#c22f61] to-[#004488] text-3xl text-white">
                     {profile.firstName?.[0]}{profile.lastName?.[0]}
                   </AvatarFallback>
                 </Avatar>

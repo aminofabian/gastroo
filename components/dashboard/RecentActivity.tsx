@@ -50,7 +50,7 @@ export default function RecentActivity() {
     <section className="relative">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-display font-bold text-gray-900">Recent Activity</h2>
-        <button className="text-sm text-[#003366] hover:text-[#004488] font-medium flex items-center gap-1.5">
+        <button className="text-sm text-[#c22f61] hover:text-[#004488] font-medium flex items-center gap-1.5">
           <FaClock className="text-gray-400" />
           View All
         </button>
@@ -76,7 +76,7 @@ export default function RecentActivity() {
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
-                  <div className="font-medium text-gray-900 group-hover:text-[#003366] transition-colors truncate">
+                  <div className="font-medium text-gray-900 group-hover:text-[#c22f61] transition-colors truncate">
                     {activity.title}
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-gray-400 whitespace-nowrap">

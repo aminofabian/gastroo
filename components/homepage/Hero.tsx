@@ -89,7 +89,7 @@ const Hero = () => {
   // Show loading state
   if (loading) {
     return (
-      <div className="relative min-h-screen bg-[#001a35] overflow-hidden">
+      <div className="relative min-h-screen bg-[#ce5981] overflow-hidden">
         <div className="absolute inset-0" style={styles.meshGradient} />
         <div className="absolute inset-0 bg-[url('/effects/noise.png')] opacity-[0.02] mix-blend-overlay" />
         <div className="flex items-center justify-center h-screen">
@@ -104,7 +104,7 @@ const Hero = () => {
 
   // Always show the hero section, even without banners
   return (
-    <div className="relative min-h-screen bg-[#001a35] overflow-hidden">
+    <div className="relative min-h-screen bg-[#ce5981] overflow-hidden">
       {/* Background effects */}
       <div className="absolute inset-0" style={styles.meshGradient} />
       <div className="absolute inset-0 bg-[url('/effects/noise.png')] opacity-[0.02] mix-blend-overlay" />
@@ -248,7 +248,7 @@ const Hero = () => {
               transition={{ delay: 0.6 }}
               className="relative"
             >
-              <div className="absolute -left-12 top-0 h-full w-24 bg-gradient-to-r from-[#001a35] via-[#001a35]/80 to-transparent z-20" />
+              <div className="absolute -left-12 top-0 h-full w-24 bg-gradient-to-r from-[#ce5981] via-[#ce5981]/80 to-transparent z-20" />
               {banners.length > 0 && <SwipeCarousel banners={banners} />}
               
               {/* Stats overlay with enhanced animation */}

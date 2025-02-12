@@ -18,7 +18,7 @@ interface FloatingIconProps {
 
 const FloatingIcon: React.FC<FloatingIconProps> = ({ icon: Icon, delay, duration, x, y }) => (
   <motion.div
-    className="absolute text-[#003366]/10 text-3xl"
+    className="absolute text-[#c22f61]/10 text-3xl"
     initial={{ x, y }}
     animate={{ 
       y: y,
@@ -99,7 +99,7 @@ const Publications = () => {
           viewport={{ once: true }}
         >
           <div className="relative inline-block mb-8">
-            <h2 className="relative font-merriweather text-6xl md:text-7xl font-bold text-[#003366]">
+            <h2 className="relative font-merriweather text-6xl md:text-7xl font-bold text-[#c22f61]">
               Medical Journal
             </h2>
             <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#0f5a5e]/20" />
@@ -125,7 +125,7 @@ const Publications = () => {
               className="object-cover"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#003366]/80 via-[#003366]/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#c22f61]/80 via-[#c22f61]/20 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-8 sm:p-12">
               <div className="max-w-3xl">
                 <h3 className="text-2xl sm:text-3xl md:text-4xl font-merriweather font-bold text-white mb-4">
@@ -161,7 +161,7 @@ const Publications = () => {
                 {/* Journal Header */}
                 <div className="px-8 py-6 border-b border-gray-100">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="px-4 py-1.5 bg-[#0f5a5e]/3 text-[#003366] text-sm font-medium">
+                    <span className="px-4 py-1.5 bg-[#0f5a5e]/3 text-[#c22f61] text-sm font-medium">
                       {pub.category}
                     </span>
                     <span className="flex items-center gap-2 text-gray-500 text-sm">
@@ -169,7 +169,7 @@ const Publications = () => {
                       {pub.date}
                     </span>
                   </div>
-                  <h3 className="text-2xl font-merriweather font-bold text-[#003366] mb-3">
+                  <h3 className="text-2xl font-merriweather font-bold text-[#c22f61] mb-3">
                     {pub.title}
                   </h3>
                   <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -194,7 +194,7 @@ const Publications = () => {
                       className="object-cover"
                     />
                   </div>
-                  <div className="absolute inset-0 bg-[#003366]/60" />
+                  <div className="absolute inset-0 bg-[#c22f61]/60" />
                   <div className="absolute bottom-0 left-0 right-0 p-8">
                     <div className="text-white mb-4 line-clamp-2 font-merriweather">
                       <FaQuoteRight className="float-left mr-4 text-3xl text-[#0f5a5e]/20" />
@@ -209,7 +209,7 @@ const Publications = () => {
                     {pub.tags.map((tag, tagIndex) => (
                       <span 
                         key={tagIndex}
-                        className="px-3 py-1 bg-[#0f5a5e]/3 text-[#003366] text-sm font-merriweather hover:bg-[#0f5a5e]/5 transition-colors cursor-pointer"
+                        className="px-3 py-1 bg-[#0f5a5e]/3 text-[#c22f61] text-sm font-merriweather hover:bg-[#0f5a5e]/5 transition-colors cursor-pointer"
                       >
                         #{tag}
                       </span>
@@ -217,7 +217,7 @@ const Publications = () => {
                   </div>
 
                   <motion.button 
-                    className="group w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#003366] text-white hover:bg-[#003366]/90 transition-all duration-300"
+                    className="group w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#c22f61] text-white hover:bg-[#c22f61]/90 transition-all duration-300"
                     whileHover={{ scale: 1.01 }}
                     transition={{ duration: 0.3 }}
                   >
@@ -239,7 +239,7 @@ const Publications = () => {
           viewport={{ once: true }}
         >
           <motion.button 
-            className="group relative inline-flex items-center gap-3 px-10 py-5 bg-[#003366] text-white text-lg font-merriweather hover:bg-[#003366]/90 transition-all duration-300"
+            className="group relative inline-flex items-center gap-3 px-10 py-5 bg-[#c22f61] text-white text-lg font-merriweather hover:bg-[#c22f61]/90 transition-all duration-300"
             whileHover={{ scale: 1.01 }}
             transition={{ duration: 0.3 }}
           >

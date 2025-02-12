@@ -71,8 +71,8 @@ export default function LeadershipPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="relative h-[300px] w-full overflow-hidden bg-[#003366]">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#003366] to-[#002244]"></div>
+      <div className="relative h-[300px] w-full overflow-hidden bg-[#c22f61]">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#c22f61] to-[#002244]"></div>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white max-w-4xl mx-auto px-4">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Leadership</h1>
@@ -86,7 +86,7 @@ export default function LeadershipPage() {
       <div className="max-w-7xl mx-auto px-4 py-16">
         {/* Mission Statement */}
         <div className="max-w-3xl mx-auto text-center mb-16">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#003366] mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-[#c22f61] mb-6">
             Committed to Excellence in Gastroenterology
           </h2>
           <p className="text-gray-600 leading-relaxed">
@@ -129,7 +129,7 @@ export default function LeadershipPage() {
                 <div className="space-y-2">
                   {/* Specialty */}
                   <div className="flex items-center gap-2 text-sm">
-                    <svg className="w-4 h-4 text-[#003366]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-[#c22f61]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                     <span className="text-gray-600">{leader.specialty}</span>
@@ -137,7 +137,7 @@ export default function LeadershipPage() {
 
                   {/* Experience */}
                   <div className="flex items-center gap-2 text-sm">
-                    <svg className="w-4 h-4 text-[#003366]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-[#c22f61]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span className="text-gray-600">{leader.experience}</span>
@@ -145,7 +145,7 @@ export default function LeadershipPage() {
 
                   {/* Hospital */}
                   <div className="flex items-center gap-2 text-sm">
-                    <svg className="w-4 h-4 text-[#003366]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-[#c22f61]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                     <span className="text-gray-600">{leader.hospital}</span>
@@ -157,7 +157,7 @@ export default function LeadershipPage() {
                   <div className="flex items-center justify-start gap-4">
                     <a
                       href={`mailto:${leader.email}`}
-                      className="text-[#003366] hover:text-[#002244] transition-colors"
+                      className="text-[#c22f61] hover:text-[#002244] transition-colors"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -168,7 +168,7 @@ export default function LeadershipPage() {
                         href={leader.linkedin}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#003366] hover:text-[#002244] transition-colors"
+                        className="text-[#c22f61] hover:text-[#002244] transition-colors"
                       >
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
@@ -184,7 +184,7 @@ export default function LeadershipPage() {
 
         {/* Vision Section */}
         <div className="mt-20 max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#003366] mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-[#c22f61] mb-6">
             Our Vision for the Future
           </h2>
           <p className="text-gray-600 leading-relaxed">

@@ -35,7 +35,7 @@ export default function NewsPage() {
           <h2 className="text-2xl font-display font-bold text-gray-900">News & Updates</h2>
           <button
             onClick={() => setShowAddForm(true)}
-            className="px-4 py-2 bg-[#003366] text-white  hover:bg-[#004488] transition-colors"
+            className="px-4 py-2 bg-[#c22f61] text-white  hover:bg-[#004488] transition-colors"
           >
             <div className="flex items-center gap-2">
               <FaPlus />
@@ -53,7 +53,7 @@ export default function NewsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
                 <input
                   type="text"
-                  className="w-full px-4 py-2  border border-gray-200 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]"
+                  className="w-full px-4 py-2  border border-gray-200 focus:border-[#c22f61] focus:ring-1 focus:ring-[#c22f61]"
                   placeholder="Enter article title"
                 />
               </div>
@@ -61,7 +61,7 @@ export default function NewsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
                 <textarea
                   rows={6}
-                  className="w-full px-4 py-2  border border-gray-200 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]"
+                  className="w-full px-4 py-2  border border-gray-200 focus:border-[#c22f61] focus:ring-1 focus:ring-[#c22f61]"
                   placeholder="Write your article content..."
                 />
               </div>
@@ -70,13 +70,13 @@ export default function NewsPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Author</label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2  border border-gray-200 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]"
+                    className="w-full px-4 py-2  border border-gray-200 focus:border-[#c22f61] focus:ring-1 focus:ring-[#c22f61]"
                     placeholder="Enter author name"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select className="w-full px-4 py-2  border border-gray-200 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]">
+                  <select className="w-full px-4 py-2  border border-gray-200 focus:border-[#c22f61] focus:ring-1 focus:ring-[#c22f61]">
                     <option value="draft">Draft</option>
                     <option value="published">Published</option>
                   </select>
@@ -92,7 +92,7 @@ export default function NewsPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#003366] text-white  hover:bg-[#004488] transition-colors"
+                  className="px-4 py-2 bg-[#c22f61] text-white  hover:bg-[#004488] transition-colors"
                 >
                   Save Article
                 </button>

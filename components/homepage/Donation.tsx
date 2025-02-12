@@ -16,7 +16,7 @@ const Donation = () => {
   ];
 
   return (
-    <section className="relative bg-[#001a35] py-20 overflow-hidden">
+    <section className="relative bg-[#ce5981] py-20 overflow-hidden">
       {/* Header */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
         <h2 className="text-4xl sm:text-5xl font-merriweather font-bold text-white text-center mb-4">
@@ -42,7 +42,7 @@ const Donation = () => {
             <motion.a
               href="/donate"
               whileHover={{ scale: 1.02 }}
-              className="inline-flex items-center px-8 py-3 bg-white text-[#001a35] font-merriweather font-semibold hover:bg-white/90 transition-all duration-300"
+              className="inline-flex items-center px-8 py-3 bg-white text-[#ce5981] font-merriweather font-semibold hover:bg-white/90 transition-all duration-300"
             >
               Make a Donation
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,25 +179,25 @@ const Donation = () => {
             { 
               number: "500+", 
               label: "Gastroenterologists", 
-              icon: <FaUserMd className="text-[#001a35]" />,
+              icon: <FaUserMd className="text-[#ce5981]" />,
               description: "Specialized Practitioners"
             },
             { 
               number: "50+", 
               label: "Endoscopy Centers", 
-              icon: <FaHospital className="text-[#001a35]" />,
+              icon: <FaHospital className="text-[#ce5981]" />,
               description: "Advanced Facilities"
             },
             { 
               number: "1000+", 
               label: "Research Papers", 
-              icon: <FaBookMedical className="text-[#001a35]" />,
+              icon: <FaBookMedical className="text-[#ce5981]" />,
               description: "Published Studies"
             },
             { 
               number: "20+", 
               label: "Clinical Trials", 
-              icon: <FaMicroscope className="text-[#001a35]" />,
+              icon: <FaMicroscope className="text-[#ce5981]" />,
               description: "Ongoing Research"
             }
           ].map((stat, index) => (
@@ -211,7 +211,7 @@ const Donation = () => {
             >
               <div className="bg-white p-6 transition-all duration-300 group-hover:-translate-y-1 border border-white/20">
                 <div className="text-4xl mb-3">{stat.icon}</div>
-                <div className="text-2xl font-bold text-[#001a35] mb-1">{stat.number}</div>
+                <div className="text-2xl font-bold text-[#ce5981] mb-1">{stat.number}</div>
                 <div className="text-gray-900 font-merriweather font-semibold mb-1">{stat.label}</div>
                 <div className="text-gray-500 font-merriweather text-sm">{stat.description}</div>
               </div>
@@ -227,7 +227,7 @@ const Donation = () => {
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
         >
-          <div className="bg-[#001a35] p-8 md:p-12 shadow-xl relative overflow-hidden border border-white/20">
+          <div className="bg-[#ce5981] p-8 md:p-12 shadow-xl relative overflow-hidden border border-white/20">
             <div className="max-w-4xl mx-auto text-center relative">
               <h3 className="text-3xl md:text-4xl font-merriweather font-bold text-white mb-6">
                 Transform Digestive Healthcare
@@ -239,7 +239,7 @@ const Donation = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="bg-white text-[#001a35] px-8 py-4 font-merriweather font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all duration-300 shadow-lg"
+                  className="bg-white text-[#ce5981] px-8 py-4 font-merriweather font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all duration-300 shadow-lg"
                 >
                   <FaHandHoldingHeart className="text-xl" />
                   Support Research

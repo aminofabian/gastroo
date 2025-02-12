@@ -107,8 +107,8 @@ export default function HelpDeskPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="relative h-[200px] w-full overflow-hidden bg-[#003366]">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#003366] to-[#002244]"></div>
+      <div className="relative h-[200px] w-full overflow-hidden bg-[#c22f61]">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#c22f61] to-[#002244]"></div>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white">
             <h1 className="text-4xl md:text-5xl font-bold mb-2">Help &amp; Support</h1>
@@ -132,7 +132,7 @@ export default function HelpDeskPage() {
               animate={{ opacity: 1, y: 0 }}
               className={`p-6 GSK text-left transition-all ${
                 selectedCategory === category.id
-                  ? 'bg-[#003366] text-white shadow-lg scale-105'
+                  ? 'bg-[#c22f61] text-white shadow-lg scale-105'
                   : 'bg-white hover:bg-gray-50 shadow-md'
               }`}
             >
@@ -166,7 +166,7 @@ export default function HelpDeskPage() {
                       required
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#003366] focus:border-[#003366]"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#c22f61] focus:border-[#c22f61]"
                     />
                   </div>
                   <div>
@@ -179,7 +179,7 @@ export default function HelpDeskPage() {
                       required
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#003366] focus:border-[#003366]"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#c22f61] focus:border-[#c22f61]"
                     />
                   </div>
                 </div>
@@ -193,7 +193,7 @@ export default function HelpDeskPage() {
                       name="priority"
                       value={formData.priority}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#003366] focus:border-[#003366]"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#c22f61] focus:border-[#c22f61]"
                     >
                       <option value="low">Low Priority</option>
                       <option value="normal">Normal Priority</option>
@@ -209,7 +209,7 @@ export default function HelpDeskPage() {
                       name="ticketType"
                       value={formData.ticketType}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#003366] focus:border-[#003366]"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#c22f61] focus:border-[#c22f61]"
                     >
                       <option value="support">Technical Support</option>
                       <option value="inquiry">General Inquiry</option>
@@ -229,7 +229,7 @@ export default function HelpDeskPage() {
                     required
                     value={formData.subject}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#003366] focus:border-[#003366]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#c22f61] focus:border-[#c22f61]"
                     placeholder="Brief description of your issue"
                   />
                 </div>
@@ -244,7 +244,7 @@ export default function HelpDeskPage() {
                     value={formData.message}
                     onChange={handleInputChange}
                     rows={4}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#003366] focus:border-[#003366]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#c22f61] focus:border-[#c22f61]"
                     placeholder="Please provide as much detail as possible"
                   ></textarea>
                 </div>
@@ -255,7 +255,7 @@ export default function HelpDeskPage() {
                   className={`w-full py-3 px-6 rounded-md text-white font-semibold transition-all ${
                     isSubmitting
                       ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-[#003366] hover:bg-[#002244]'
+                      : 'bg-[#c22f61] hover:bg-[#002244]'
                   }`}
                 >
                   {isSubmitting ? 'Submitting Ticket...' : 'Submit Support Ticket'}

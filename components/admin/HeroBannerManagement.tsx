@@ -177,7 +177,7 @@ export default function HeroBannerManagement() {
             });
             setShowForm(true);
           }}
-          className="px-4 py-2 bg-[#003366] text-white hover:bg-[#004488] transition-colors"
+          className="px-4 py-2 bg-[#c22f61] text-white hover:bg-[#004488] transition-colors"
         >
           Add New Banner
         </button>
@@ -197,7 +197,7 @@ export default function HeroBannerManagement() {
                 name="title"
                 value={formData.title}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-200 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]"
+                className="w-full px-4 py-2 border border-gray-200 focus:border-[#c22f61] focus:ring-1 focus:ring-[#c22f61]"
                 placeholder="Enter banner title"
                 required
               />
@@ -209,7 +209,7 @@ export default function HeroBannerManagement() {
                 name="cta"
                 value={formData.cta}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-200 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]"
+                className="w-full px-4 py-2 border border-gray-200 focus:border-[#c22f61] focus:ring-1 focus:ring-[#c22f61]"
                 placeholder="Enter call-to-action text"
                 required
               />
@@ -221,7 +221,7 @@ export default function HeroBannerManagement() {
                 name="link"
                 value={formData.link}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-200 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]"
+                className="w-full px-4 py-2 border border-gray-200 focus:border-[#c22f61] focus:ring-1 focus:ring-[#c22f61]"
                 placeholder="Enter banner link"
                 required
               />
@@ -250,7 +250,7 @@ export default function HeroBannerManagement() {
                     />
                     <label
                       htmlFor="banner-image"
-                      className="flex items-center justify-center w-full px-4 py-2 border-2 border-dashed border-gray-300 cursor-pointer hover:border-[#003366] transition-colors"
+                      className="flex items-center justify-center w-full px-4 py-2 border-2 border-dashed border-gray-300 cursor-pointer hover:border-[#c22f61] transition-colors"
                     >
                       <div className="flex items-center gap-2 text-gray-600">
                         <FaImage />
@@ -279,7 +279,7 @@ export default function HeroBannerManagement() {
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-[#003366] text-white hover:bg-[#004488] transition-colors"
+                className="px-4 py-2 bg-[#c22f61] text-white hover:bg-[#004488] transition-colors"
               >
                 {editingBanner ? "Update Banner" : "Save Banner"}
               </button>
@@ -331,7 +331,7 @@ export default function HeroBannerManagement() {
                   className="sr-only peer"
                   onChange={() => handleToggleActive(banner)}
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:h-5 after:w-5 after:transition-all peer-checked:bg-[#003366]"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c22f61]"></div>
               </label>
             </div>
           </div>

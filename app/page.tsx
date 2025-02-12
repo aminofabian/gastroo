@@ -76,7 +76,7 @@ export default function Home() {
           {/* Publications Section with subtle separator */}
           <section className="relative bg-white pt-5">
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-            <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-b from-transparent to-[#003366]" />
+            <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-b from-transparent to-[#c22f61]" />
             <div className="relative">
               <Publications />
             </div>
@@ -95,7 +95,7 @@ export default function Home() {
           </section>
 
           {/* Footer */}
-          <section className="relative bg-[#003366]">
+          <section className="relative bg-[#c22f61]">
             <Footer />
           </section>
         </Suspense>

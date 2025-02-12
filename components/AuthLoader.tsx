@@ -27,7 +27,7 @@ const AuthLoader = ({ onAuthenticated }: AuthLoaderProps) => {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-0 bg-[#003366] flex items-center justify-center z-50"
+      className="fixed inset-0 bg-[#c22f61] flex items-center justify-center z-50"
     >
       <div className="w-full max-w-md mx-auto p-6">
         <div className="flex flex-col items-center justify-center space-y-8">
@@ -73,7 +73,7 @@ const AuthLoader = ({ onAuthenticated }: AuthLoaderProps) => {
                 </div>
                 <button
                   type="submit"
-                  className="w-full px-4 py-2 bg-white text-[#003366]  font-serif font-semibold hover:bg-emerald-50 transition-colors"
+                  className="w-full px-4 py-2 bg-white text-[#c22f61]  font-serif font-semibold hover:bg-emerald-50 transition-colors"
                 >
                   Access Website
                 </button>
