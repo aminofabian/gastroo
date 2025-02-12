@@ -58,7 +58,7 @@ export default function Home() {
 
             {/* Features Section with top wave separator */}
             <section className="relative bg-white pt-20 pb-20">
-              <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-[#002347] to-transparent pointer-events-none" />
+              <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-[#af2a57] to-transparent pointer-events-none" />
               <div className="relative">
                 <Features />
               </div>

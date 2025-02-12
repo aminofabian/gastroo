@@ -167,7 +167,7 @@ const Hero = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
                 whileHover={{ scale: 1.02 }}
-                className="bg-[#0a1547] p-6 rounded-sm max-w-xl mt-12 relative overflow-hidden group"
+                className="bg-[#882144] p-6 rounded-sm max-w-xl mt-12 relative overflow-hidden group"
               >
                 <motion.div 
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
