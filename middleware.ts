@@ -23,8 +23,24 @@ const ALLOWED_ADMIN_EMAILS = [
   // Add more admin emails here
 ];
 
+// Static file patterns that should be excluded from middleware
+const staticFilePatterns = [
+  '/favicon.ico',
+  '/favicon.png',
+  '/robots.txt',
+  '/site.webmanifest',
+  '/apple-touch-icon.png',
+  '/safari-pinned-tab.svg',
+  '/icon-',  // This will match all icon files
+];
+
 export async function middleware(request: NextRequest) {
   const { nextUrl } = request;
+  
+  // Skip middleware for static files
+  if (staticFilePatterns.some(pattern => nextUrl.pathname.startsWith(pattern))) {
+    return NextResponse.next();
+  }
   
   // Get auth data from headers
   const token = request.cookies.get("next-auth.session-token")?.value;
@@ -77,8 +93,8 @@ export const config = {
      * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
+     * - assets (static assets)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|_next/static|_next/image|assets|favicon.ico|robots.txt).*)',
   ],
 };
