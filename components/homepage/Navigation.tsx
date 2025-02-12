@@ -456,13 +456,13 @@ const Navigation = () => {
               ) : (
                 <div className="hidden lg:flex items-center space-x-6">
                   <a 
-                    href="/login" 
+                    href="/auth/login" 
                     className="text-sm font-semibold text-[#003366]/80 hover:text-[#0f5a5e]/70 transition-colors duration-200 uppercase"
                   >
                     Sign In
                   </a>
                   <a 
-                    href="/register" 
+                    href="/auth/register" 
                     className="px-5 py-2 text-sm font-semibold text-white bg-[#003366] hover:bg-gradient-to-r hover:from-[#003366] hover:to-[#0f5a5e]/80 transition-all duration-200 uppercase tracking-wider"
                   >
                     Join GSK
