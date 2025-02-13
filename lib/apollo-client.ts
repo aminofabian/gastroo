@@ -33,4 +33,35 @@ export const GET_SITE_SETTINGS = gql`
       generalSettingsDescription
     }
   }
+`;
+
+export const GET_POST_BY_SLUG = gql`
+  query GetPostBySlug($slug: String!) {
+    post(id: $slug, idType: SLUG) {
+      id
+      title
+      content
+      date
+      author {
+        node {
+          name
+          avatar {
+            url
+          }
+        }
+      }
+      featuredImage {
+        node {
+          sourceUrl
+          altText
+        }
+      }
+      categories {
+        nodes {
+          name
+          slug
+        }
+      }
+    }
+  }
 `; 

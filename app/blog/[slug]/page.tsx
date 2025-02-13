@@ -7,6 +7,11 @@ interface PostProps {
   };
 }
 
+interface Category {
+  name: string;
+  slug: string;
+}
+
 async function getPost(slug: string) {
   try {
     const { data } = await client.query({
@@ -65,7 +70,7 @@ export default async function BlogPost({ params }: PostProps) {
           <>
             <span>•</span>
             <div className="flex gap-2">
-              {post.categories.nodes.map(category => (
+              {post.categories.nodes.map((category: Category) => (
                 <span
                   key={category.slug}
                   className="bg-gray-100 px-2 py-1 rounded-full text-sm"
