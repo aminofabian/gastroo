@@ -209,17 +209,17 @@ export default function UserManagement() {
                         <select
                           value={user.membershipApplication.status}
                           onChange={(e) => handleApplicationUpdate(user.id, e.target.value as MembershipStatus)}
-                          className={`text-xs font-semibold px-2 py-1 rounded-full border ${
+                          className={`text-xs font-semibold px-2 py-1 rounded-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                             user.membershipApplication.status === MembershipStatus.APPROVED
-                              ? 'bg-green-100 text-green-800 border-green-200'
+                              ? 'bg-green-100 text-green-800 border-green-200 focus:ring-green-500'
                               : user.membershipApplication.status === MembershipStatus.REJECTED
-                              ? 'bg-red-100 text-red-800 border-red-200'
-                              : 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                              ? 'bg-red-100 text-red-800 border-red-200 focus:ring-red-500'
+                              : 'bg-yellow-100 text-yellow-800 border-yellow-200 focus:ring-yellow-500'
                           }`}
                         >
-                          {Object.values(MembershipStatus).map((status) => (
-                            <option key={status} value={status}>{status}</option>
-                          ))}
+                          <option value={MembershipStatus.PENDING}>PENDING</option>
+                          <option value={MembershipStatus.APPROVED}>APPROVED</option>
+                          <option value={MembershipStatus.REJECTED}>REJECTED</option>
                         </select>
                         <button
                           onClick={() => setEditingApplication(user.id)}
