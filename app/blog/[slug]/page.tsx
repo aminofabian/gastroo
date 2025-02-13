@@ -14,9 +14,12 @@ interface Category {
 
 async function getPost(slug: string) {
   try {
+    // Clean the slug by removing any URL parts and leading/trailing slashes
+    const cleanSlug = slug.split('/').pop()?.replace(/^\/+|\/+$/g, '') || slug;
+    
     const { data } = await client.query({
       query: GET_POST_BY_SLUG,
-      variables: { slug }
+      variables: { slug: cleanSlug }
     });
     return data.post;
   } catch (error) {
