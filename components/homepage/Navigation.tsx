@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Logo from './Logo';
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOut, User, Settings, Bell } from 'lucide-react';
+import { toast } from "sonner";
 
 // Add keyframe animation for marquee
 const marqueeStyles = `
@@ -258,6 +259,11 @@ const MobileMenu = ({ navItems, isOpen, setIsOpen }: {
 const UserNav = () => {
   const { data: session } = useSession();
   
+  const handleSignOut = () => {
+    toast.success("Successfully signed out");
+    signOut({ callbackUrl: "/auth/login" });
+  };
+  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -295,12 +301,13 @@ const UserNav = () => {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <form action="/api/auth/signout" method="POST" className="w-full">
-            <button type="submit" className="flex items-center w-full cursor-pointer">
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign out
-            </button>
-          </form>
+          <button 
+            onClick={handleSignOut}
+            className="flex items-center w-full cursor-pointer"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign out
+          </button>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
