@@ -108,7 +108,6 @@ model MembershipApplication {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status         MembershipStatus @default(PENDING)
 
   @@map("membership_applications")
 }
