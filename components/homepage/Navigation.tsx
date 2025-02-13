@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut, User, Settings, Bell } from 'lucide-react';
 import { toast } from "sonner";
+import Link from 'next/link';
 
 // Add keyframe animation for marquee
 const marqueeStyles = `
@@ -502,6 +503,12 @@ const Navigation = () => {
                 </svg>
               </button>
             </div>
+            <Link
+              href="/blog"
+              className="text-gray-600 hover:text-gray-900"
+            >
+              Blog
+            </Link>
           </nav>
         </div>
       </div>
