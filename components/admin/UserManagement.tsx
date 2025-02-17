@@ -217,9 +217,24 @@ export default function UserManagement() {
                               : 'bg-yellow-100 text-yellow-800 border-yellow-200 focus:ring-yellow-500'
                           }`}
                         >
-                          <option value={MembershipStatus.PENDING}>PENDING</option>
-                          <option value={MembershipStatus.APPROVED}>APPROVED</option>
-                          <option value={MembershipStatus.REJECTED}>REJECTED</option>
+                          <option 
+                            value={MembershipStatus.PENDING}
+                            className="bg-white text-gray-900 hover:bg-gray-100"
+                          >
+                            PENDING
+                          </option>
+                          <option 
+                            value={MembershipStatus.APPROVED}
+                            className="bg-white text-gray-900 hover:bg-gray-100"
+                          >
+                            APPROVED
+                          </option>
+                          <option 
+                            value={MembershipStatus.REJECTED}
+                            className="bg-white text-gray-900 hover:bg-gray-100"
+                          >
+                            REJECTED
+                          </option>
                         </select>
                         <button
                           onClick={() => setEditingApplication(user.id)}

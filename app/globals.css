@@ -241,3 +241,14 @@ body {
 body {
   font-family: var(--font-euclid-circular);
 }
+
+/* Add these styles for the membership status dropdown */
+select option {
+  background-color: white;
+  color: #111827;
+  padding: 8px;
+}
+
+select option:hover {
+  background-color: #f3f4f6;
+}
