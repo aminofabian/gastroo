@@ -49,6 +49,13 @@ model User {
   researchProjects      ResearchProject[]
   payments              Payment[]
   resources             Resource[]
+  isOnboarded           Boolean                 @default(false)
+  membershipType        String?                 // "new" or "renewal"
+  subscriptionStatus    String                  @default("INACTIVE") // "ACTIVE", "INACTIVE", "EXPIRED"
+  subscriptionStartDate DateTime?
+  lastPaymentAmount     Float?
+  lastPaymentDate       DateTime?
+  membershipNumber      String?                 @unique
 
   @@map("users")
 }
@@ -252,7 +259,7 @@ model Subscription {
   userId          String
   planType        PlanType
   amount          Float
-  currency        String        @default("USD")
+  currency        String        @default("KES")
   status          PaymentStatus
   startDate       DateTime      @default(now())
   endDate         DateTime
@@ -293,6 +300,7 @@ model Payment {
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  currency      String        @default("KES")
 
   @@index([userId])
   @@map("payments")

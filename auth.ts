@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import { authConfig } from "./auth.config";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/auth.config";
 
 export const {
@@ -10,12 +10,12 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
-  adapter: PrismaAdapter(db) as any,
+  adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   events: {
     async linkAccount({ user }) {
       // Initialize OAuth user with default values
-      await db.user.update({
+      await prisma.user.update({
         where: { id: user.id },
         data: { 
           emailVerified: new Date(),

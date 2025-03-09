@@ -95,15 +95,36 @@ export default function MembershipForm() {
   const onSubmit = async (values: z.infer<typeof membershipSchema>) => {
     setIsSubmitting(true);
     try {
-      // Calculate amount based on membership type
       const amount = values.membershipType === "new" ? 6500 : 5000;
       
+      // First, update the user's onboarding status
+      const onboardingResponse = await fetch("/api/user/onboarding", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...values,
+          isOnboarded: true,
+          membershipType: values.membershipType,
+        }),
+      });
+
+      if (!onboardingResponse.ok) {
+        throw new Error("Failed to update onboarding status");
+      }
+
+      // Then proceed with payment
       const response = await fetch("/api/membership", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ ...values, amount }),
+        body: JSON.stringify({ 
+          ...values, 
+          amount,
+          subscriptionStatus: "PENDING" // Will be updated to ACTIVE after payment
+        }),
       });
 
       if (!response.ok) {
@@ -116,13 +137,13 @@ export default function MembershipForm() {
         duration: 5000,
       });
       
-      // Redirect to payment page instead of dashboard
+      // Redirect to payment page
       setTimeout(() => {
         router.push(`/payment?amount=${amount}&type=${values.membershipType}`);
       }, 2000);
     } catch (error) {
       console.error("Error submitting form:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to submit membership application. Please try again.");
+      toast.error(error instanceof Error ? error.message : "Failed to submit membership application");
     } finally {
       setIsSubmitting(false);
     }
@@ -404,7 +425,7 @@ export default function MembershipForm() {
                         onClick={() => field.onChange("new")}
                       >
                         <span className="font-bold">New Membership</span>
-                        <span className="text-sm">KES 6,500</span>
+                        <span className="text-sm">KES 6,500/=</span>
                       </Button>
                       <Button
                         type="button"
@@ -414,7 +435,7 @@ export default function MembershipForm() {
                         onClick={() => field.onChange("renewal")}
                       >
                         <span className="font-bold">Membership Renewal</span>
-                        <span className="text-sm">KES 5,000</span>
+                        <span className="text-sm">KES 5,000/=</span>
                       </Button>
                     </div>
                     <FormMessage />

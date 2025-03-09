@@ -5,6 +5,9 @@ import ClientLayout from "@/components/ClientLayout";
 import Providers from "@/components/Providers";
 import { Toaster } from 'sonner';
 import { Inter } from 'next/font/google'
+import { OnboardingModal } from "@/components/OnboardingModal";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 
 const outfit = Outfit({ 
   subsets: ["latin"], 
@@ -51,11 +54,22 @@ export const metadata: Metadata = {
 
 export const revalidate = 0;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+  let isOnboarded = true;
+
+  if (session?.user?.email) {
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { isOnboarded: true },
+    });
+    isOnboarded = user?.isOnboarded ?? false;
+  }
+
   return (
     <html lang="en">
       <body className={`${outfit.variable} ${garamond.variable} ${playfair.variable} font-garamond antialiased ${inter.className}`}>
@@ -63,6 +77,7 @@ export default function RootLayout({
           <ClientLayout>{children}</ClientLayout>
         </Providers>
         <Toaster position="top-center" />
+        <OnboardingModal isOnboarded={isOnboarded} />
       </body>
     </html>
   );
