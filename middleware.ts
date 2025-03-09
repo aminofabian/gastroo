@@ -1,17 +1,27 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { auth } from "@/auth"
+import { DEFAULT_LOGIN_REDIRECT } from "@/routes"
 
-// Simplified middleware configuration
-export function middleware(request: NextRequest) {
-  // Basic middleware logic
-  return NextResponse.next();
-}
+export default auth((req) => {
+  const { nextUrl } = req;
+  const isLoggedIn = !!req.auth;
 
+  const isAuthPage = nextUrl.pathname === "/login";
+  const isMembershipPage = nextUrl.pathname === "/membership";
+
+  // If trying to access membership page while not logged in
+  if (isMembershipPage && !isLoggedIn) {
+    return Response.redirect(new URL("/login?callbackUrl=/membership", nextUrl));
+  }
+
+  // If trying to access login page while already logged in
+  if (isAuthPage && isLoggedIn) {
+    return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+  }
+
+  return null;
+})
+
+// Specify which routes should be protected
 export const config = {
-  matcher: [
-    /*
-     * Match all paths except static files and API routes
-     */
-    '/((?!_next/static|_next/image|favicon.ico|public/|api/).*)',
-  ],
+  matcher: ["/membership", "/login"]
 }

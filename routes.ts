@@ -1,55 +1,34 @@
-// An array of public routes
-// These routes don't require authentication
-// @type {string[]}
-
-export const publicRoutes = ["/",
-  "/auth/new-verification",
-  "/dashboard",
-  "/settings",
-  "/admin",
+/**
+ * An array of routes that are accessible to the public
+ * These routes do not require authentication
+ * @type {string[]}
+ */
+export const publicRoutes = [
+  "/",
   "/about",
-  "/about/mission",
   "/contact",
-  "/membership",
-  "/cpd",
-  "/admin/hero-banners",
-  "/test",
-  "/publications",
-  "/donate",
-  "/volunteer",
-  "/events",
-  "/about/leadership",
-  "/api/events",
-  "/api/banners",
-  "/profile/[slug]",
-  "/api/profiles/[slug]",
-  "/pricing"
 ];
 
-/*
-  This is an array of routes that are used for authentication
-  The routes will redirect logged in users to /settings
-  @types {string[]}
-  */
-
+/**
+ * An array of routes that are used for authentication
+ * These routes will redirect logged in users to /dashboard
+ * @type {string[]}
+ */
 export const authRoutes = [
-  "/auth/login",
-  "/auth/register",
-  "/auth/error",
-  "/auth/reset",
-  "/auth/new-password",
-
- 
+  "/login",
+  "/register",
+  "/forgot-password",
 ];
 
-// The prefix for the api routes
-//Routes that start with this prefix are used for API authentication and authorization
-// @type {string}
-
+/**
+ * The prefix for API authentication routes
+ * Routes that start with this prefix are used for API authentication purposes
+ * @type {string}
+ */
 export const apiAuthPrefix = "/api/auth";
 
-/* 
-  This is the default redirect path after the user has logged in
-  @type {string}
-  */
-export const DEFAULT_LOGIN_REDIRECT = "/settings";
+/**
+ * The default redirect path after logging in
+ * @type {string}
+ */
+export const DEFAULT_LOGIN_REDIRECT = "/dashboard";

@@ -7,9 +7,10 @@ import FormError from "../common/FormError";
 import FormSuccess from "../common/FormSuccess";
 import { login } from "@/actions/login";
 import { useState, useTransition } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Logo from "../homepage/Logo";
+import { signIn } from "next-auth/react";
 
 import CardWrapper from "./CardWrapper";
 import { useForm } from "react-hook-form";
@@ -24,7 +25,11 @@ import {
   FormMessage,
 } from "../ui/form";
 
-const LoginForm = () => {
+interface LoginFormProps {
+  callbackUrl?: string | null;
+}
+
+const LoginForm = ({ callbackUrl }: LoginFormProps) => {
   const searchParams = useSearchParams();
   const urLError =
     searchParams.get("error") === "OAuthAccountNotLinked"
@@ -34,6 +39,7 @@ const LoginForm = () => {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -43,25 +49,36 @@ const LoginForm = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setError("");
     setSuccess("");
+    setIsLoading(true);
 
-    startTransition(() => {
-      login(values)
-        .then((data) => {
-          if (data?.error) {
-            form.reset();
-            setError(data?.error);
-          }
+    try {
+      const formData = new FormData(e.currentTarget);
+      const response = await signIn("credentials", {
+        email: formData.get("email"),
+        password: formData.get("password"),
+        redirect: false,
+      });
 
-          if (data?.success) {
-            form.reset();
-            setSuccess(data?.success);
-          }
-        })
-        .catch(() => setError("Something went wrong"));
-    });
+      if (response?.error) {
+        form.reset();
+        setError(response.error);
+      }
+
+      if (response?.success) {
+        form.reset();
+        setSuccess(response.success);
+        router.push(callbackUrl || "/dashboard");
+      }
+    } catch (error) {
+      console.error(error);
+      setError("Something went wrong");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -138,7 +155,7 @@ const LoginForm = () => {
                   showSocial
                 >
                   <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <form onSubmit={onSubmit} className="space-y-6">
                       <div className="space-y-4">
                         <FormField
                           control={form.control}
