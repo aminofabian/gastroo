@@ -1,11 +1,11 @@
-const PESAPAL_ENV = process.env.PESAPAL_ENV || 'sandbox';
+const PESAPAL_ENV = process.env.PESAPAL_ENV || 'live';
 const CONSUMER_KEY = process.env.PESAPAL_CONSUMER_KEY;
 const CONSUMER_SECRET = process.env.PESAPAL_CONSUMER_SECRET;
 
-const BASE_URL = PESAPAL_ENV === 'sandbox' 
-  ? 'https://cybqa.pesapal.com/pesapalv3/api'
-  : 'https://pay.pesapal.com/v3/api';
+// Use live URL
+const BASE_URL = 'https://pay.pesapal.com/v3/api';
 
+// Get auth token
 async function getAuthToken() {
   const response = await fetch(`${BASE_URL}/Auth/RequestToken`, {
     method: 'POST',
@@ -19,31 +19,15 @@ async function getAuthToken() {
     })
   });
 
+  if (!response.ok) {
+    throw new Error('Failed to get auth token');
+  }
+
   const data = await response.json();
   return data.token;
 }
 
-async function registerIPN(token: string) {
-  const response = await fetch(`${BASE_URL}/URLSetup/RegisterIPN`, {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({
-      url: `${process.env.NEXT_PUBLIC_APP_URL}/api/pesapal/ipn`,
-      ipn_notification_type: 'POST'
-    })
-  });
-
-  const data = await response.json();
-  return {
-    ipn_id: data.ipn_id,
-    url: data.url
-  };
-}
-
+// Submit payment request
 export async function submitPayment({
   amount,
   email,
@@ -61,7 +45,6 @@ export async function submitPayment({
 }) {
   try {
     const token = await getAuthToken();
-    const { ipn_id } = await registerIPN(token);
     
     const merchantReference = `GSK-${Date.now()}-${Math.random().toString(36).substring(7)}`;
     
@@ -78,11 +61,11 @@ export async function submitPayment({
         amount: amount,
         description: `GSK ${membershipType} Membership Payment`,
         callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/pesapal/callback`,
-        notification_id: ipn_id,
+        notification_id: process.env.PESAPAL_IPN_ID,
         branch: "GSK",
         billing_address: {
           email_address: email,
-          phone_number: phone,
+          phone_number: phone.startsWith('0') ? `254${phone.slice(1)}` : phone,
           country_code: "KE",
           first_name: firstName,
           middle_name: "",
@@ -98,9 +81,49 @@ export async function submitPayment({
     });
 
     const data = await response.json();
-    return data;
+
+    if (data.error) {
+      throw new Error(data.error.message || 'Payment initiation failed');
+    }
+
+    return {
+      orderTrackingId: data.order_tracking_id,
+      merchantReference: data.merchant_reference,
+      redirectUrl: data.redirect_url
+    };
+
   } catch (error) {
     console.error('PesaPal payment error:', error);
-    throw new Error('Failed to initiate payment');
+    throw error;
+  }
+}
+
+// Check payment status
+export async function checkPaymentStatus(orderTrackingId: string) {
+  try {
+    const token = await getAuthToken();
+    
+    const response = await fetch(
+      `${BASE_URL}/Transactions/GetTransactionStatus?orderTrackingId=${orderTrackingId}`,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await response.json();
+    return {
+      status: data.payment_status_description,
+      amount: data.amount,
+      paymentMethod: data.payment_method,
+      reference: data.merchant_reference
+    };
+
+  } catch (error) {
+    console.error('Payment status check error:', error);
+    throw error;
   }
 } 

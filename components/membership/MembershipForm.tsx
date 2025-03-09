@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Check, Loader2 } from "lucide-react";
 
 // Form Schema
 const membershipSchema = z.object({
@@ -72,6 +73,8 @@ export default function MembershipForm() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
+  const [paymentMessage, setPaymentMessage] = useState('');
 
   const form = useForm<z.infer<typeof membershipSchema>>({
     resolver: zodResolver(membershipSchema),
@@ -154,6 +157,70 @@ export default function MembershipForm() {
 
   const prev = () => {
     setCurrentStep(prev => Math.max(prev - 1, 0));
+  };
+
+  const handlePayment = async (type: "new" | "renewal", amount: number) => {
+    setPaymentStatus('processing');
+    setPaymentMessage('Initiating payment...');
+    
+    try {
+      const response = await fetch("/api/pesapal/stk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount,
+          membershipType: type,
+          phone: form.getValues("phone"),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Payment failed');
+      }
+
+      setPaymentMessage('Please check your phone to complete the payment');
+
+      // Start polling for payment status
+      const checkPaymentStatus = async () => {
+        const statusResponse = await fetch(`/api/pesapal/status/${data.checkoutRequestId}`);
+        const statusData = await statusResponse.json();
+
+        if (statusData.status === 'COMPLETED') {
+          setPaymentStatus('success');
+          setPaymentMessage('Payment completed successfully!');
+          return true;
+        } else if (statusData.status === 'FAILED') {
+          setPaymentStatus('error');
+          setPaymentMessage('Payment failed. Please try again.');
+          return true;
+        }
+        return false;
+      };
+
+      // Poll every 5 seconds for 2 minutes
+      let attempts = 0;
+      const maxAttempts = 24; // 2 minutes
+      
+      const pollInterval = setInterval(async () => {
+        attempts++;
+        const isDone = await checkPaymentStatus();
+        
+        if (isDone || attempts >= maxAttempts) {
+          clearInterval(pollInterval);
+          if (!isDone && attempts >= maxAttempts) {
+            setPaymentStatus('error');
+            setPaymentMessage('Payment timeout. Please try again.');
+          }
+        }
+      }, 5000);
+
+    } catch (error) {
+      console.error('Payment error:', error);
+      setPaymentStatus('error');
+      setPaymentMessage(error instanceof Error ? error.message : 'Payment failed');
+    }
   };
 
   return (
@@ -410,25 +477,66 @@ export default function MembershipForm() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Button
                         type="button"
-                        className={`h-24 flex flex-col items-center justify-center space-y-2 ${
+                        disabled={paymentStatus === 'processing'}
+                        className={`h-24 flex flex-col items-center justify-center space-y-2 relative ${
                           field.value === "new" ? "bg-[#c22f61] text-white" : "bg-gray-100"
                         }`}
-                        onClick={() => field.onChange("new")}
+                        onClick={async () => {
+                          field.onChange("new");
+                          await handlePayment("new", 6500);
+                        }}
                       >
-                        <span className="font-bold">New Membership</span>
-                        <span className="text-sm">KES 6,500/=</span>
+                        <div className="flex flex-col items-center">
+                          <span className="font-bold">New Membership</span>
+                          <span className="text-sm">KES 6,500/=</span>
+                        </div>
+                        {paymentStatus === 'processing' && field.value === 'new' && (
+                          <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                            <Loader2 className="w-6 h-6 animate-spin text-white" />
+                          </div>
+                        )}
+                        {paymentStatus === 'success' && field.value === 'new' && (
+                          <div className="absolute inset-0 bg-green-500/90 flex items-center justify-center">
+                            <Check className="w-8 h-8 text-white" />
+                          </div>
+                        )}
                       </Button>
                       <Button
                         type="button"
-                        className={`h-24 flex flex-col items-center justify-center space-y-2 ${
+                        disabled={paymentStatus === 'processing'}
+                        className={`h-24 flex flex-col items-center justify-center space-y-2 relative ${
                           field.value === "renewal" ? "bg-[#c22f61] text-white" : "bg-gray-100"
                         }`}
-                        onClick={() => field.onChange("renewal")}
+                        onClick={async () => {
+                          field.onChange("renewal");
+                          await handlePayment("renewal", 5000);
+                        }}
                       >
-                        <span className="font-bold">Membership Renewal</span>
-                        <span className="text-sm">KES 5,000/=</span>
+                        <div className="flex flex-col items-center">
+                          <span className="font-bold">Membership Renewal</span>
+                          <span className="text-sm">KES 5,000/=</span>
+                        </div>
+                        {paymentStatus === 'processing' && field.value === 'renewal' && (
+                          <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                            <Loader2 className="w-6 h-6 animate-spin text-white" />
+                          </div>
+                        )}
+                        {paymentStatus === 'success' && field.value === 'renewal' && (
+                          <div className="absolute inset-0 bg-green-500/90 flex items-center justify-center">
+                            <Check className="w-8 h-8 text-white" />
+                          </div>
+                        )}
                       </Button>
                     </div>
+                    {paymentMessage && (
+                      <p className={`text-sm ${
+                        paymentStatus === 'error' ? 'text-red-500' : 
+                        paymentStatus === 'success' ? 'text-green-500' : 
+                        'text-gray-500'
+                      }`}>
+                        {paymentMessage}
+                      </p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
