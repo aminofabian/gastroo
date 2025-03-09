@@ -100,9 +100,7 @@ export default function MembershipForm() {
       // First, update the user's onboarding status
       const onboardingResponse = await fetch("/api/user/onboarding", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...values,
           isOnboarded: true,
@@ -114,36 +112,29 @@ export default function MembershipForm() {
         throw new Error("Failed to update onboarding status");
       }
 
-      // Then proceed with payment
-      const response = await fetch("/api/membership", {
+      // Initialize PesaPal payment
+      const paymentResponse = await fetch("/api/pesapal/submit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          ...values, 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           amount,
-          subscriptionStatus: "PENDING" // Will be updated to ACTIVE after payment
+          membershipType: values.membershipType,
+          phone: values.phone
         }),
       });
 
-      if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error || "Failed to submit membership application");
+      const paymentData = await paymentResponse.json();
+      
+      if (paymentData.error) {
+        throw new Error(paymentData.error);
       }
 
-      toast.success("Membership Application Received!", {
-        description: "You will be redirected to complete the payment.",
-        duration: 5000,
-      });
-      
-      // Redirect to payment page
-      setTimeout(() => {
-        router.push(`/payment?amount=${amount}&type=${values.membershipType}`);
-      }, 2000);
+      // Redirect to PesaPal payment page
+      window.location.href = paymentData.redirect_url;
+
     } catch (error) {
-      console.error("Error submitting form:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to submit membership application");
+      console.error("Error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to process payment");
     } finally {
       setIsSubmitting(false);
     }
