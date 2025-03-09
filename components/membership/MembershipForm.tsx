@@ -32,16 +32,13 @@ const membershipSchema = z.object({
   county: z.string().min(2, "County must be at least 2 characters"),
   postalCode: z.string().optional(),
   
-  // Account Information
-  password: z.string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number"),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
+  // Add payment information
+  membershipType: z.enum(["new", "renewal"], {
+    required_error: "Please select membership type",
+  }),
+}).refine((data) => {
+  // Remove the password validation refine
+  return true;
 });
 
 const steps = [
@@ -64,10 +61,10 @@ const steps = [
     fields: ["address", "city", "county", "postalCode"],
   },
   {
-    id: "account",
-    title: "Account Setup",
-    description: "Create your account credentials",
-    fields: ["password", "confirmPassword"],
+    id: "payment",
+    title: "Payment Information",
+    description: "Choose your membership type",
+    fields: ["membershipType"],
   },
 ];
 
@@ -91,20 +88,22 @@ export default function MembershipForm() {
       city: "",
       county: "",
       postalCode: "",
-      password: "",
-      confirmPassword: "",
+      membershipType: "new",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof membershipSchema>) => {
     setIsSubmitting(true);
     try {
+      // Calculate amount based on membership type
+      const amount = values.membershipType === "new" ? 6500 : 5000;
+      
       const response = await fetch("/api/membership", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, amount }),
       });
 
       if (!response.ok) {
@@ -112,15 +111,14 @@ export default function MembershipForm() {
         throw new Error(error || "Failed to submit membership application");
       }
 
-      toast.success("Welcome to GSK!", {
-        description: "Your membership application has been submitted successfully. We'll review it shortly.",
+      toast.success("Membership Application Received!", {
+        description: "You will be redirected to complete the payment.",
         duration: 5000,
       });
       
-      // Use Next.js router for navigation
+      // Redirect to payment page instead of dashboard
       setTimeout(() => {
-        router.push("/dashboard");
-        router.refresh(); // Refresh the page to ensure we have the latest data
+        router.push(`/payment?amount=${amount}&type=${values.membershipType}`);
       }, 2000);
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -390,32 +388,35 @@ export default function MembershipForm() {
               />
             )}
 
-            {currentFields.includes("password") && (
+            {currentFields.includes("membershipType") && (
               <FormField
                 control={form.control}
-                name="password"
+                name="membershipType"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="password" className="h-12" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
-            {currentFields.includes("confirmPassword") && (
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="password" className="h-12" />
-                    </FormControl>
+                  <FormItem className="space-y-4">
+                    <FormLabel>Select Membership Type</FormLabel>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Button
+                        type="button"
+                        className={`h-24 flex flex-col items-center justify-center space-y-2 ${
+                          field.value === "new" ? "bg-[#c22f61] text-white" : "bg-gray-100"
+                        }`}
+                        onClick={() => field.onChange("new")}
+                      >
+                        <span className="font-bold">New Membership</span>
+                        <span className="text-sm">KES 6,500</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        className={`h-24 flex flex-col items-center justify-center space-y-2 ${
+                          field.value === "renewal" ? "bg-[#c22f61] text-white" : "bg-gray-100"
+                        }`}
+                        onClick={() => field.onChange("renewal")}
+                      >
+                        <span className="font-bold">Membership Renewal</span>
+                        <span className="text-sm">KES 5,000</span>
+                      </Button>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
