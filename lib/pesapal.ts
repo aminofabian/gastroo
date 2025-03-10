@@ -308,7 +308,12 @@ export async function checkPaymentStatus(orderTrackingId: string) {
 
     console.log('Status Check Response:', response);
 
-    if (response.error) {
+    // PesaPal sometimes returns an error object with null values even for successful responses
+    // Only consider it an error if the error object has actual error values
+    if (response.error && 
+        (response.error.error_type || 
+         response.error.code || 
+         response.error.message)) {
       throw new Error(`Status check failed: ${JSON.stringify(response.error)}`);
     }
 
