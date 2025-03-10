@@ -45,6 +45,12 @@ export default function EventRegistrationModal({
 }: EventRegistrationModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+
+  // If the event is free (no member price), don't show the modal
+  if (!event?.memberPrice || event.memberPrice <= 0) {
+    return null;
+  }
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -101,17 +107,15 @@ export default function EventRegistrationModal({
           <DialogDescription className="text-base text-muted-foreground">
             Please fill in your details to register for {event?.title}
           </DialogDescription>
-          {event?.memberPrice && (
-            <div className="mt-2 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-              <p className="text-sm text-emerald-800">
-                <span className="font-semibold">Registration Fee:</span>{' '}
-                KES {event.memberPrice.toLocaleString()}
-              </p>
-              <p className="text-xs text-emerald-600 mt-1">
-                Payment will be processed securely via PesaPal
-              </p>
-            </div>
-          )}
+          <div className="mt-2 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+            <p className="text-sm text-emerald-800">
+              <span className="font-semibold">Registration Fee:</span>{' '}
+              KES {event.memberPrice.toLocaleString()}
+            </p>
+            <p className="text-xs text-emerald-600 mt-1">
+              Payment will be processed securely via PesaPal
+            </p>
+          </div>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
