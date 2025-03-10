@@ -37,6 +37,7 @@ const membershipSchema = z.object({
   membershipType: z.enum(["new", "renewal"], {
     required_error: "Please select membership type",
   }),
+  customAmount: z.string().optional(),
 }).refine((data) => {
   // Remove the password validation refine
   return true;
@@ -92,6 +93,7 @@ export default function MembershipForm() {
       county: "",
       postalCode: "",
       membershipType: "new",
+      customAmount: "",
     },
   });
 
@@ -511,7 +513,7 @@ export default function MembershipForm() {
                                 field.onChange(e);
                                 const amount = parseInt(e.target.value);
                                 if (amount > 0) {
-                                  handlePayment(field.value, amount);
+                                  handlePayment(form.getValues("membershipType"), amount);
                                 }
                               }}
                             />
