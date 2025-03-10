@@ -10,24 +10,43 @@ const BASE_URL = process.env.PESAPAL_API_URL || 'https://pay.pesapal.com/v3/api'
 // Get auth token
 async function getAuthToken() {
   try {
+    console.log('Using API URL:', BASE_URL); // Debug URL
+    console.log('Using credentials:', {
+      key: process.env.PESAPAL_CONSUMER_KEY?.substring(0, 4) + '...',
+      secret: process.env.PESAPAL_CONSUMER_SECRET?.substring(0, 4) + '...'
+    }); // Debug credentials
+
     const response = await axios.post(`${BASE_URL}/Auth/RequestToken`, {
       consumer_key: process.env.PESAPAL_CONSUMER_KEY,
       consumer_secret: process.env.PESAPAL_CONSUMER_SECRET
     }, {
       headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json'
       }
     });
+
+    console.log('Auth Response:', response.data); // Debug response
 
     if (response.data.error) {
       throw new Error(response.data.error.message || 'Failed to get auth token');
     }
 
+    if (!response.data.token) {
+      throw new Error('No token in response: ' + JSON.stringify(response.data));
+    }
+
     return response.data.token;
 
-  } catch (error) {
-    console.error('Auth token error:', error.response?.data || error.message);
-    throw error;
+  } catch (error: any) {
+    if (error.response) {
+      console.error('Auth Error Response:', {
+        status: error.response.status,
+        data: error.response.data,
+        headers: error.response.headers
+      });
+    }
+    throw new Error(error.response?.data?.error?.message || error.message || 'Failed to get auth token');
   }
 }
 
