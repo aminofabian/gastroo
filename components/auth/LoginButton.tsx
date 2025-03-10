@@ -1,26 +1,36 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { signIn } from 'next-auth/react';
+import { useState } from 'react';
 
-interface LoginButtonProps {
-  children: React.ReactNode;
-  mode?: "modal" | "redirect";
-  asChild?: boolean;
-}
+export function LoginButton() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-function LoginButton({
-  children,
-  mode = "redirect",
-  asChild,
-}: LoginButtonProps) {
-  const router = useRouter();
-
-  const onClick = () => {
-    router.push("/auth/login");
+  const handleLogin = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const result = await signIn('github', { callbackUrl: '/' });
+      if (result?.error) {
+        setError(result.error);
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Failed to login');
+    } finally {
+      setIsLoading(false);
+    }
   };
-  if (mode === "modal") {
-    return <span className="text-slate-50">TODO: implement modal</span>;
-  }
-  return <span onClick={onClick}>{children}</span>;
-}
 
-export default LoginButton;
+  return (
+    <div>
+      <button 
+        onClick={handleLogin}
+        disabled={isLoading}
+      >
+        {isLoading ? 'Loading...' : 'Login'}
+      </button>
+      {error && <p className="text-red-500">{error}</p>}
+    </div>
+  );
+}
