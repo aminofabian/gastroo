@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 const PESAPAL_ENV = process.env.PESAPAL_ENV || 'live';
 const CONSUMER_KEY = process.env.PESAPAL_CONSUMER_KEY;
 const CONSUMER_SECRET = process.env.PESAPAL_CONSUMER_SECRET;
@@ -8,41 +10,23 @@ const BASE_URL = process.env.PESAPAL_API_URL || 'https://pay.pesapal.com/v3/api'
 // Get auth token
 async function getAuthToken() {
   try {
-    const response = await fetch(`${BASE_URL}/Auth/RequestToken`, {
-      method: 'POST',
+    const response = await axios.post(`${BASE_URL}/Auth/RequestToken`, {
+      consumer_key: process.env.PESAPAL_CONSUMER_KEY,
+      consumer_secret: process.env.PESAPAL_CONSUMER_SECRET
+    }, {
       headers: {
-        'Accept': 'application/json',
         'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        consumer_key: process.env.PESAPAL_CONSUMER_KEY,
-        consumer_secret: process.env.PESAPAL_CONSUMER_SECRET
-      })
+      }
     });
 
-    // Check if response is ok and has content
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (response.data.error) {
+      throw new Error(response.data.error.message || 'Failed to get auth token');
     }
 
-    const text = await response.text(); // Get response as text first
-    if (!text) {
-      throw new Error('Empty response received');
-    }
-
-    try {
-      const data = JSON.parse(text);
-      if (data.error) {
-        throw new Error(data.error.message || 'Failed to get auth token');
-      }
-      return data.token;
-    } catch (parseError) {
-      console.error('Response parsing error:', text);
-      throw new Error('Invalid JSON response from server');
-    }
+    return response.data.token;
 
   } catch (error) {
-    console.error('Auth token error:', error);
+    console.error('Auth token error:', error.response?.data || error.message);
     throw error;
   }
 }
@@ -71,67 +55,49 @@ export async function submitPayment({
 
     const merchantReference = `GSK${Date.now()}${Math.floor(Math.random() * 1000)}`;
     
-    const response = await fetch(`${BASE_URL}/Transactions/SubmitOrderRequest`, {
-      method: 'POST',
+    const response = await axios.post(`${BASE_URL}/Transactions/SubmitOrderRequest`, {
+      id: merchantReference,
+      currency: "KES",
+      amount: amount,
+      description: `GSK ${membershipType} Membership Payment`,
+      callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/pesapal/callback`,
+      notification_id: process.env.PESAPAL_IPN_ID,
+      branch: "GSK",
+      billing_address: {
+        email_address: email,
+        phone_number: phone,
+        country_code: "KE",
+        first_name: firstName,
+        middle_name: "",
+        last_name: lastName,
+        line_1: "GSK Membership",
+        line_2: "",
+        city: "",
+        state: "",
+        postal_code: "",
+        zip_code: ""
+      }
+    }, {
       headers: {
-        'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        id: merchantReference,
-        currency: "KES",
-        amount: amount,
-        description: `GSK ${membershipType} Membership Payment`,
-        callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/pesapal/callback`,
-        notification_id: process.env.PESAPAL_IPN_ID,
-        branch: "GSK",
-        billing_address: {
-          email_address: email,
-          phone_number: phone,
-          country_code: "KE",
-          first_name: firstName,
-          middle_name: "",
-          last_name: lastName,
-          line_1: "GSK Membership",
-          line_2: "",
-          city: "",
-          state: "",
-          postal_code: "",
-          zip_code: ""
-        }
-      })
+      }
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    console.log('Payment Response:', response.data);
+
+    if (response.data.error) {
+      throw new Error(response.data.error.message || 'Payment initiation failed');
     }
 
-    const text = await response.text();
-    if (!text) {
-      throw new Error('Empty response received');
-    }
-
-    try {
-      const data = JSON.parse(text);
-      console.log('Payment Response:', data);
-
-      if (data.error) {
-        throw new Error(data.error.message || 'Payment initiation failed');
-      }
-
-      return {
-        redirectUrl: data.redirect_url,
-        orderTrackingId: data.order_tracking_id,
-        merchantReference: data.merchant_reference
-      };
-    } catch (parseError) {
-      console.error('Response parsing error:', text);
-      throw new Error('Invalid JSON response from server');
-    }
+    return {
+      redirectUrl: response.data.redirect_url,
+      orderTrackingId: response.data.order_tracking_id,
+      merchantReference: response.data.merchant_reference
+    };
 
   } catch (error) {
-    console.error('PesaPal payment error:', error);
+    console.error('PesaPal payment error:', error.response?.data || error.message);
     throw error;
   }
 }
