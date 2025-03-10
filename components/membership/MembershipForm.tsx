@@ -162,14 +162,11 @@ export default function MembershipForm() {
   const handlePayment = async (type: string, amount: number) => {
     setPaymentStatus('processing');
     try {
-      // Convert amount to a lower value for testing
-      const testAmount = 100; // Start with 100 KES for testing
-      
       const response = await fetch("/api/pesapal/stk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: testAmount, // Use test amount instead of full amount
+          amount, // Use actual amount
           membershipType: type,
           phone: form.getValues("phone")
         }),
@@ -496,6 +493,33 @@ export default function MembershipForm() {
                         )}
                       </Button>
                     </div>
+                    
+                    {/* Custom Amount Input */}
+                    <FormField
+                      control={form.control}
+                      name="customAmount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Custom Amount (Optional)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              placeholder="Enter custom amount in KES"
+                              className="h-12"
+                              {...field}
+                              onChange={(e) => {
+                                field.onChange(e);
+                                const amount = parseInt(e.target.value);
+                                if (amount > 0) {
+                                  handlePayment(field.value, amount);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    
                     {paymentMessage && (
                       <p className={`text-sm ${
                         paymentStatus === 'error' ? 'text-red-500' : 
