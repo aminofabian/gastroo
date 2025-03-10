@@ -142,8 +142,8 @@ export default function MembershipForm() {
         membershipType: values.membershipType
       });
 
-      if (paymentResponse.error) {
-        throw new Error(paymentResponse.error);
+      if (!paymentResponse.redirectUrl) {
+        throw new Error("Failed to initialize payment");
       }
 
       // Redirect to PesaPal payment page
@@ -481,7 +481,7 @@ export default function MembershipForm() {
                         className={`h-24 flex flex-col items-center justify-center space-y-2 relative ${
                           field.value === "new" ? "bg-[#c22f61] text-white" : "bg-gray-100"
                         }`}
-                        onClick={async () => {
+                        onClick={async (e) => {
                           field.onChange("new");
                           await handlePayment(e);
                         }}
@@ -507,7 +507,7 @@ export default function MembershipForm() {
                         className={`h-24 flex flex-col items-center justify-center space-y-2 relative ${
                           field.value === "renewal" ? "bg-[#c22f61] text-white" : "bg-gray-100"
                         }`}
-                        onClick={async () => {
+                        onClick={async (e) => {
                           field.onChange("renewal");
                           await handlePayment(e);
                         }}
