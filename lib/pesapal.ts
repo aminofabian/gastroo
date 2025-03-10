@@ -11,16 +11,18 @@ async function getAuthToken() {
     console.log('Environment:', PESAPAL_ENV);
     console.log('Using API URL:', BASE_URL);
     
-    // Sandbox credentials
-    const credentials = {
-      consumer_key: "qkio1BGGYAXTu2JOfm7XSXNruoZsrqEW",      // Fixed order
-      consumer_secret: "osGQ364R49cXKeOYSpaOnT++rHs="
-    };
+    // Use environment-specific credentials
+    const credentials = PESAPAL_ENV === 'sandbox' 
+      ? {
+          consumer_key: "qkio1BGGYAXTu2JOfm7XSXNruoZsrqEW",
+          consumer_secret: "osGQ364R49cXKeOYSpaOnT++rHs="
+        }
+      : {
+          consumer_key: process.env.PESAPAL_CONSUMER_KEY,
+          consumer_secret: process.env.PESAPAL_CONSUMER_SECRET
+        };
 
-    console.log('Using credentials:', {
-      key: credentials.consumer_key.substring(0, 4) + '...',
-      secret: credentials.consumer_secret.substring(0, 4) + '...'
-    });
+    console.log('Using credentials for:', PESAPAL_ENV);
 
     const response = await axios.post(`${BASE_URL}/api/Auth/RequestToken`, credentials, {
       headers: {
@@ -45,6 +47,7 @@ async function getAuthToken() {
 
   } catch (error: any) {
     console.error('Full Auth Error:', {
+      env: PESAPAL_ENV,
       message: error.message,
       response: error.response?.data,
       status: error.response?.status,
@@ -78,7 +81,7 @@ export async function submitPayment({
 
     const merchantReference = `GSK${Date.now()}${Math.floor(Math.random() * 1000)}`;
     
-    const response = await axios.post(`${BASE_URL}/api/Transactions/SubmitOrderRequest`, {
+    const paymentData = {
       id: merchantReference,
       currency: "KES",
       amount: amount,
@@ -100,12 +103,24 @@ export async function submitPayment({
         postal_code: "",
         zip_code: ""
       }
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
+    };
+
+    console.log('Submitting payment:', {
+      env: PESAPAL_ENV,
+      url: `${BASE_URL}/api/Transactions/SubmitOrderRequest`,
+      amount: amount,
+      reference: merchantReference
     });
+
+    const response = await axios.post(`${BASE_URL}/api/Transactions/SubmitOrderRequest`, 
+      paymentData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
 
     console.log('Payment Response:', response.data);
 
@@ -120,7 +135,11 @@ export async function submitPayment({
     };
 
   } catch (error: any) {
-    console.error('PesaPal payment error:', error.response?.data || error.message);
+    console.error('PesaPal payment error:', {
+      env: PESAPAL_ENV,
+      error: error.response?.data || error.message,
+      status: error.response?.status
+    });
     throw error;
   }
 }
