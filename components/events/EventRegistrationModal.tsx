@@ -31,37 +31,39 @@ const formSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
-  paymentMethod: z.enum(["MPESA", "CARD", "BANK_TRANSFER"]),
+  phone: z.string().min(10, "Phone number must be at least 10 characters"),
+  paymentMethod: z.enum(["PESAPAL", "MPESA", "BANK_TRANSFER"], {
+    required_error: "Please select a payment method",
+  }),
 });
+
+type FormData = z.infer<typeof formSchema>;
 
 interface EventRegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: z.infer<typeof formSchema>) => void;
-  isLoading: boolean;
-  eventTitle: string;
+  onSubmit: (data: FormData) => void;
+  event: any;
 }
 
 export default function EventRegistrationModal({
   isOpen,
   onClose,
   onSubmit,
-  isLoading,
-  eventTitle,
+  event,
 }: EventRegistrationModalProps) {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
       email: "",
-      phoneNumber: "",
-      paymentMethod: "MPESA",
+      phone: "",
+      paymentMethod: "PESAPAL",
     },
   });
 
-  const handleSubmit = (data: z.infer<typeof formSchema>) => {
+  const handleSubmit = (data: FormData) => {
     onSubmit(data);
   };
 
@@ -71,7 +73,7 @@ export default function EventRegistrationModal({
         <DialogHeader>
           <DialogTitle>Register for Event</DialogTitle>
           <DialogDescription>
-            Please provide your details to register for {eventTitle}
+            Please fill in your details to register for {event?.title}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -109,7 +111,7 @@ export default function EventRegistrationModal({
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="john.doe@example.com" type="email" {...field} />
+                    <Input placeholder="john@example.com" type="email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -117,12 +119,12 @@ export default function EventRegistrationModal({
             />
             <FormField
               control={form.control}
-              name="phoneNumber"
+              name="phone"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="+254 XXX XXX XXX" {...field} />
+                    <Input placeholder="+254..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -137,12 +139,12 @@ export default function EventRegistrationModal({
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select payment method" />
+                        <SelectValue placeholder="Select a payment method" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="MPESA">M-Pesa</SelectItem>
-                      <SelectItem value="CARD">Credit/Debit Card</SelectItem>
+                      <SelectItem value="PESAPAL">PesaPal</SelectItem>
+                      <SelectItem value="MPESA">M-PESA</SelectItem>
                       <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
                     </SelectContent>
                   </Select>
@@ -154,16 +156,7 @@ export default function EventRegistrationModal({
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                    Processing...
-                  </>
-                ) : (
-                  "Register"
-                )}
-              </Button>
+              <Button type="submit">Register</Button>
             </div>
           </form>
         </Form>

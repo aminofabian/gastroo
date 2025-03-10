@@ -37,6 +37,13 @@ model User {
   isProfilePublic       Boolean                 @default(true)
   hasActiveSubscription Boolean                 @default(false)
   subscriptionEndDate   DateTime?
+  subscriptionStatus    String?                 @default("INACTIVE")
+  isMember              Boolean                 @default(false)
+  lastPaymentAmount     Float?
+  lastPaymentDate       DateTime?
+  membershipType        String?
+  membershipNumber      String?                 @unique
+  subscriptionStartDate DateTime?
   subscriptions         Subscription[]
   accounts              Account[]
   membershipApplication MembershipApplication[]
@@ -50,12 +57,6 @@ model User {
   payments              Payment[]
   resources             Resource[]
   isOnboarded           Boolean                 @default(false)
-  membershipType        String?                 // "new" or "renewal"
-  subscriptionStatus    String                  @default("INACTIVE") // "ACTIVE", "INACTIVE", "EXPIRED"
-  subscriptionStartDate DateTime?
-  lastPaymentAmount     Float?
-  lastPaymentDate       DateTime?
-  membershipNumber      String?                 @unique
 
   @@map("users")
 }
@@ -120,27 +121,28 @@ model MembershipApplication {
 }
 
 model Event {
-  id                   String    @id @default(cuid())
+  id                   String             @id @default(cuid())
   title                String
   description          String
   type                 EventType
   startDate            DateTime
   endDate              DateTime
   venue                String
-  slug                 String    @unique
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
+  slug                 String             @unique
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
   capacity             Int?
-  cpdPoints            Int       @default(0)
-  materials            Json?     @default("{}")
+  cpdPoints            Int                @default(0)
+  materials            Json?              @default("{}")
   moderators           String[]
   objectives           String[]
   registrationDeadline DateTime?
   speakers             String[]
-  memberPrice          Float?    @default(0)
-  nonMemberPrice       Float?    @default(0)
-  attendees            User[]    @relation("EventAttendees")
-  organizers           User[]    @relation("EventOrganizers")
+  memberPrice          Float?             @default(0)
+  nonMemberPrice       Float?             @default(0)
+  attendees            User[]             @relation("EventAttendees")
+  organizers           User[]             @relation("EventOrganizers")
+  registrations        EventRegistration[]
 
   @@map("events")
 }
@@ -290,17 +292,18 @@ model Banner {
 }
 
 model Payment {
-  id            String        @id @default(cuid())
-  amount        Float
-  status        PaymentStatus
-  transactionId String        @unique
-  phoneNumber   String
-  description   String
-  userId        String
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  currency      String        @default("KES")
+  id                String             @id @default(cuid())
+  amount            Float
+  status            PaymentStatus
+  transactionId     String             @unique
+  phoneNumber       String
+  description       String
+  userId            String
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  currency          String             @default("KES")
+  eventRegistration EventRegistration?
 
   @@index([userId])
   @@map("payments")
@@ -317,6 +320,27 @@ model SliderInfo {
   updatedAt DateTime @updatedAt
 
   @@map("slider_info")
+}
+
+model EventRegistration {
+  id            String        @id @default(cuid())
+  eventId       String
+  event         Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  firstName     String
+  lastName      String
+  email         String
+  phone         String?
+  paymentMethod String?
+  paymentStatus PaymentStatus @default(PENDING)
+  paymentId     String?       @unique
+  payment       Payment?      @relation(fields: [paymentId], references: [id])
+  isAttended    Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([eventId])
+  @@index([paymentId])
+  @@map("event_registrations")
 }
 
 enum UserRole {

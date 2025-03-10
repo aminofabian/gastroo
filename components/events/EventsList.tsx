@@ -93,10 +93,16 @@ export default function EventsList() {
         throw new Error(data.message || "Failed to register for event");
       }
 
-      toast({
-        title: "Success",
-        description: data.message || "Successfully registered for the event",
-      });
+      // Check if payment is required
+      if (data.requiresPayment) {
+        // Initiate payment
+        await initiatePayment(eventId, data.registrationId);
+      } else {
+        toast({
+          title: "Success",
+          description: data.message || "Successfully registered for the event",
+        });
+      }
 
       fetchEvents();
     } catch (error) {
@@ -104,6 +110,49 @@ export default function EventsList() {
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to register for event",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(null);
+    }
+  };
+
+  const initiatePayment = async (eventId: string, registrationId?: string) => {
+    try {
+      setIsLoading(eventId);
+      
+      const response = await fetch("/api/events/payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          eventId, 
+          registrationId,
+          isGuest: registrationId ? true : false
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to initiate payment");
+      }
+
+      // Open payment window in new tab
+      if (data.redirectUrl) {
+        window.open(data.redirectUrl, '_blank');
+        
+        toast({
+          title: "Payment Initiated",
+          description: "Please complete the payment in the new window. Your registration will be confirmed once payment is completed.",
+        });
+      }
+    } catch (error) {
+      console.error("[PAYMENT_ERROR]", error);
+      toast({
+        title: "Payment Error",
+        description: error instanceof Error ? error.message : "Failed to initiate payment",
         variant: "destructive",
       });
     } finally {
@@ -128,16 +177,25 @@ export default function EventsList() {
       });
 
       if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error);
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to register for event");
       }
 
+      const data = await response.json();
+      
       toast({
-        title: "Success",
-        description: "Successfully registered for the event. Please check your email for payment instructions.",
+        title: "Registration Successful",
+        description: "Your registration has been received. Please proceed to payment.",
       });
 
+      // Close the registration modal
       setShowRegistrationModal(false);
+      
+      // Initiate payment if registration was successful
+      if (data.registrationId) {
+        await initiatePayment(selectedEventId, data.registrationId);
+      }
+      
       fetchEvents();
     } catch (error) {
       toast({

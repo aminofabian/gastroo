@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
 const registerSchema = z.object({
@@ -13,7 +13,6 @@ export async function POST(req: Request) {
   try {
     // Get the authenticated user
     const session = await auth();
-    console.log('[EVENT_REGISTRATION] Full auth session:', JSON.stringify(session));
     console.log('[EVENT_REGISTRATION] Auth session user ID:', session?.user?.id);
     
     if (!session?.user) {
@@ -27,8 +26,16 @@ export async function POST(req: Request) {
     const { eventId } = registerSchema.parse(body);
 
     // Check if user exists
-    const user = await db.user.findUnique({
-      where: { id: session.user.id }
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        isMember: true
+      }
     });
 
     if (!user) {
@@ -37,7 +44,7 @@ export async function POST(req: Request) {
     }
 
     // Check if event exists and get its details
-    const event = await db.event.findUnique({
+    const event = await prisma.event.findUnique({
       where: { id: eventId },
       include: {
         attendees: {
@@ -71,36 +78,62 @@ export async function POST(req: Request) {
       return new NextResponse("Already registered for this event", { status: 400 });
     }
 
-    // Register user for the event
-    console.log("[EVENT_REGISTRATION] Registering user:", session.user.id, "for event:", eventId);
-    
-    const updatedEvent = await db.event.update({
-      where: { id: eventId },
-      data: {
-        attendees: {
-          connect: { id: session.user.id }
+    // Determine if payment is required
+    const requiresPayment = (user.isMember ? event.memberPrice : event.nonMemberPrice) > 0;
+
+    if (requiresPayment) {
+      // Create an event registration record for payment
+      const registration = await prisma.eventRegistration.create({
+        data: {
+          eventId: eventId,
+          firstName: user.firstName || '',
+          lastName: user.lastName || '',
+          email: user.email || '',
+          phone: user.phone || '',
+          paymentStatus: "PENDING"
         }
-      },
-      include: {
-        attendees: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true
+      });
+
+      console.log("[EVENT_REGISTRATION] Registration created, payment required:", registration.id);
+
+      return NextResponse.json({
+        success: true,
+        message: "Registration initiated, payment required",
+        registrationId: registration.id,
+        requiresPayment: true,
+        price: user.isMember ? event.memberPrice : event.nonMemberPrice,
+        nextStep: "payment"
+      });
+    } else {
+      // If no payment required, directly register user for the event
+      const updatedEvent = await prisma.event.update({
+        where: { id: eventId },
+        data: {
+          attendees: {
+            connect: { id: session.user.id }
+          }
+        },
+        include: {
+          attendees: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true
+            }
           }
         }
-      }
-    });
+      });
 
-    console.log("[EVENT_REGISTRATION] Registration successful");
+      console.log("[EVENT_REGISTRATION] Registration successful, no payment required");
 
-    return NextResponse.json({
-      success: true,
-      message: "Successfully registered for the event",
-      event: updatedEvent
-    });
-
+      return NextResponse.json({
+        success: true,
+        message: "Successfully registered for the event",
+        event: updatedEvent,
+        requiresPayment: false
+      });
+    }
   } catch (error) {
     console.error("[EVENT_REGISTRATION_ERROR]", error);
 
