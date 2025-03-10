@@ -5,16 +5,20 @@ async function registerIPN() {
   try {
     const baseUrl = 'https://pay.pesapal.com/v3';  // Live URL
 
-    // Live credentials from .env
+    // Use credentials from .env
     const credentials = {
-      consumer_key: "IdHbOun/pEBzs9qN5OH3UJTO/tqdNK8C",
-      consumer_secret: "2FFD4eRSDSlcCTBwWZZYUiYmkmo="
+      consumer_key: process.env.PESAPAL_CONSUMER_KEY,
+      consumer_secret: process.env.PESAPAL_CONSUMER_SECRET
     };
 
-    console.log('Using live credentials');
+    console.log('Using credentials:', {
+      key: credentials.consumer_key?.substring(0, 8) + '...',
+      secret: credentials.consumer_secret?.substring(0, 8) + '...'
+    });
 
     const tokenResponse = await axios.post(`${baseUrl}/api/Auth/RequestToken`, credentials, {
       headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json'
       }
     });
@@ -34,6 +38,7 @@ async function registerIPN() {
       ipn_notification_type: 'POST'
     }, {
       headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       }
@@ -45,8 +50,11 @@ async function registerIPN() {
 
   } catch (error) {
     if (error.response) {
-      console.error('API Error:', error.response.data);
-      console.error('Status:', error.response.status);
+      console.error('API Error:', {
+        status: error.response.status,
+        data: error.response.data,
+        url: error.config?.url
+      });
     } else {
       console.error('Request Error:', error.message);
     }
@@ -54,7 +62,9 @@ async function registerIPN() {
 }
 
 // Verify credentials are loaded
-console.log('Consumer Key present:', !!process.env.PESAPAL_CONSUMER_KEY);
-console.log('Consumer Secret present:', !!process.env.PESAPAL_CONSUMER_SECRET);
+console.log('Environment:', process.env.PESAPAL_ENV);
+console.log('API URL:', process.env.PESAPAL_API_URL);
+console.log('Consumer Key:', process.env.PESAPAL_CONSUMER_KEY?.substring(0, 8) + '...');
+console.log('Consumer Secret:', process.env.PESAPAL_CONSUMER_SECRET?.substring(0, 8) + '...');
 
 registerIPN(); 
