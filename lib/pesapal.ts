@@ -1,9 +1,10 @@
 import axios from 'axios';
 
 const PESAPAL_ENV = process.env.PESAPAL_ENV || 'sandbox';
+// Remove /api from base URL as it's added in the endpoints
 const BASE_URL = PESAPAL_ENV === 'sandbox' 
-  ? 'https://cybqa.pesapal.com/pesapalv3'  // Sandbox URL
-  : 'https://pay.pesapal.com/v3';          // Live URL
+  ? 'https://cybqa.pesapal.com/pesapalv3'
+  : 'https://pay.pesapal.com/v3';
 
 // Get auth token
 async function getAuthToken() {
@@ -11,49 +12,61 @@ async function getAuthToken() {
     console.log('Environment:', PESAPAL_ENV);
     console.log('Using API URL:', BASE_URL);
     
-    // Use environment-specific credentials
-    const credentials = PESAPAL_ENV === 'sandbox' 
-      ? {
-          consumer_key: "qkio1BGGYAXTu2JOfm7XSXNruoZsrqEW",
-          consumer_secret: "osGQ364R49cXKeOYSpaOnT++rHs="
-        }
-      : {
-          consumer_key: process.env.PESAPAL_CONSUMER_KEY,
-          consumer_secret: process.env.PESAPAL_CONSUMER_SECRET
-        };
+    // Ensure credentials are present
+    if (!process.env.PESAPAL_CONSUMER_KEY || !process.env.PESAPAL_CONSUMER_SECRET) {
+      throw new Error('Missing PesaPal credentials');
+    }
 
-    console.log('Using credentials for:', PESAPAL_ENV);
+    const credentials = {
+      consumer_key: process.env.PESAPAL_CONSUMER_KEY.trim(),
+      consumer_secret: process.env.PESAPAL_CONSUMER_SECRET.trim()
+    };
 
-    const response = await axios.post(`${BASE_URL}/api/Auth/RequestToken`, credentials, {
+    // Log partial credentials for debugging
+    console.log('Using credentials:', {
+      key: credentials.consumer_key.substring(0, 8) + '...',
+      secret: credentials.consumer_secret.substring(0, 8) + '...',
+      env: PESAPAL_ENV,
+      keyLength: credentials.consumer_key.length,
+      secretLength: credentials.consumer_secret.length
+    });
+
+    const response = await axios({
+      method: 'POST',
+      url: `${BASE_URL}/api/Auth/RequestToken`,
+      data: credentials,
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-      }
+      },
+      validateStatus: null // Allow any status code
     });
 
-    console.log('Raw Response:', response.data);
+    console.log('Auth Response:', {
+      status: response.status,
+      error: response.data.error,
+      hasToken: !!response.data.token
+    });
 
     if (response.data.error) {
-      console.error('Auth Error:', response.data.error);
-      throw new Error(response.data.error.message || 'Failed to get auth token');
+      throw new Error(`Auth failed: ${JSON.stringify(response.data.error)}`);
     }
 
     if (!response.data.token) {
-      console.error('No token in response:', response.data);
-      throw new Error('Authentication failed - no token received');
+      throw new Error('No token in response');
     }
 
     return response.data.token;
 
   } catch (error: any) {
-    console.error('Full Auth Error:', {
-      env: PESAPAL_ENV,
+    console.error('Auth Error:', {
       message: error.message,
       response: error.response?.data,
       status: error.response?.status,
-      url: error.config?.url
+      url: error.config?.url,
+      env: PESAPAL_ENV
     });
-    throw new Error(error.response?.data?.error?.message || error.message || 'Failed to get auth token');
+    throw error;
   }
 }
 
@@ -75,9 +88,6 @@ export async function submitPayment({
 }) {
   try {
     const token = await getAuthToken();
-    if (!token) {
-      throw new Error('Failed to get authentication token');
-    }
 
     const merchantReference = `GSK${Date.now()}${Math.floor(Math.random() * 1000)}`;
     
@@ -105,22 +115,17 @@ export async function submitPayment({
       }
     };
 
-    console.log('Submitting payment:', {
-      env: PESAPAL_ENV,
+    const response = await axios({
+      method: 'POST',
       url: `${BASE_URL}/api/Transactions/SubmitOrderRequest`,
-      amount: amount,
-      reference: merchantReference
+      data: paymentData,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      validateStatus: null
     });
-
-    const response = await axios.post(`${BASE_URL}/api/Transactions/SubmitOrderRequest`, 
-      paymentData,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
 
     console.log('Payment Response:', response.data);
 
@@ -135,10 +140,11 @@ export async function submitPayment({
     };
 
   } catch (error: any) {
-    console.error('PesaPal payment error:', {
-      env: PESAPAL_ENV,
-      error: error.response?.data || error.message,
-      status: error.response?.status
+    console.error('Payment Error:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      url: error.config?.url
     });
     throw error;
   }
@@ -149,27 +155,38 @@ export async function checkPaymentStatus(orderTrackingId: string) {
   try {
     const token = await getAuthToken();
     
-    const response = await fetch(
-      `${BASE_URL}/Transactions/GetTransactionStatus?orderTrackingId=${orderTrackingId}`,
-      {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
+    const response = await axios({
+      method: 'GET',
+      url: `${BASE_URL}/api/Transactions/GetTransactionStatus`,
+      params: { orderTrackingId },
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      validateStatus: null
+    });
 
-    const data = await response.json();
+    console.log('Status Check Response:', response.data);
+
+    if (response.data.error) {
+      throw new Error(`Status check failed: ${JSON.stringify(response.data.error)}`);
+    }
+
     return {
-      status: data.payment_status_description,
-      amount: data.amount,
-      paymentMethod: data.payment_method,
-      reference: data.merchant_reference
+      status: response.data.payment_status_description,
+      amount: response.data.amount,
+      paymentMethod: response.data.payment_method,
+      reference: response.data.merchant_reference
     };
 
-  } catch (error) {
-    console.error('Payment status check error:', error);
+  } catch (error: any) {
+    console.error('Status Check Error:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      url: error.config?.url
+    });
     throw error;
   }
 } 
