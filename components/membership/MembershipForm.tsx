@@ -159,10 +159,8 @@ export default function MembershipForm() {
     setCurrentStep(prev => Math.max(prev - 1, 0));
   };
 
-  const handlePayment = async (type: "new" | "renewal", amount: number) => {
+  const handlePayment = async (type: string, amount: number) => {
     setPaymentStatus('processing');
-    setPaymentMessage('Initiating payment...');
-    
     try {
       const response = await fetch("/api/pesapal/stk", {
         method: "POST",
@@ -170,54 +168,21 @@ export default function MembershipForm() {
         body: JSON.stringify({
           amount,
           membershipType: type,
-          phone: form.getValues("phone"),
+          phone: form.getValues("phone")
         }),
       });
 
       const data = await response.json();
-
+      
       if (!response.ok) {
         throw new Error(data.error || 'Payment failed');
       }
 
-      setPaymentMessage('Please check your phone to complete the payment');
-
-      // Start polling for payment status
-      const checkPaymentStatus = async () => {
-        const statusResponse = await fetch(`/api/pesapal/status/${data.checkoutRequestId}`);
-        const statusData = await statusResponse.json();
-
-        if (statusData.status === 'COMPLETED') {
-          setPaymentStatus('success');
-          setPaymentMessage('Payment completed successfully!');
-          return true;
-        } else if (statusData.status === 'FAILED') {
-          setPaymentStatus('error');
-          setPaymentMessage('Payment failed. Please try again.');
-          return true;
-        }
-        return false;
-      };
-
-      // Poll every 5 seconds for 2 minutes
-      let attempts = 0;
-      const maxAttempts = 24; // 2 minutes
-      
-      const pollInterval = setInterval(async () => {
-        attempts++;
-        const isDone = await checkPaymentStatus();
-        
-        if (isDone || attempts >= maxAttempts) {
-          clearInterval(pollInterval);
-          if (!isDone && attempts >= maxAttempts) {
-            setPaymentStatus('error');
-            setPaymentMessage('Payment timeout. Please try again.');
-          }
-        }
-      }, 5000);
+      // Redirect to PesaPal payment page
+      window.location.href = data.redirectUrl;
 
     } catch (error) {
-      console.error('Payment error:', error);
+      console.error("Payment error:", error);
       setPaymentStatus('error');
       setPaymentMessage(error instanceof Error ? error.message : 'Payment failed');
     }
