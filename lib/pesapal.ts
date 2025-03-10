@@ -2,8 +2,8 @@ import axios from 'axios';
 
 const PESAPAL_ENV = process.env.PESAPAL_ENV || 'sandbox';
 const BASE_URL = PESAPAL_ENV === 'sandbox' 
-  ? 'https://cybqa.pesapal.com/pesapalv3'  // Note: no /api at the end
-  : 'https://pay.pesapal.com/v3';
+  ? 'https://cybqa.pesapal.com/pesapalv3'  // Sandbox URL
+  : 'https://pay.pesapal.com/v3';          // Live URL
 
 // Get auth token
 async function getAuthToken() {
@@ -11,16 +11,11 @@ async function getAuthToken() {
     console.log('Environment:', PESAPAL_ENV);
     console.log('Using API URL:', BASE_URL);
     
-    // Use hardcoded sandbox credentials for testing
-    const credentials = PESAPAL_ENV === 'sandbox' 
-      ? {
-          consumer_key: "qkio1BGGYAXTu2JOfm7XSXNruoZsrqEW",
-          consumer_secret: "osGQ364R49cXKeOYSpaOnT++rHs="
-        }
-      : {
-          consumer_key: process.env.PESAPAL_CONSUMER_KEY,
-          consumer_secret: process.env.PESAPAL_CONSUMER_SECRET
-        };
+    // Sandbox credentials
+    const credentials = {
+      consumer_key: "qkio1BGGYAXTu2JOfm7XSXNruoZsrqEW",      // Fixed order
+      consumer_secret: "osGQ364R49cXKeOYSpaOnT++rHs="
+    };
 
     console.log('Using credentials:', {
       key: credentials.consumer_key.substring(0, 4) + '...',
@@ -52,7 +47,8 @@ async function getAuthToken() {
     console.error('Full Auth Error:', {
       message: error.message,
       response: error.response?.data,
-      status: error.response?.status
+      status: error.response?.status,
+      url: error.config?.url
     });
     throw new Error(error.response?.data?.error?.message || error.message || 'Failed to get auth token');
   }
@@ -82,7 +78,7 @@ export async function submitPayment({
 
     const merchantReference = `GSK${Date.now()}${Math.floor(Math.random() * 1000)}`;
     
-    const response = await axios.post(`${BASE_URL}/Transactions/SubmitOrderRequest`, {
+    const response = await axios.post(`${BASE_URL}/api/Transactions/SubmitOrderRequest`, {
       id: merchantReference,
       currency: "KES",
       amount: amount,
@@ -123,7 +119,7 @@ export async function submitPayment({
       merchantReference: response.data.merchant_reference
     };
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('PesaPal payment error:', error.response?.data || error.message);
     throw error;
   }
