@@ -11,7 +11,6 @@ async function getAuthToken() {
     const response = await fetch(`${BASE_URL}/Auth/RequestToken`, {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -20,12 +19,11 @@ async function getAuthToken() {
       })
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || 'Failed to get auth token');
+    const data = await response.json();
+    if (data.error) {
+      throw new Error(data.error.message || 'Failed to get auth token');
     }
 
-    const data = await response.json();
     return data.token;
   } catch (error) {
     console.error('Auth token error:', error);
@@ -51,12 +49,15 @@ export async function submitPayment({
 }) {
   try {
     const token = await getAuthToken();
+    if (!token) {
+      throw new Error('Failed to get authentication token');
+    }
+
     const merchantReference = `GSK${Date.now()}${Math.floor(Math.random() * 1000)}`;
     
     const response = await fetch(`${BASE_URL}/Transactions/SubmitOrderRequest`, {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
@@ -88,8 +89,8 @@ export async function submitPayment({
     const data = await response.json();
     console.log('Payment Response:', data);
 
-    if (!response.ok || data.error) {
-      throw new Error(data.error?.message || 'Payment initiation failed');
+    if (data.error) {
+      throw new Error(data.error.message || 'Payment initiation failed');
     }
 
     return {
