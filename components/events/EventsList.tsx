@@ -496,8 +496,7 @@ export default function EventsList() {
                     setSelectedEventId(null);
                   }}
                   onSubmit={handleGuestRegistration}
-                  isLoading={isLoading === event.id}
-                  eventTitle={event.title}
+                  event={event}
                 />
               )}
             </div>

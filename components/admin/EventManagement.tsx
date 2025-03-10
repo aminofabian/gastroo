@@ -352,8 +352,8 @@ export default function EventManagement() {
               Add New Event
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
-            <DialogHeader className="space-y-3 mb-6 sticky top-0 bg-white pb-6 border-b z-10">
+          <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto z-[100]">
+            <DialogHeader className="space-y-3 mb-6 sticky top-0 bg-white pb-6 border-b z-[101]">
               <DialogTitle className="text-2xl font-bold">
                 {selectedEvent ? 'Edit Event' : 'Create New Event'}
               </DialogTitle>

@@ -5,9 +5,16 @@ import { NextResponse } from "next/server"
 export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
+  const isAdmin = req.auth?.user?.role === "ADMIN";
 
   const isAuthPage = nextUrl.pathname === "/login";
   const isMembershipPage = nextUrl.pathname === "/membership";
+  const isAdminRoute = nextUrl.pathname.startsWith("/admin") || nextUrl.pathname.startsWith("/api/admin");
+
+  // If trying to access admin routes without admin privileges
+  if (isAdminRoute && (!isLoggedIn || !isAdmin)) {
+    return Response.redirect(new URL("/auth/login?callbackUrl=" + nextUrl.pathname, nextUrl));
+  }
 
   // If trying to access membership page while not logged in
   if (isMembershipPage && !isLoggedIn) {
@@ -24,5 +31,10 @@ export default auth((req) => {
 
 // Specify which routes should be protected
 export const config = {
-  matcher: ["/membership", "/login"]
+  matcher: [
+    "/membership",
+    "/login",
+    "/admin/:path*",
+    "/api/admin/:path*"
+  ]
 }
