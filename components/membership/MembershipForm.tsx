@@ -180,29 +180,19 @@ export default function MembershipForm() {
     setCurrentStep(prev => Math.max(prev - 1, 0));
   };
 
-  const handlePayment = async (membershipType: string, customAmount?: string) => {
+  const handlePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsSubmitting(true);
     setError(null);
 
     try {
-      const amount = customAmount 
-        ? parseInt(customAmount)
-        : membershipType === "new" 
-          ? 6500 
-          : 5000;
-
       const response = await submitPayment({
         email: form.getValues("email"),
         firstName: form.getValues("firstName"),
         lastName: form.getValues("lastName"),
         phone: form.getValues("phone"),
-        membershipType,
-        amount
+        membershipType: form.getValues("membershipType")
       });
-
-      if (response.error) {
-        throw new Error(response.error);
-      }
 
       // Open payment window in new tab
       window.open(response.redirectUrl, '_blank');
@@ -216,7 +206,6 @@ export default function MembershipForm() {
 
     } catch (error: any) {
       setError(error.message || 'Payment initiation failed');
-      toast.error(error.message || 'Payment initiation failed');
     } finally {
       setIsSubmitting(false);
     }
@@ -492,9 +481,9 @@ export default function MembershipForm() {
                         className={`h-24 flex flex-col items-center justify-center space-y-2 relative ${
                           field.value === "new" ? "bg-[#c22f61] text-white" : "bg-gray-100"
                         }`}
-                        onClick={() => {
+                        onClick={async () => {
                           field.onChange("new");
-                          handlePayment("new");
+                          await handlePayment(e);
                         }}
                       >
                         <div className="flex flex-col items-center">
@@ -518,9 +507,9 @@ export default function MembershipForm() {
                         className={`h-24 flex flex-col items-center justify-center space-y-2 relative ${
                           field.value === "renewal" ? "bg-[#c22f61] text-white" : "bg-gray-100"
                         }`}
-                        onClick={() => {
+                        onClick={async () => {
                           field.onChange("renewal");
-                          handlePayment("renewal");
+                          await handlePayment(e);
                         }}
                       >
                         <div className="flex flex-col items-center">
@@ -548,29 +537,28 @@ export default function MembershipForm() {
                         <FormItem>
                           <FormLabel>Custom Amount (Optional)</FormLabel>
                           <FormControl>
-                            <div className="flex gap-2">
-                              <Input 
-                                type="number" 
-                                placeholder="Enter custom amount in KES"
-                                className="h-12"
-                                {...field}
-                              />
-                              <Button 
-                                type="button"
-                                disabled={!field.value || isSubmitting}
-                                onClick={() => handlePayment(form.getValues("membershipType"), field.value)}
-                                className="whitespace-nowrap"
-                              >
-                                Pay Custom Amount
-                              </Button>
-                            </div>
+                            <Input 
+                              type="number" 
+                              placeholder="Enter custom amount in KES"
+                              className="h-12"
+                              {...field}
+                              onChange={(e) => {
+                                field.onChange(e);
+                                const amount = parseInt(e.target.value);
+                                if (amount > 0) {
+                                  handlePayment(e);
+                                }
+                              }}
+                            />
                           </FormControl>
                         </FormItem>
                       )}
                     />
                     
                     {error && (
-                      <p className="text-sm text-red-500">
+                      <p className={`text-sm ${
+                        'text-red-500'
+                      }`}>
                         {error}
                       </p>
                     )}
@@ -613,12 +601,31 @@ export default function MembershipForm() {
           </div>
 
           {/* Payment Section */}
+          {!paymentStatus.paid && (
+            <div className="mt-6">
+              <button
+                type="button"
+                onClick={handlePayment}
+                disabled={isSubmitting}
+                className="w-full px-4 py-2 text-white bg-primary hover:bg-primary/90 rounded-lg disabled:opacity-50"
+              >
+                {isSubmitting ? 'Processing...' : 'Pay Membership Fee'}
+              </button>
+            </div>
+          )}
+
           {paymentStatus.orderTrackingId && !paymentStatus.paid && (
             <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-yellow-700">
                 Please complete the payment in the new window. Your application will be enabled once payment is confirmed.
               </p>
             </div>
+          )}
+
+          {!paymentStatus.paid && (
+            <p className="mt-2 text-sm text-gray-600 text-center">
+              Please complete payment to enable application submission
+            </p>
           )}
         </form>
       </Form>
