@@ -45,38 +45,53 @@ export async function submitPayment({
 }) {
   try {
     const token = await getAuthToken();
+    const merchantReference = `GSK${Date.now()}${Math.floor(Math.random() * 1000)}`;
     
-    const formattedPhone = phone.startsWith('0') ? `254${phone.slice(1)}` : phone;
-    
-    const response = await fetch(`${BASE_URL}/stkpush/process`, {
+    const response = await fetch(`${BASE_URL}/Transactions/SubmitOrderRequest`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({
-        BusinessShortCode: process.env.PESAPAL_SHORTCODE,
-        Password: process.env.PESAPAL_PASSWORD,
-        Timestamp: new Date().toISOString(),
-        TransactionType: "CustomerPayBillOnline",
-        Amount: amount,
-        PartyA: formattedPhone,
-        PartyB: process.env.PESAPAL_SHORTCODE,
-        PhoneNumber: formattedPhone,
-        CallBackURL: `${process.env.NEXT_PUBLIC_APP_URL}/api/pesapal/callback`,
-        AccountReference: "GSK Membership",
-        TransactionDesc: `GSK ${membershipType} Membership Payment`
+        id: merchantReference,
+        currency: "KES",
+        amount: amount,
+        description: `GSK ${membershipType} Membership Payment`,
+        callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/pesapal/callback`,
+        notification_id: process.env.PESAPAL_IPN_ID,
+        branch: "GSK",
+        billing_address: {
+          email_address: email,
+          phone_number: phone,
+          country_code: "KE",
+          first_name: firstName,
+          middle_name: "",
+          last_name: lastName,
+          line_1: "GSK Membership",
+          line_2: "",
+          city: "",
+          state: "",
+          postal_code: "",
+          zip_code: ""
+        }
       })
     });
 
     const data = await response.json();
-    console.log('STK Push Response:', data); // For debugging
+    console.log('Payment Response:', data);
 
-    if (!response.ok) {
+    if (!response.ok || data.error) {
       throw new Error(data.error?.message || 'Payment initiation failed');
     }
 
-    return data;
+    return {
+      redirectUrl: data.redirect_url,
+      orderTrackingId: data.order_tracking_id,
+      merchantReference: data.merchant_reference
+    };
+
   } catch (error) {
     console.error('PesaPal payment error:', error);
     throw error;
