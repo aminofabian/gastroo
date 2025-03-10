@@ -11,6 +11,7 @@ async function getAuthToken() {
     const response = await fetch(`${BASE_URL}/Auth/RequestToken`, {
       method: 'POST',
       headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -19,12 +20,27 @@ async function getAuthToken() {
       })
     });
 
-    const data = await response.json();
-    if (data.error) {
-      throw new Error(data.error.message || 'Failed to get auth token');
+    // Check if response is ok and has content
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return data.token;
+    const text = await response.text(); // Get response as text first
+    if (!text) {
+      throw new Error('Empty response received');
+    }
+
+    try {
+      const data = JSON.parse(text);
+      if (data.error) {
+        throw new Error(data.error.message || 'Failed to get auth token');
+      }
+      return data.token;
+    } catch (parseError) {
+      console.error('Response parsing error:', text);
+      throw new Error('Invalid JSON response from server');
+    }
+
   } catch (error) {
     console.error('Auth token error:', error);
     throw error;
@@ -58,6 +74,7 @@ export async function submitPayment({
     const response = await fetch(`${BASE_URL}/Transactions/SubmitOrderRequest`, {
       method: 'POST',
       headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
@@ -86,18 +103,32 @@ export async function submitPayment({
       })
     });
 
-    const data = await response.json();
-    console.log('Payment Response:', data);
-
-    if (data.error) {
-      throw new Error(data.error.message || 'Payment initiation failed');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return {
-      redirectUrl: data.redirect_url,
-      orderTrackingId: data.order_tracking_id,
-      merchantReference: data.merchant_reference
-    };
+    const text = await response.text();
+    if (!text) {
+      throw new Error('Empty response received');
+    }
+
+    try {
+      const data = JSON.parse(text);
+      console.log('Payment Response:', data);
+
+      if (data.error) {
+        throw new Error(data.error.message || 'Payment initiation failed');
+      }
+
+      return {
+        redirectUrl: data.redirect_url,
+        orderTrackingId: data.order_tracking_id,
+        merchantReference: data.merchant_reference
+      };
+    } catch (parseError) {
+      console.error('Response parsing error:', text);
+      throw new Error('Invalid JSON response from server');
+    }
 
   } catch (error) {
     console.error('PesaPal payment error:', error);
