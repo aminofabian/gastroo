@@ -57,32 +57,52 @@ export async function getAuthToken() {
       secretLength: credentials.consumer_secret.length
     });
 
-    const response = await axios({
-      method: 'POST',
-      url: `${BASE_URL}/api/Auth/RequestToken`,
-      data: credentials,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      validateStatus: null // Allow any status code
-    });
+    // Use a server-side proxy to avoid CORS issues
+    let tokenUrl = `${BASE_URL}/api/Auth/RequestToken`;
+    let useProxy = false;
+    
+    // If we're in the browser, use the proxy
+    if (typeof window !== 'undefined') {
+      useProxy = true;
+      tokenUrl = '/api/pesapal/proxy/auth';
+      console.log('Using proxy for auth token request');
+    }
+
+    const response = useProxy 
+      ? await fetch(tokenUrl, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(credentials)
+        }).then(res => res.json())
+      : await axios({
+          method: 'POST',
+          url: tokenUrl,
+          data: credentials,
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          validateStatus: null // Allow any status code
+        }).then(res => res.data);
 
     console.log('Auth Response:', {
       status: response.status,
-      error: response.data.error,
-      hasToken: !!response.data.token
+      error: response.error,
+      hasToken: !!response.token
     });
 
-    if (response.data.error) {
-      throw new Error(`Auth failed: ${JSON.stringify(response.data.error)}`);
+    if (response.error) {
+      throw new Error(`Auth failed: ${JSON.stringify(response.error)}`);
     }
 
-    if (!response.data.token) {
+    if (!response.token) {
       throw new Error('No token in response');
     }
 
-    return response.data.token;
+    return response.token;
 
   } catch (error: any) {
     console.error('Auth Error:', {
@@ -92,6 +112,12 @@ export async function getAuthToken() {
       url: error.config?.url,
       env: PESAPAL_ENV
     });
+    
+    // Provide more detailed error message for network errors
+    if (error.message === 'Network Error') {
+      throw new Error(`Network error connecting to PesaPal API. This could be due to CORS restrictions, network connectivity issues, or the API being unavailable. Please try using the server-side proxy or check your network connection.`);
+    }
+    
     throw error;
   }
 }
@@ -167,33 +193,56 @@ export async function submitPayment({
       env: PESAPAL_ENV
     });
 
-    const response = await axios({
-      method: 'POST',
-      url: `${BASE_URL}/api/Transactions/SubmitOrderRequest`,
-      data: paymentData,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      validateStatus: null
-    });
+    // Use a server-side proxy to avoid CORS issues
+    let useProxy = false;
+    let response;
+    
+    // If we're in the browser, use the proxy
+    if (typeof window !== 'undefined') {
+      useProxy = true;
+      console.log('Using proxy for payment submission');
+      
+      const proxyResponse = await fetch('/api/pesapal/proxy/submit', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ token, paymentData })
+      });
+      
+      response = await proxyResponse.json();
+    } else {
+      // Server-side request
+      const axiosResponse = await axios({
+        method: 'POST',
+        url: `${BASE_URL}/api/Transactions/SubmitOrderRequest`,
+        data: paymentData,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        validateStatus: null
+      });
+      
+      response = axiosResponse.data;
+    }
 
     console.log('Payment Response:', {
-      status: response.status,
-      error: response.data.error,
-      redirectUrl: response.data.redirect_url,
-      orderTrackingId: response.data.order_tracking_id
+      error: response.error,
+      redirectUrl: response.redirect_url,
+      orderTrackingId: response.order_tracking_id
     });
 
-    if (response.data.error) {
-      throw new Error(response.data.error.message || 'Payment initiation failed');
+    if (response.error) {
+      throw new Error(response.error.message || 'Payment initiation failed');
     }
 
     return {
-      redirectUrl: response.data.redirect_url,
-      orderTrackingId: response.data.order_tracking_id,
-      merchantReference: response.data.merchant_reference
+      redirectUrl: response.redirect_url,
+      orderTrackingId: response.order_tracking_id,
+      merchantReference: response.merchant_reference
     };
 
   } catch (error: any) {
@@ -203,6 +252,12 @@ export async function submitPayment({
       status: error.response?.status,
       url: error.config?.url
     });
+    
+    // Provide more detailed error message for network errors
+    if (error.message === 'Network Error') {
+      throw new Error(`Network error connecting to PesaPal API. This could be due to CORS restrictions, network connectivity issues, or the API being unavailable. Please try using the server-side proxy or check your network connection.`);
+    }
+    
     throw error;
   }
 }
@@ -222,26 +277,43 @@ export async function checkPaymentStatus(orderTrackingId: string) {
     
     const token = await getAuthToken();
     
-    const response = await axios({
-      method: 'GET',
-      url: `${BASE_URL}/api/Transactions/GetTransactionStatus`,
-      params: { orderTrackingId },
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      validateStatus: null
-    });
+    // Use a server-side proxy to avoid CORS issues
+    let useProxy = false;
+    let response;
+    
+    // If we're in the browser, use the proxy
+    if (typeof window !== 'undefined') {
+      useProxy = true;
+      console.log('Using proxy for status check');
+      
+      const proxyResponse = await fetch(`/api/pesapal/proxy/status?token=${encodeURIComponent(token)}&orderTrackingId=${encodeURIComponent(orderTrackingId)}`);
+      
+      response = await proxyResponse.json();
+    } else {
+      // Server-side request
+      const axiosResponse = await axios({
+        method: 'GET',
+        url: `${BASE_URL}/api/Transactions/GetTransactionStatus`,
+        params: { orderTrackingId },
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        validateStatus: null
+      });
+      
+      response = axiosResponse.data;
+    }
 
-    console.log('Status Check Response:', response.data);
+    console.log('Status Check Response:', response);
 
-    if (response.data.error) {
-      throw new Error(`Status check failed: ${JSON.stringify(response.data.error)}`);
+    if (response.error) {
+      throw new Error(`Status check failed: ${JSON.stringify(response.error)}`);
     }
 
     // Normalize status to handle different possible values
-    let normalizedStatus = response.data.payment_status_description;
+    let normalizedStatus = response.payment_status_description;
     
     // Check if the status indicates a completed payment
     const completedStatuses = ['COMPLETED', 'PAID', 'SUCCESS', 'SUCCESSFUL'];
@@ -251,9 +323,9 @@ export async function checkPaymentStatus(orderTrackingId: string) {
 
     return {
       status: isCompleted ? 'COMPLETED' : normalizedStatus,
-      amount: response.data.amount,
-      paymentMethod: response.data.payment_method,
-      reference: response.data.merchant_reference
+      amount: response.amount,
+      paymentMethod: response.payment_method,
+      reference: response.merchant_reference
     };
 
   } catch (error: any) {
@@ -263,6 +335,12 @@ export async function checkPaymentStatus(orderTrackingId: string) {
       status: error.response?.status,
       url: error.config?.url
     });
+    
+    // Provide more detailed error message for network errors
+    if (error.message === 'Network Error') {
+      throw new Error(`Network error connecting to PesaPal API. This could be due to CORS restrictions, network connectivity issues, or the API being unavailable. Please try using the server-side proxy or check your network connection.`);
+    }
+    
     throw error;
   }
 } 
