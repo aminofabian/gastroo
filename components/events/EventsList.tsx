@@ -65,45 +65,48 @@ export default function EventsList() {
   const { data: session } = useSession();
 
   const handleRegister = async (eventId: string) => {
-    if (!session) {
-      setSelectedEventId(eventId);
-      setShowRegistrationModal(true);
-      return;
-    }
-
-    await registerSignedInUser(eventId);
+    setSelectedEventId(eventId);
+    setShowRegistrationModal(true);
   };
 
-  const registerSignedInUser = async (eventId: string) => {
+  const handleRegistrationSubmit = async (formData: any) => {
+    if (!selectedEventId) return;
+
     try {
-      setIsLoading(eventId);
-      console.log("[EVENT_REGISTRATION] Sending registration request for event:", eventId);
-      
-      const response = await fetch("/api/events/register", {
+      setIsLoading(selectedEventId);
+      console.log("[EVENT_REGISTRATION] Sending registration request for event:", selectedEventId);
+
+      const response = await fetch(session?.user ? "/api/events/register" : "/api/events/register-guest", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ eventId }),
+        body: JSON.stringify({
+          ...formData,
+          eventId: selectedEventId,
+          paymentMethod: "PESAPAL"
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to register for event");
+        throw new Error(data.error || "Failed to register for event");
       }
 
-      // Check if payment is required
-      if (data.requiresPayment) {
-        // Initiate payment
-        await initiatePayment(eventId, data.registrationId);
-      } else {
-        toast({
-          title: "Success",
-          description: data.message || "Successfully registered for the event",
-        });
-      }
+      toast({
+        title: "Success",
+        description: "Registration successful. Redirecting to payment...",
+      });
 
+      // Close the registration modal
+      setShowRegistrationModal(false);
+      
+      // Initiate payment if registration was successful
+      if (data.registrationId) {
+        await initiatePayment(selectedEventId, data.registrationId);
+      }
+      
       fetchEvents();
     } catch (error) {
       console.error("[EVENT_REGISTRATION_ERROR]", error);
@@ -153,54 +156,6 @@ export default function EventsList() {
       toast({
         title: "Payment Error",
         description: error instanceof Error ? error.message : "Failed to initiate payment",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(null);
-    }
-  };
-
-  const handleGuestRegistration = async (formData: any) => {
-    if (!selectedEventId) return;
-
-    try {
-      setIsLoading(selectedEventId);
-      const response = await fetch("/api/events/register-guest", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          eventId: selectedEventId,
-          ...formData
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to register for event");
-      }
-
-      const data = await response.json();
-      
-      toast({
-        title: "Registration Successful",
-        description: "Your registration has been received. Please proceed to payment.",
-      });
-
-      // Close the registration modal
-      setShowRegistrationModal(false);
-      
-      // Initiate payment if registration was successful
-      if (data.registrationId) {
-        await initiatePayment(selectedEventId, data.registrationId);
-      }
-      
-      fetchEvents();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to register for event",
         variant: "destructive",
       });
     } finally {
@@ -491,11 +446,8 @@ export default function EventsList() {
               {selectedEventId === event.id && (
                 <EventRegistrationModal
                   isOpen={showRegistrationModal}
-                  onClose={() => {
-                    setShowRegistrationModal(false);
-                    setSelectedEventId(null);
-                  }}
-                  onSubmit={handleGuestRegistration}
+                  onClose={() => setShowRegistrationModal(false)}
+                  onSubmit={handleRegistrationSubmit}
                   event={event}
                 />
               )}

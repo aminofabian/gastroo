@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import {
   Dialog,
   DialogContent,
@@ -44,6 +45,7 @@ export default function EventRegistrationModal({
   event,
 }: EventRegistrationModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { data: session } = useSession();
   const { toast } = useToast();
 
   // If the event is free (no member price), don't show the modal
@@ -54,38 +56,27 @@ export default function EventRegistrationModal({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
+      firstName: session?.user?.firstName || "",
+      lastName: session?.user?.lastName || "",
+      email: session?.user?.email || "",
+      phone: session?.user?.phone || "",
     },
   });
+
+  // Update form values when session changes
+  useEffect(() => {
+    if (session?.user) {
+      form.setValue("firstName", session.user.firstName || "");
+      form.setValue("lastName", session.user.lastName || "");
+      form.setValue("email", session.user.email || "");
+      form.setValue("phone", session.user.phone || "");
+    }
+  }, [session, form]);
 
   const handleSubmit = async (data: FormData) => {
     try {
       setIsSubmitting(true);
-      const response = await fetch("/api/events/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...data,
-          eventId: event.id,
-          paymentMethod: "PESAPAL",
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error);
-      }
-
-      toast({
-        title: "Success",
-        description: "Registration successful. Redirecting to payment...",
-      });
-      onSubmit(data);
+      await onSubmit(data);
       onClose();
     } catch (error) {
       console.error("Registration error:", error);
@@ -101,128 +92,149 @@ export default function EventRegistrationModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] p-6 z-[151]">
-        <DialogHeader className="space-y-3 mb-6">
-          <DialogTitle className="text-2xl font-bold">Register for Event</DialogTitle>
-          <DialogDescription className="text-base text-muted-foreground">
-            Please fill in your details to register for {event?.title}
-          </DialogDescription>
-          <div className="mt-2 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-            <p className="text-sm text-emerald-800">
-              <span className="font-semibold">Registration Fee:</span>{' '}
-              KES {event.memberPrice.toLocaleString()}
+      <DialogContent className="sm:max-w-[500px] p-0 bg-white border-0 shadow-2xl">
+        <div className="bg-emerald-600 p-6 text-white">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="text-2xl font-bold text-white">Register for Event</DialogTitle>
+            <DialogDescription className="text-base text-emerald-50">
+              Please fill in your details to register for {event?.title}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-emerald-400/30">
+            <p className="text-lg font-semibold text-white">
+              Registration Fee: KES {event.memberPrice.toLocaleString()}
             </p>
-            <p className="text-xs text-emerald-600 mt-1">
-              Payment will be processed securely via PesaPal
-            </p>
+            <div className="flex items-center gap-2 mt-2 text-sm text-emerald-50">
+              <svg 
+                className="w-5 h-5" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              Secure payment processing via PesaPal
+            </div>
           </div>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
-            <div className="grid grid-cols-2 gap-4">
+        </div>
+        
+        <div className="p-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="firstName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold text-gray-700">First Name</FormLabel>
+                      <FormControl>
+                        <Input className="h-10 border-gray-200 focus:border-emerald-500 focus:ring-emerald-500" placeholder="John" {...field} />
+                      </FormControl>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold text-gray-700">Last Name</FormLabel>
+                      <FormControl>
+                        <Input className="h-10 border-gray-200 focus:border-emerald-500 focus:ring-emerald-500" placeholder="Doe" {...field} />
+                      </FormControl>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
               <FormField
                 control={form.control}
-                name="firstName"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-semibold">First Name</FormLabel>
+                    <FormLabel className="text-sm font-semibold text-gray-700">Email</FormLabel>
                     <FormControl>
-                      <Input className="h-10" placeholder="John" {...field} />
+                      <Input className="h-10 border-gray-200 focus:border-emerald-500 focus:ring-emerald-500" placeholder="john@example.com" type="email" {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-red-500" />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
-                name="lastName"
+                name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-semibold">Last Name</FormLabel>
+                    <FormLabel className="text-sm font-semibold text-gray-700">Phone Number</FormLabel>
                     <FormControl>
-                      <Input className="h-10" placeholder="Doe" {...field} />
+                      <Input className="h-10 border-gray-200 focus:border-emerald-500 focus:ring-emerald-500" placeholder="+254..." {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-red-500" />
                   </FormItem>
                 )}
               />
-            </div>
 
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-semibold">Email</FormLabel>
-                  <FormControl>
-                    <Input className="h-10" placeholder="john@example.com" type="email" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-semibold">Phone Number</FormLabel>
-                  <FormControl>
-                    <Input className="h-10" placeholder="+254..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type="submit" className="gap-2 bg-emerald-600 hover:bg-emerald-700" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <svg 
-                      className="w-5 h-5 mr-2" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="2"
-                    >
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-6h2v2h-2zm0-8h2v6h-2z"/>
-                    </svg>
-                    Proceed to Payment
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </Form>
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={onClose}
+                  className="border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-600"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 min-w-[160px] shadow-sm" 
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg
+                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <svg 
+                        className="w-5 h-5" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      Proceed to Payment
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );
