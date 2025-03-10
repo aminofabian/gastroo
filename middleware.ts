@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes"
+import { NextResponse } from "next/server"
 
 export default auth((req) => {
   const { nextUrl } = req;
@@ -10,7 +11,7 @@ export default auth((req) => {
 
   // If trying to access membership page while not logged in
   if (isMembershipPage && !isLoggedIn) {
-    return Response.redirect(new URL("/login?callbackUrl=/membership", nextUrl));
+    return Response.redirect(new URL("/auth/login?callbackUrl=/membership", nextUrl));
   }
 
   // If trying to access login page while already logged in
@@ -18,7 +19,7 @@ export default auth((req) => {
     return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
   }
 
-  return null;
+  return NextResponse.next();
 })
 
 // Specify which routes should be protected

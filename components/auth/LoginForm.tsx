@@ -39,6 +39,7 @@ const LoginForm = ({ callbackUrl }: LoginFormProps) => {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof LoginSchema>>({
@@ -68,9 +69,9 @@ const LoginForm = ({ callbackUrl }: LoginFormProps) => {
         setError(response.error);
       }
 
-      if (response?.success) {
+      if (!response?.error) {
         form.reset();
-        setSuccess(response.success);
+        setSuccess("Logged in successfully!");
         router.push(callbackUrl || "/dashboard");
       }
     } catch (error) {

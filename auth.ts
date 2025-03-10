@@ -4,13 +4,15 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/auth.config";
 
+const adapter = PrismaAdapter(prisma) as any; // Type assertion to bypass mismatch
+
 export const {
   handlers: { GET, POST },
   auth,
   signIn,
   signOut,
 } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter,
   session: { strategy: "jwt" },
   events: {
     async linkAccount({ user }) {
