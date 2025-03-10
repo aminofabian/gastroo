@@ -7,24 +7,30 @@ const BASE_URL = process.env.PESAPAL_API_URL || 'https://pay.pesapal.com/v3/api'
 
 // Get auth token
 async function getAuthToken() {
-  const response = await fetch(`${BASE_URL}/Auth/RequestToken`, {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      consumer_key: CONSUMER_KEY,
-      consumer_secret: CONSUMER_SECRET
-    })
-  });
+  try {
+    const response = await fetch(`${BASE_URL}/Auth/RequestToken`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        consumer_key: process.env.PESAPAL_CONSUMER_KEY,
+        consumer_secret: process.env.PESAPAL_CONSUMER_SECRET
+      })
+    });
 
-  if (!response.ok) {
-    throw new Error('Failed to get auth token');
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error?.message || 'Failed to get auth token');
+    }
+
+    const data = await response.json();
+    return data.token;
+  } catch (error) {
+    console.error('Auth token error:', error);
+    throw error;
   }
-
-  const data = await response.json();
-  return data.token;
 }
 
 // Submit payment request
