@@ -1,18 +1,35 @@
 "use client";
 import { signIn } from 'next-auth/react';
+import { useRouter } from "next/navigation";
 import { useState } from 'react';
 
-export function LoginButton() {
+interface LoginButtonProps {
+  children: React.ReactNode;
+  mode?: "modal" | "redirect";
+  asChild?: boolean;
+}
+
+function LoginButton({
+  children,
+  mode = "redirect",
+  asChild,
+}: LoginButtonProps) {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async () => {
+  const onClick = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const result = await signIn('github', { callbackUrl: '/' });
-      if (result?.error) {
-        setError(result.error);
+      
+      if (mode === "modal") {
+        const result = await signIn('github', { callbackUrl: '/' });
+        if (result?.error) {
+          setError(result.error);
+        }
+      } else {
+        router.push("/auth/login");
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -24,13 +41,16 @@ export function LoginButton() {
 
   return (
     <div>
-      <button 
-        onClick={handleLogin}
-        disabled={isLoading}
+      <span 
+        onClick={onClick}
+        style={{ cursor: 'pointer' }}
+        className={isLoading ? 'opacity-50' : ''}
       >
-        {isLoading ? 'Loading...' : 'Login'}
-      </button>
-      {error && <p className="text-red-500">{error}</p>}
+        {isLoading ? 'Loading...' : children}
+      </span>
+      {error && <p className="text-red-500 mt-2">{error}</p>}
     </div>
   );
 }
+
+export default LoginButton;
