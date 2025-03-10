@@ -18,6 +18,15 @@ const nextConfig = {
   // Add output configuration
   output: 'standalone',
   poweredByHeader: false,
+  // Explicitly define environment variables to be available at runtime
+  env: {
+    PESAPAL_ENV: process.env.PESAPAL_ENV,
+    PESAPAL_CONSUMER_KEY: process.env.PESAPAL_CONSUMER_KEY,
+    PESAPAL_CONSUMER_SECRET: process.env.PESAPAL_CONSUMER_SECRET,
+    PESAPAL_API_URL: process.env.PESAPAL_API_URL,
+    PESAPAL_IPN_ID: process.env.PESAPAL_IPN_ID,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+  },
   async headers() {
     return [
       {

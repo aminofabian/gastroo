@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { Check, Loader2, AlertCircle } from "lucide-react";
 import { submitPayment } from '@/lib/pesapal';
 import { usePaymentStatus } from '@/lib/hooks/usePaymentStatus';
+import TestPaymentButton from './TestPaymentButton';
 
 // Form Schema
 const membershipSchema = z.object({
@@ -84,6 +85,7 @@ export default function MembershipForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>({ paid: false });
   const [error, setError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const form = useForm<z.infer<typeof membershipSchema>>({
     resolver: zodResolver(membershipSchema),
@@ -113,6 +115,21 @@ export default function MembershipForm() {
       toast.success("Payment completed successfully!");
     }
   }, [isPaid]);
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        const response = await fetch('/api/user/me');
+        const data = await response.json();
+        setIsAdmin(data.user?.role === 'ADMIN');
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+      }
+    };
+    
+    checkAdminStatus();
+  }, []);
 
   const onSubmit = async (values: z.infer<typeof membershipSchema>) => {
     setIsSubmitting(true);
@@ -615,6 +632,14 @@ export default function MembershipForm() {
                     {error && (
                       <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                         <p className="text-sm text-red-700">{error}</p>
+                      </div>
+                    )}
+                    
+                    {/* Admin Test Button */}
+                    {isAdmin && (
+                      <div className="mt-6 border-t pt-6">
+                        <h3 className="text-sm font-medium text-gray-500 mb-4">Admin Tools</h3>
+                        <TestPaymentButton />
                       </div>
                     )}
                   </FormItem>

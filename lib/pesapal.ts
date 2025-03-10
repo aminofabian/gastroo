@@ -1,25 +1,51 @@
 import axios from 'axios';
 
-const PESAPAL_ENV = process.env.PESAPAL_ENV || 'sandbox';
+// Fallback values from .env file in case environment variables are not loaded properly
+// These should match the values in your .env file
+const FALLBACK_CREDENTIALS = {
+  PESAPAL_ENV: 'live',
+  PESAPAL_CONSUMER_KEY: 'IdHbOun/pEBzs9qN5OH3UJTO/tqdNK8C',
+  PESAPAL_CONSUMER_SECRET: '2FFD4eRSDSlcCTBwWZZYUiYmkmo=',
+  PESAPAL_API_URL: 'https://pay.pesapal.com/v3',
+  PESAPAL_IPN_ID: 'e77d03e4-50de-4a2d-9f84-dc11e7191a59'
+};
+
+// Use environment variables or fallback to hardcoded values if not available
+const PESAPAL_ENV = process.env.PESAPAL_ENV || FALLBACK_CREDENTIALS.PESAPAL_ENV;
 // Remove /api from base URL as it's added in the endpoints
 const BASE_URL = PESAPAL_ENV === 'sandbox' 
   ? 'https://cybqa.pesapal.com/pesapalv3'
   : 'https://pay.pesapal.com/v3';
 
 // Get auth token
-async function getAuthToken() {
+export async function getAuthToken() {
   try {
     console.log('Environment:', PESAPAL_ENV);
     console.log('Using API URL:', BASE_URL);
     
+    // More detailed logging for debugging
+    console.log('Checking PesaPal credentials:', {
+      keyExists: !!process.env.PESAPAL_CONSUMER_KEY,
+      secretExists: !!process.env.PESAPAL_CONSUMER_SECRET,
+      keyType: typeof process.env.PESAPAL_CONSUMER_KEY,
+      secretType: typeof process.env.PESAPAL_CONSUMER_SECRET,
+      keyEmpty: process.env.PESAPAL_CONSUMER_KEY === '',
+      secretEmpty: process.env.PESAPAL_CONSUMER_SECRET === '',
+      nodeEnv: process.env.NODE_ENV
+    });
+    
+    // Get credentials from environment variables or use fallback values
+    const consumerKey = process.env.PESAPAL_CONSUMER_KEY || FALLBACK_CREDENTIALS.PESAPAL_CONSUMER_KEY;
+    const consumerSecret = process.env.PESAPAL_CONSUMER_SECRET || FALLBACK_CREDENTIALS.PESAPAL_CONSUMER_SECRET;
+    
     // Ensure credentials are present
-    if (!process.env.PESAPAL_CONSUMER_KEY || !process.env.PESAPAL_CONSUMER_SECRET) {
+    if (!consumerKey || !consumerSecret) {
       throw new Error('Missing PesaPal credentials');
     }
 
     const credentials = {
-      consumer_key: process.env.PESAPAL_CONSUMER_KEY.trim(),
-      consumer_secret: process.env.PESAPAL_CONSUMER_SECRET.trim()
+      consumer_key: consumerKey.trim(),
+      consumer_secret: consumerSecret.trim()
     };
 
     // Log partial credentials for debugging
@@ -87,6 +113,17 @@ export async function submitPayment({
   membershipType: string;
 }) {
   try {
+    // Get credentials from environment variables or use fallback values
+    const consumerKey = process.env.PESAPAL_CONSUMER_KEY || FALLBACK_CREDENTIALS.PESAPAL_CONSUMER_KEY;
+    const consumerSecret = process.env.PESAPAL_CONSUMER_SECRET || FALLBACK_CREDENTIALS.PESAPAL_CONSUMER_SECRET;
+    const ipnId = process.env.PESAPAL_IPN_ID || FALLBACK_CREDENTIALS.PESAPAL_IPN_ID;
+    
+    // Check if credentials are available
+    if (!consumerKey || !consumerSecret) {
+      console.error('PesaPal credentials are missing');
+      throw new Error('Payment gateway configuration error. Please contact support.');
+    }
+    
     const token = await getAuthToken();
 
     const merchantReference = `GSK${Date.now()}${Math.floor(Math.random() * 1000)}`;
@@ -97,13 +134,15 @@ export async function submitPayment({
       paymentAmount = membershipType === "new" ? 6500 : 5000;
     }
     
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://gastro.or.ke';
+    
     const paymentData = {
       id: merchantReference,
       currency: "KES",
       amount: paymentAmount,
       description: `GSK ${membershipType} Membership Payment - KES ${paymentAmount.toLocaleString()}`,
-      callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/pesapal/callback`,
-      notification_id: process.env.PESAPAL_IPN_ID,
+      callback_url: `${appUrl}/api/pesapal/callback`,
+      notification_id: ipnId,
       branch: "GSK",
       billing_address: {
         email_address: email,
@@ -171,6 +210,16 @@ export async function submitPayment({
 // Check payment status
 export async function checkPaymentStatus(orderTrackingId: string) {
   try {
+    // Get credentials from environment variables or use fallback values
+    const consumerKey = process.env.PESAPAL_CONSUMER_KEY || FALLBACK_CREDENTIALS.PESAPAL_CONSUMER_KEY;
+    const consumerSecret = process.env.PESAPAL_CONSUMER_SECRET || FALLBACK_CREDENTIALS.PESAPAL_CONSUMER_SECRET;
+    
+    // Check if credentials are available
+    if (!consumerKey || !consumerSecret) {
+      console.error('PesaPal credentials are missing');
+      throw new Error('Payment gateway configuration error. Please contact support.');
+    }
+    
     const token = await getAuthToken();
     
     const response = await axios({
