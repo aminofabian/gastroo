@@ -5,32 +5,48 @@ export function usePaymentStatus(orderTrackingId: string | undefined) {
   const [isPaid, setIsPaid] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
 
   useEffect(() => {
     if (!orderTrackingId) return;
 
+    let isMounted = true;
+    
     const checkStatus = async () => {
+      if (!isMounted) return false;
+      
       try {
         setIsChecking(true);
-        const status = await checkPaymentStatus(orderTrackingId);
+        const statusResponse = await checkPaymentStatus(orderTrackingId);
         
-        if (status.status === 'COMPLETED') {
+        if (!isMounted) return false;
+        
+        setStatus(statusResponse.status);
+        
+        if (statusResponse.status === 'COMPLETED') {
           setIsPaid(true);
           return true; // Stop polling
         }
         return false; // Continue polling
       } catch (error: any) {
+        if (!isMounted) return false;
+        
+        console.error('Payment status check error:', error);
         setError(error.message);
-        return true; // Stop polling on error
+        
+        // Don't stop polling on network errors, only on validation errors
+        return error.message.includes('Invalid') || error.message.includes('not found');
       } finally {
-        setIsChecking(false);
+        if (isMounted) {
+          setIsChecking(false);
+        }
       }
     };
 
     // Poll every 5 seconds
     const interval = setInterval(async () => {
       const shouldStop = await checkStatus();
-      if (shouldStop) {
+      if (shouldStop && isMounted) {
         clearInterval(interval);
       }
     }, 5000);
@@ -38,8 +54,11 @@ export function usePaymentStatus(orderTrackingId: string | undefined) {
     // Initial check
     checkStatus();
 
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, [orderTrackingId]);
 
-  return { isPaid, isChecking, error };
+  return { isPaid, isChecking, error, status };
 } 

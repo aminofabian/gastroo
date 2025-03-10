@@ -72,7 +72,7 @@ async function getAuthToken() {
 
 // Submit payment request
 export async function submitPayment({
-  amount = 1000, // Default to KES 1000
+  amount,
   email,
   firstName,
   lastName,
@@ -91,11 +91,17 @@ export async function submitPayment({
 
     const merchantReference = `GSK${Date.now()}${Math.floor(Math.random() * 1000)}`;
     
+    // Calculate the correct amount based on membership type if not explicitly provided
+    let paymentAmount = amount;
+    if (!paymentAmount) {
+      paymentAmount = membershipType === "new" ? 6500 : 5000;
+    }
+    
     const paymentData = {
       id: merchantReference,
       currency: "KES",
-      amount: 1000, // Fixed amount of KES 1000
-      description: `GSK ${membershipType} Membership Payment - KES 1,000`,
+      amount: paymentAmount,
+      description: `GSK ${membershipType} Membership Payment - KES ${paymentAmount.toLocaleString()}`,
       callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/pesapal/callback`,
       notification_id: process.env.PESAPAL_IPN_ID,
       branch: "GSK",
@@ -185,8 +191,17 @@ export async function checkPaymentStatus(orderTrackingId: string) {
       throw new Error(`Status check failed: ${JSON.stringify(response.data.error)}`);
     }
 
+    // Normalize status to handle different possible values
+    let normalizedStatus = response.data.payment_status_description;
+    
+    // Check if the status indicates a completed payment
+    const completedStatuses = ['COMPLETED', 'PAID', 'SUCCESS', 'SUCCESSFUL'];
+    const isCompleted = completedStatuses.some(status => 
+      normalizedStatus?.toUpperCase().includes(status)
+    );
+
     return {
-      status: response.data.payment_status_description,
+      status: isCompleted ? 'COMPLETED' : normalizedStatus,
       amount: response.data.amount,
       paymentMethod: response.data.payment_method,
       reference: response.data.merchant_reference

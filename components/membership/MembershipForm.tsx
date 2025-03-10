@@ -5,13 +5,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion } from "framer-motion";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, AlertCircle } from "lucide-react";
 import { submitPayment } from '@/lib/pesapal';
 import { usePaymentStatus } from '@/lib/hooks/usePaymentStatus';
 
@@ -105,11 +105,12 @@ export default function MembershipForm() {
     },
   });
 
-  const { isPaid, isChecking } = usePaymentStatus(paymentStatus.orderTrackingId);
+  const { isPaid, isChecking, error: paymentStatusError, status: paymentStatusText } = usePaymentStatus(paymentStatus.orderTrackingId);
 
   useEffect(() => {
     if (isPaid) {
       setPaymentStatus(prev => ({ ...prev, paid: true }));
+      toast.success("Payment completed successfully!");
     }
   }, [isPaid]);
 
@@ -139,7 +140,8 @@ export default function MembershipForm() {
         firstName: values.firstName,
         lastName: values.lastName,
         phone: values.phone,
-        membershipType: values.membershipType
+        membershipType: values.membershipType,
+        amount: amount
       });
 
       if (!paymentResponse.redirectUrl) {
@@ -186,12 +188,24 @@ export default function MembershipForm() {
     setError(null);
 
     try {
+      const membershipType = form.getValues("membershipType");
+      const customAmount = form.getValues("customAmount");
+      
+      // Calculate amount based on membership type or use custom amount if provided
+      let amount;
+      if (customAmount && parseInt(customAmount) > 0) {
+        amount = parseInt(customAmount);
+      } else {
+        amount = membershipType === "new" ? 6500 : 5000;
+      }
+
       const response = await submitPayment({
         email: form.getValues("email"),
         firstName: form.getValues("firstName"),
         lastName: form.getValues("lastName"),
         phone: form.getValues("phone"),
-        membershipType: form.getValues("membershipType")
+        membershipType: membershipType,
+        amount: amount
       });
 
       // Open payment window in new tab
@@ -481,20 +495,14 @@ export default function MembershipForm() {
                         className={`h-24 flex flex-col items-center justify-center space-y-2 relative ${
                           field.value === "new" ? "bg-[#c22f61] text-white" : "bg-gray-100"
                         }`}
-                        onClick={async (e) => {
+                        onClick={(e) => {
                           field.onChange("new");
-                          await handlePayment(e);
                         }}
                       >
                         <div className="flex flex-col items-center">
                           <span className="font-bold">New Membership</span>
                           <span className="text-sm">KES 6,500/=</span>
                         </div>
-                        {isSubmitting && field.value === 'new' && (
-                          <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
-                            <Loader2 className="w-6 h-6 animate-spin text-white" />
-                          </div>
-                        )}
                         {paymentStatus.paid && field.value === 'new' && (
                           <div className="absolute inset-0 bg-green-500/90 flex items-center justify-center">
                             <Check className="w-8 h-8 text-white" />
@@ -507,20 +515,14 @@ export default function MembershipForm() {
                         className={`h-24 flex flex-col items-center justify-center space-y-2 relative ${
                           field.value === "renewal" ? "bg-[#c22f61] text-white" : "bg-gray-100"
                         }`}
-                        onClick={async (e) => {
+                        onClick={(e) => {
                           field.onChange("renewal");
-                          await handlePayment(e);
                         }}
                       >
                         <div className="flex flex-col items-center">
                           <span className="font-bold">Membership Renewal</span>
                           <span className="text-sm">KES 5,000/=</span>
                         </div>
-                        {isSubmitting && field.value === 'renewal' && (
-                          <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
-                            <Loader2 className="w-6 h-6 animate-spin text-white" />
-                          </div>
-                        )}
                         {paymentStatus.paid && field.value === 'renewal' && (
                           <div className="absolute inset-0 bg-green-500/90 flex items-center justify-center">
                             <Check className="w-8 h-8 text-white" />
@@ -544,25 +546,77 @@ export default function MembershipForm() {
                               {...field}
                               onChange={(e) => {
                                 field.onChange(e);
-                                const amount = parseInt(e.target.value);
-                                if (amount > 0) {
-                                  handlePayment(e);
-                                }
+                                // Don't automatically trigger payment on input change
+                                // Let the user click the payment button instead
                               }}
                             />
                           </FormControl>
+                          <FormDescription>
+                            Enter a custom amount if you wish to contribute more than the standard fee.
+                          </FormDescription>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
                     
-                    {error && (
-                      <p className={`text-sm ${
-                        'text-red-500'
-                      }`}>
-                        {error}
-                      </p>
+                    {/* Payment Button */}
+                    <Button
+                      type="button"
+                      onClick={handlePayment}
+                      disabled={isSubmitting || paymentStatus.paid}
+                      className="w-full h-12 mt-4 bg-[#c22f61] hover:bg-[#a02550] text-white"
+                    >
+                      {isSubmitting ? (
+                        <div className="flex items-center justify-center">
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          Processing Payment...
+                        </div>
+                      ) : paymentStatus.paid ? (
+                        <div className="flex items-center justify-center">
+                          <Check className="w-5 h-5 mr-2" />
+                          Payment Completed
+                        </div>
+                      ) : (
+                        "Proceed to Payment"
+                      )}
+                    </Button>
+                    
+                    {/* Payment Status Information */}
+                    {paymentStatus.orderTrackingId && !paymentStatus.paid && (
+                      <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          {isChecking ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-yellow-700" />
+                          ) : (
+                            <AlertCircle className="w-4 h-4 text-yellow-700" />
+                          )}
+                          <p className="text-sm text-yellow-700">
+                            {isChecking 
+                              ? "Checking payment status..." 
+                              : "Please complete the payment in the new window. Your payment status will be updated automatically once completed."}
+                          </p>
+                        </div>
+                        {paymentStatusText && !isPaid && (
+                          <p className="mt-2 text-xs text-yellow-700">
+                            Current status: {paymentStatusText}
+                          </p>
+                        )}
+                      </div>
                     )}
-                    <FormMessage />
+                    
+                    {paymentStatusError && !paymentStatus.paid && (
+                      <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-sm text-red-700">
+                          Error checking payment status: {paymentStatusError}
+                        </p>
+                      </div>
+                    )}
+                    
+                    {error && (
+                      <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-sm text-red-700">{error}</p>
+                      </div>
+                    )}
                   </FormItem>
                 )}
               />
