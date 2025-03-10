@@ -1,4 +1,11 @@
+import 'dotenv/config';
 import fetch from 'node-fetch';
+
+interface IPNResponse {
+  ipn_id: string;
+  url: string;
+  error?: { message: string };
+}
 
 async function registerIPN() {
   try {
@@ -15,7 +22,8 @@ async function registerIPN() {
       })
     });
 
-    const { token } = await tokenResponse.json();
+    const { token } = await tokenResponse.json() as { token: string };
+    console.log('Got token:', token);
 
     // Register IPN URL
     const response = await fetch('https://pay.pesapal.com/v3/api/URLSetup/RegisterIPN', {
@@ -31,11 +39,14 @@ async function registerIPN() {
       })
     });
 
-    const data = await response.json();
+    const data = await response.json() as IPNResponse;
     console.log('IPN Registration Response:', data);
     
-    // Save this IPN ID to your environment variables
-    console.log('Add this to your .env file:');
+    if (data.error) {
+      throw new Error(data.error.message || 'IPN registration failed');
+    }
+    
+    console.log('\nAdd this to your .env file:');
     console.log(`PESAPAL_IPN_ID=${data.ipn_id}`);
 
   } catch (error) {
