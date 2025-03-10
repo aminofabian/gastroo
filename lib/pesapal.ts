@@ -72,14 +72,14 @@ async function getAuthToken() {
 
 // Submit payment request
 export async function submitPayment({
-  amount,
+  amount = 1000, // Default to KES 1000
   email,
   firstName,
   lastName,
   phone,
   membershipType
 }: {
-  amount: number;
+  amount?: number;
   email: string;
   firstName: string;
   lastName: string;
@@ -94,8 +94,8 @@ export async function submitPayment({
     const paymentData = {
       id: merchantReference,
       currency: "KES",
-      amount: amount,
-      description: `GSK ${membershipType} Membership Payment`,
+      amount: 1000, // Fixed amount of KES 1000
+      description: `GSK ${membershipType} Membership Payment - KES 1,000`,
       callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/pesapal/callback`,
       notification_id: process.env.PESAPAL_IPN_ID,
       branch: "GSK",
@@ -115,6 +115,13 @@ export async function submitPayment({
       }
     };
 
+    console.log('Submitting payment request:', {
+      amount: paymentData.amount,
+      currency: paymentData.currency,
+      reference: merchantReference,
+      env: PESAPAL_ENV
+    });
+
     const response = await axios({
       method: 'POST',
       url: `${BASE_URL}/api/Transactions/SubmitOrderRequest`,
@@ -127,7 +134,12 @@ export async function submitPayment({
       validateStatus: null
     });
 
-    console.log('Payment Response:', response.data);
+    console.log('Payment Response:', {
+      status: response.status,
+      error: response.data.error,
+      redirectUrl: response.data.redirect_url,
+      orderTrackingId: response.data.order_tracking_id
+    });
 
     if (response.data.error) {
       throw new Error(response.data.error.message || 'Payment initiation failed');
