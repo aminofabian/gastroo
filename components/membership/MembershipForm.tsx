@@ -162,11 +162,14 @@ export default function MembershipForm() {
   const handlePayment = async (type: string, amount: number) => {
     setPaymentStatus('processing');
     try {
+      // Convert amount to a lower value for testing
+      const testAmount = 100; // Start with 100 KES for testing
+      
       const response = await fetch("/api/pesapal/stk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount,
+          amount: testAmount, // Use test amount instead of full amount
           membershipType: type,
           phone: form.getValues("phone")
         }),
