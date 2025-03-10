@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Check, Loader2 } from "lucide-react";
+import { submitPayment } from '@/lib/pesapal';
+import { usePaymentStatus } from '@/lib/hooks/usePaymentStatus';
 
 // Form Schema
 const membershipSchema = z.object({
@@ -70,12 +72,18 @@ const steps = [
   },
 ];
 
+interface PaymentStatus {
+  paid: boolean;
+  orderTrackingId?: string;
+  merchantReference?: string;
+}
+
 export default function MembershipForm() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
-  const [paymentMessage, setPaymentMessage] = useState('');
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>({ paid: false });
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof membershipSchema>>({
     resolver: zodResolver(membershipSchema),
@@ -96,6 +104,14 @@ export default function MembershipForm() {
       customAmount: "",
     },
   });
+
+  const { isPaid, isChecking } = usePaymentStatus(paymentStatus.orderTrackingId);
+
+  useEffect(() => {
+    if (isPaid) {
+      setPaymentStatus(prev => ({ ...prev, paid: true }));
+    }
+  }, [isPaid]);
 
   const onSubmit = async (values: z.infer<typeof membershipSchema>) => {
     setIsSubmitting(true);
@@ -118,24 +134,27 @@ export default function MembershipForm() {
       }
 
       // Initialize PesaPal payment
-      const paymentResponse = await fetch("/api/pesapal/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount,
-          membershipType: values.membershipType,
-          phone: values.phone
-        }),
+      const paymentResponse = await submitPayment({
+        email: values.email,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        phone: values.phone,
+        membershipType: values.membershipType
       });
 
-      const paymentData = await paymentResponse.json();
-      
-      if (paymentData.error) {
-        throw new Error(paymentData.error);
+      if (paymentResponse.error) {
+        throw new Error(paymentResponse.error);
       }
 
       // Redirect to PesaPal payment page
-      window.location.href = paymentData.redirect_url;
+      window.open(paymentResponse.redirectUrl, '_blank');
+
+      // Store payment reference for verification
+      setPaymentStatus({
+        paid: false,
+        orderTrackingId: paymentResponse.orderTrackingId,
+        merchantReference: paymentResponse.merchantReference
+      });
 
     } catch (error) {
       console.error("Error:", error);
@@ -161,33 +180,47 @@ export default function MembershipForm() {
     setCurrentStep(prev => Math.max(prev - 1, 0));
   };
 
-  const handlePayment = async (type: string, amount: number) => {
-    setPaymentStatus('processing');
+  const handlePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
     try {
-      const response = await fetch("/api/pesapal/stk", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount, // Use actual amount
-          membershipType: type,
-          phone: form.getValues("phone")
-        }),
+      const response = await submitPayment({
+        email: form.getValues("email"),
+        firstName: form.getValues("firstName"),
+        lastName: form.getValues("lastName"),
+        phone: form.getValues("phone"),
+        membershipType: form.getValues("membershipType")
       });
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Payment failed');
-      }
+      // Open payment window in new tab
+      window.open(response.redirectUrl, '_blank');
 
-      // Redirect to PesaPal payment page
-      window.location.href = data.redirectUrl;
+      // Store payment reference for verification
+      setPaymentStatus({
+        paid: false,
+        orderTrackingId: response.orderTrackingId,
+        merchantReference: response.merchantReference
+      });
 
-    } catch (error) {
-      console.error("Payment error:", error);
-      setPaymentStatus('error');
-      setPaymentMessage(error instanceof Error ? error.message : 'Payment failed');
+    } catch (error: any) {
+      setError(error.message || 'Payment initiation failed');
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!paymentStatus.paid) {
+      setError('Please complete payment before submitting application');
+      return;
+    }
+
+    setIsSubmitting(true);
+    // ... rest of your form submission logic
   };
 
   return (
@@ -215,7 +248,7 @@ export default function MembershipForm() {
       </nav>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Step Title */}
           <div className="space-y-2">
             <h2 className="text-2xl font-display font-bold text-gray-900">
@@ -444,25 +477,25 @@ export default function MembershipForm() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Button
                         type="button"
-                        disabled={paymentStatus === 'processing'}
+                        disabled={isSubmitting}
                         className={`h-24 flex flex-col items-center justify-center space-y-2 relative ${
                           field.value === "new" ? "bg-[#c22f61] text-white" : "bg-gray-100"
                         }`}
                         onClick={async () => {
                           field.onChange("new");
-                          await handlePayment("new", 6500);
+                          await handlePayment(e);
                         }}
                       >
                         <div className="flex flex-col items-center">
                           <span className="font-bold">New Membership</span>
                           <span className="text-sm">KES 6,500/=</span>
                         </div>
-                        {paymentStatus === 'processing' && field.value === 'new' && (
+                        {isSubmitting && field.value === 'new' && (
                           <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
                             <Loader2 className="w-6 h-6 animate-spin text-white" />
                           </div>
                         )}
-                        {paymentStatus === 'success' && field.value === 'new' && (
+                        {paymentStatus.paid && field.value === 'new' && (
                           <div className="absolute inset-0 bg-green-500/90 flex items-center justify-center">
                             <Check className="w-8 h-8 text-white" />
                           </div>
@@ -470,25 +503,25 @@ export default function MembershipForm() {
                       </Button>
                       <Button
                         type="button"
-                        disabled={paymentStatus === 'processing'}
+                        disabled={isSubmitting}
                         className={`h-24 flex flex-col items-center justify-center space-y-2 relative ${
                           field.value === "renewal" ? "bg-[#c22f61] text-white" : "bg-gray-100"
                         }`}
                         onClick={async () => {
                           field.onChange("renewal");
-                          await handlePayment("renewal", 5000);
+                          await handlePayment(e);
                         }}
                       >
                         <div className="flex flex-col items-center">
                           <span className="font-bold">Membership Renewal</span>
                           <span className="text-sm">KES 5,000/=</span>
                         </div>
-                        {paymentStatus === 'processing' && field.value === 'renewal' && (
+                        {isSubmitting && field.value === 'renewal' && (
                           <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
                             <Loader2 className="w-6 h-6 animate-spin text-white" />
                           </div>
                         )}
-                        {paymentStatus === 'success' && field.value === 'renewal' && (
+                        {paymentStatus.paid && field.value === 'renewal' && (
                           <div className="absolute inset-0 bg-green-500/90 flex items-center justify-center">
                             <Check className="w-8 h-8 text-white" />
                           </div>
@@ -513,7 +546,7 @@ export default function MembershipForm() {
                                 field.onChange(e);
                                 const amount = parseInt(e.target.value);
                                 if (amount > 0) {
-                                  handlePayment(form.getValues("membershipType"), amount);
+                                  handlePayment(e);
                                 }
                               }}
                             />
@@ -522,13 +555,11 @@ export default function MembershipForm() {
                       )}
                     />
                     
-                    {paymentMessage && (
+                    {error && (
                       <p className={`text-sm ${
-                        paymentStatus === 'error' ? 'text-red-500' : 
-                        paymentStatus === 'success' ? 'text-green-500' : 
-                        'text-gray-500'
+                        'text-red-500'
                       }`}>
-                        {paymentMessage}
+                        {error}
                       </p>
                     )}
                     <FormMessage />
@@ -553,7 +584,7 @@ export default function MembershipForm() {
             {isLastStep ? (
               <Button 
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !paymentStatus.paid}
                 className="h-12 bg-[#c22f61] hover:bg-[#004488] text-white font-display font-bold transition-colors"
               >
                 {isSubmitting ? "Submitting..." : "Submit Application"}
@@ -568,6 +599,34 @@ export default function MembershipForm() {
               </Button>
             )}
           </div>
+
+          {/* Payment Section */}
+          {!paymentStatus.paid && (
+            <div className="mt-6">
+              <button
+                type="button"
+                onClick={handlePayment}
+                disabled={isSubmitting}
+                className="w-full px-4 py-2 text-white bg-primary hover:bg-primary/90 rounded-lg disabled:opacity-50"
+              >
+                {isSubmitting ? 'Processing...' : 'Pay Membership Fee'}
+              </button>
+            </div>
+          )}
+
+          {paymentStatus.orderTrackingId && !paymentStatus.paid && (
+            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-700">
+                Please complete the payment in the new window. Your application will be enabled once payment is confirmed.
+              </p>
+            </div>
+          )}
+
+          {!paymentStatus.paid && (
+            <p className="mt-2 text-sm text-gray-600 text-center">
+              Please complete payment to enable application submission
+            </p>
+          )}
         </form>
       </Form>
     </div>

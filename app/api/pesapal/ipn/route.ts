@@ -1,27 +1,30 @@
 import { prisma } from '@/lib/prisma';
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { 
-      OrderTrackingId,
-      OrderMerchantReference,
-      OrderNotificationType,
-      OrderPaymentStatus
-    } = body;
+    const data = await req.json();
+    
+    // Verify payment status
+    if (data.status === 'COMPLETED') {
+      // Update payment status in your database
+      await prisma.payment.update({
+        where: {
+          merchantReference: data.merchant_reference
+        },
+        data: {
+          status: 'COMPLETED',
+          paymentMethod: data.payment_method,
+          transactionDate: new Date()
+        }
+      });
 
-    // Update payment status in your database
-    await prisma.payment.update({
-      where: { transactionId: OrderMerchantReference },
-      data: {
-        status: OrderPaymentStatus,
-        // Add other relevant fields
-      }
-    });
+      // You might want to emit an event or update the UI somehow
+    }
 
-    return Response.json({ success: true });
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('IPN handling error:', error);
-    return Response.json({ error: 'Failed to process IPN' }, { status: 500 });
+    console.error('IPN Error:', error);
+    return NextResponse.json({ error: 'IPN processing failed' }, { status: 500 });
   }
 } 
