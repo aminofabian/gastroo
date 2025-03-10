@@ -1,51 +1,59 @@
 import axios from 'axios';
 
-const PESAPAL_ENV = process.env.PESAPAL_ENV || 'live';
-const CONSUMER_KEY = process.env.PESAPAL_CONSUMER_KEY;
-const CONSUMER_SECRET = process.env.PESAPAL_CONSUMER_SECRET;
-
-// Use live URL
-const BASE_URL = process.env.PESAPAL_API_URL || 'https://pay.pesapal.com/v3/api';
+const PESAPAL_ENV = process.env.PESAPAL_ENV || 'sandbox';
+const BASE_URL = PESAPAL_ENV === 'sandbox' 
+  ? 'https://cybqa.pesapal.com/pesapalv3'  // Note: no /api at the end
+  : 'https://pay.pesapal.com/v3';
 
 // Get auth token
 async function getAuthToken() {
   try {
-    console.log('Using API URL:', BASE_URL); // Debug URL
-    console.log('Using credentials:', {
-      key: process.env.PESAPAL_CONSUMER_KEY?.substring(0, 4) + '...',
-      secret: process.env.PESAPAL_CONSUMER_SECRET?.substring(0, 4) + '...'
-    }); // Debug credentials
+    console.log('Environment:', PESAPAL_ENV);
+    console.log('Using API URL:', BASE_URL);
+    
+    // Use hardcoded sandbox credentials for testing
+    const credentials = PESAPAL_ENV === 'sandbox' 
+      ? {
+          consumer_key: "qkio1BGGYAXTu2JOfm7XSXNruoZsrqEW",
+          consumer_secret: "osGQ364R49cXKeOYSpaOnT++rHs="
+        }
+      : {
+          consumer_key: process.env.PESAPAL_CONSUMER_KEY,
+          consumer_secret: process.env.PESAPAL_CONSUMER_SECRET
+        };
 
-    const response = await axios.post(`${BASE_URL}/Auth/RequestToken`, {
-      consumer_key: process.env.PESAPAL_CONSUMER_KEY,
-      consumer_secret: process.env.PESAPAL_CONSUMER_SECRET
-    }, {
+    console.log('Using credentials:', {
+      key: credentials.consumer_key.substring(0, 4) + '...',
+      secret: credentials.consumer_secret.substring(0, 4) + '...'
+    });
+
+    const response = await axios.post(`${BASE_URL}/api/Auth/RequestToken`, credentials, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       }
     });
 
-    console.log('Auth Response:', response.data); // Debug response
+    console.log('Raw Response:', response.data);
 
     if (response.data.error) {
+      console.error('Auth Error:', response.data.error);
       throw new Error(response.data.error.message || 'Failed to get auth token');
     }
 
     if (!response.data.token) {
-      throw new Error('No token in response: ' + JSON.stringify(response.data));
+      console.error('No token in response:', response.data);
+      throw new Error('Authentication failed - no token received');
     }
 
     return response.data.token;
 
   } catch (error: any) {
-    if (error.response) {
-      console.error('Auth Error Response:', {
-        status: error.response.status,
-        data: error.response.data,
-        headers: error.response.headers
-      });
-    }
+    console.error('Full Auth Error:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status
+    });
     throw new Error(error.response?.data?.error?.message || error.message || 'Failed to get auth token');
   }
 }
