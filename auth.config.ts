@@ -70,6 +70,7 @@ export const authConfig: NextAuthConfig = {
       session.user.image = token.picture as string | null;
       session.user.emailVerified = token.emailVerified as Date | null;
       session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
+      session.user.isOnboarded = token.isOnboarded as boolean;
 
       return session;
     },
@@ -87,6 +88,7 @@ export const authConfig: NextAuthConfig = {
       token.picture = existingUser.image;
       token.emailVerified = existingUser.emailVerified;
       token.isTwoFactorEnabled = false;
+      token.isOnboarded = existingUser.isOnboarded;
 
       return token;
     },

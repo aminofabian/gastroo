@@ -3,8 +3,12 @@
 import { motion } from "framer-motion";
 import Logo from "@/components/homepage/Logo";
 import MembershipForm from "@/components/membership/MembershipForm";
+import { useSearchParams } from "next/navigation";
 
 export default function MembershipPage() {
+  const searchParams = useSearchParams();
+  const fromDashboard = searchParams.get("from") === "dashboard";
+
   return (
     <div className="min-h-screen bg-gray-50 relative overflow-hidden">
       {/* Background Pattern */}
@@ -33,15 +37,17 @@ export default function MembershipPage() {
               </div>
               
               {/* Content Card */}
-              <div className="relative bg-[#c22f61]  p-8 shadow-xl">
+              <div className="relative bg-[#c22f61] p-8 shadow-xl">
                 <div className="flex justify-center mb-8">
                   <Logo variant="light" />
                 </div>
                 <h1 className="text-3xl xl:text-4xl font-display font-bold text-white mb-6 text-center">
-                  Join Our Community
+                  {fromDashboard ? "Complete Your Profile" : "Join Our Community"}
                 </h1>
                 <p className="text-lg text-white/80 font-display leading-relaxed text-center">
-                  Become a member of the Gastroenterology Society of Kenya and help advance digestive healthcare.
+                  {fromDashboard 
+                    ? "Please complete your profile to access the dashboard and all member features."
+                    : "Become a member of the Gastroenterology Society of Kenya and help advance digestive healthcare."}
                 </p>
                 {/* Benefits List */}
                 <div className="mt-8 space-y-4">
@@ -73,6 +79,15 @@ export default function MembershipPage() {
                 <div className="flex justify-center w-full mb-8 lg:hidden">
                   <Logo variant="dark" />
                 </div>
+
+                {fromDashboard && (
+                  <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h2 className="text-lg font-semibold text-blue-800 mb-2">Complete Your Profile</h2>
+                    <p className="text-blue-700">
+                      You need to complete your profile and membership registration to access the dashboard and all member features.
+                    </p>
+                  </div>
+                )}
 
                 <MembershipForm />
               </div>

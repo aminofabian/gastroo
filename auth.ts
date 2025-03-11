@@ -4,6 +4,24 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/auth.config";
 
+// Extend the Session type to include custom fields
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      firstName?: string | null;
+      lastName?: string | null;
+      role?: UserRole;
+      emailVerified?: Date | null;
+      isTwoFactorEnabled?: boolean;
+      isOnboarded?: boolean;
+    };
+  }
+}
+
 const adapter = PrismaAdapter(prisma) as any; // Type assertion to bypass mismatch
 
 export const {

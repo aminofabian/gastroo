@@ -86,6 +86,7 @@ export default function MembershipForm() {
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>({ paid: false });
   const [error, setError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [hasExistingPayment, setHasExistingPayment] = useState(false);
 
   const form = useForm<z.infer<typeof membershipSchema>>({
     resolver: zodResolver(membershipSchema),
@@ -109,12 +110,61 @@ export default function MembershipForm() {
 
   const { isPaid, isChecking, error: paymentStatusError, status: paymentStatusText } = usePaymentStatus(paymentStatus.orderTrackingId);
 
+  // Function to handle redirection to dashboard
+  const redirectToDashboard = (message: string = "Profile completed successfully!") => {
+    toast.success(message);
+    
+    // Redirect to dashboard after a short delay
+    setTimeout(() => {
+      router.push('/dashboard');
+    }, 1500);
+  };
+
   useEffect(() => {
     if (isPaid) {
       setPaymentStatus(prev => ({ ...prev, paid: true }));
       toast.success("Payment completed successfully!");
+      
+      // Update onboarding status after payment is completed
+      const updateOnboardingStatus = async () => {
+        try {
+          // Get form values
+          const formValues = form.getValues();
+          
+          // Create a copy of form values without the email field
+          const { email, ...dataWithoutEmail } = formValues;
+          
+          // Prepare onboarding data without email
+          const onboardingData = {
+            ...dataWithoutEmail,
+            isOnboarded: true,
+            profileCompleteness: 100, // Set profile completeness to 100%
+            membershipType: formValues.membershipType,
+          };
+          
+          // Update user profile with membership details and mark as onboarded
+          const response = await fetch("/api/user/onboarding", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(onboardingData),
+          });
+          
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Error updating profile after payment:", errorText);
+            throw new Error(`Failed to update profile: ${errorText}`);
+          }
+          
+          redirectToDashboard("Payment completed and profile updated successfully!");
+          
+        } catch (error) {
+          console.error("Error updating profile after payment:", error);
+        }
+      };
+      
+      updateOnboardingStatus();
     }
-  }, [isPaid]);
+  }, [isPaid, form, router]);
 
   // Check if user is admin
   useEffect(() => {
@@ -129,6 +179,28 @@ export default function MembershipForm() {
     };
     
     checkAdminStatus();
+  }, []);
+
+  // Check if user has existing payments
+  useEffect(() => {
+    const checkExistingPayments = async () => {
+      try {
+        const response = await fetch('/api/payments/user');
+        const data = await response.json();
+        
+        // If user has any successful payments, set hasExistingPayment to true
+        if (data.payments && data.payments.length > 0) {
+          const successfulPayments = data.payments.filter(
+            (payment: any) => payment.status === 'COMPLETED'
+          );
+          setHasExistingPayment(successfulPayments.length > 0);
+        }
+      } catch (error) {
+        console.error('Error checking payment status:', error);
+      }
+    };
+    
+    checkExistingPayments();
   }, []);
 
   const onSubmit = async (values: z.infer<typeof membershipSchema>) => {
@@ -169,6 +241,16 @@ export default function MembershipForm() {
         console.error("Error updating onboarding status:", onboardingError);
         toast.error(`Onboarding error: ${onboardingError.message}`);
         // Continue with payment even if onboarding fails
+      }
+
+      // Skip payment if user already has a successful payment
+      if (hasExistingPayment) {
+        toast.success("Profile updated successfully!");
+        setPaymentStatus({ paid: true });
+        
+        redirectToDashboard("Profile updated successfully!");
+        
+        return;
       }
 
       // Initialize PesaPal payment
@@ -305,8 +387,7 @@ export default function MembershipForm() {
         throw new Error(`Failed to update profile: ${responseText}`);
       }
       
-      toast.success("Membership application submitted successfully!");
-      router.push('/dashboard');
+      redirectToDashboard("Membership application submitted successfully!");
     } catch (error: any) {
       console.error("Submit error:", error);
       setError(error.message || 'Failed to submit application');
