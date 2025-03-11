@@ -162,30 +162,57 @@ export default function EventsList() {
         setIsLoading(null);
       }
     } else {
-      // For paid events or guest users (even for free events), show the registration modal
+      // For paid events or non-logged-in users, show the registration modal
       setSelectedEventId(eventId);
       setShowRegistrationModal(true);
     }
   };
 
-  const handleRegistrationSubmit = async (formData: any) => {
-    if (!selectedEventId) return;
-
+  const handleRegistrationSubmit = async (formData: any): Promise<string> => {
+    if (!selectedEventId) return '';
+    
     try {
       setIsLoading(selectedEventId);
       
-      // Find the selected event to determine if it's free
       const selectedEvent = events.find(e => e.id === selectedEventId);
       if (!selectedEvent) {
         throw new Error("Event not found");
       }
       
-      // Determine if the event is free
+      // Determine if this is a guest registration or a logged-in user
+      const isGuestRegistration = !session?.user;
+      
+      // If this is a guest registration, check if they're already registered
+      if (isGuestRegistration) {
+        const isAlreadyRegistered = await checkGuestRegistration(selectedEventId, formData.email);
+        if (isAlreadyRegistered) {
+          toast({
+            title: "Already Registered",
+            description: "This email is already registered for this event.",
+          });
+          setShowRegistrationModal(false);
+          setSelectedEventId(null);
+          return '';
+        }
+      }
+      
+      // Set up user details for payment or registration
+      const userDetails = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        userId: session?.user?.id
+      };
+      
+      setUserDetails(userDetails);
+      
+      // Check if the event is free
       const isFreeEvent = !selectedEvent.memberPrice || selectedEvent.memberPrice <= 0;
       
-      // For free events, register immediately
       if (isFreeEvent) {
-        const endpoint = session?.user ? "/api/events/register" : "/api/events/register-guest";
+        // For free events, directly register the user
+        const endpoint = isGuestRegistration ? "/api/events/register-guest" : "/api/events/register";
         
         const response = await fetch(endpoint, {
           method: "POST",
@@ -193,8 +220,11 @@ export default function EventsList() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            ...formData,
             eventId: selectedEventId,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phone: formData.phone,
             paymentMethod: "FREE"
           }),
         });
@@ -206,12 +236,12 @@ export default function EventsList() {
         }
 
         toast({
-          title: "Registration Successful",
+          title: "Success",
           description: "You have been successfully registered for this event.",
         });
         
-        // If the user is logged in, update the local state
-        if (session?.user) {
+        // If it's a logged-in user, update the local state
+        if (!isGuestRegistration) {
           setUserRegistrations(prev => {
             const newSet = new Set(prev);
             newSet.add(selectedEventId);
@@ -219,35 +249,31 @@ export default function EventsList() {
           });
         }
         
-        // Return the registration data
-        return { registrationId: data.registrationId };
-      } 
-      // For paid events, store user details and show payment modal
-      else {
-        // Store user details for payment
-        setUserDetails({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone,
-          userId: session?.user?.id // Include userId if user is logged in
-        });
+        // Close the modal
+        setShowRegistrationModal(false);
+        setSelectedEventId(null);
         
-        // Close registration modal and open payment modal
+        // Refresh the events list
+        fetchEvents();
+        
+        // Return the registration ID
+        return data.registrationId || '';
+      } else {
+        // For paid events, show the payment modal
         setShowRegistrationModal(false);
         setShowPaymentModal(true);
         
-        // Return empty registration ID as we'll create it after payment
-        return { registrationId: '' };
+        // Return an empty string as we'll create the registration after payment
+        return '';
       }
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error("Registration submission error:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to register for event",
+        description: error instanceof Error ? error.message : "Failed to process registration",
         variant: "destructive",
       });
-      throw error; // Re-throw to be handled by the modal
+      return '';
     } finally {
       setIsLoading(null);
     }
@@ -474,6 +500,23 @@ export default function EventsList() {
   // Check if user is registered for a specific event
   const isUserRegistered = (eventId: string) => {
     return userRegistrations.has(eventId);
+  };
+
+  // Function to check if a guest is registered for an event
+  const checkGuestRegistration = async (eventId: string, email: string) => {
+    try {
+      const response = await fetch(`/api/events/check-guest-registration?eventId=${eventId}&email=${encodeURIComponent(email)}`);
+      
+      if (!response.ok) {
+        throw new Error("Failed to check guest registration");
+      }
+      
+      const data = await response.json();
+      return data.isRegistered;
+    } catch (error) {
+      console.error("Error checking guest registration:", error);
+      return false;
+    }
   };
 
   if (isInitialLoading) {
@@ -706,9 +749,8 @@ export default function EventsList() {
             fetchEvents();
           }}
           onSubmit={async (data: { firstName: string; lastName: string; email: string; phone: string; }) => {
-            const result = await handleRegistrationSubmit(data);
-            if (!result) return { registrationId: '' }; // Return empty string if undefined
-            return { registrationId: result.registrationId.toString() }; // Convert to string
+            const registrationId = await handleRegistrationSubmit(data);
+            return { registrationId: registrationId || '' };
           }}
           event={events.find(e => e.id === selectedEventId)}
         />

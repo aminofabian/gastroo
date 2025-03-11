@@ -72,19 +72,20 @@ export default function EventRegistrationModal({
     },
   });
 
-  // If no event or the event is free, don't show the modal
-  if (!event || !event.memberPrice || event.memberPrice <= 0) {
-    return null;
-  }
-
   // Update form values when session changes
   useEffect(() => {
     if (session?.user) {
       form.setValue("firstName", session.user.firstName || "");
       form.setValue("lastName", session.user.lastName || "");
       form.setValue("email", session.user.email || "");
+      form.setValue("phone", (session.user as any).phone || "");
     }
   }, [session, form]);
+
+  // If no event, don't show the modal
+  if (!event) {
+    return null;
+  }
 
   // Check payment status periodically if payment has been initiated
   useEffect(() => {
@@ -146,7 +147,12 @@ export default function EventRegistrationModal({
       setError(null);
       
       // First register for the event
-      const registrationResult = await onSubmit(data);
+      let registrationResult;
+      try {
+        registrationResult = await onSubmit(data);
+      } catch (error) {
+        throw error;
+      }
       
       // Check if the event is free
       const isFreeEvent = !event.memberPrice || event.memberPrice <= 0;
@@ -187,7 +193,7 @@ export default function EventRegistrationModal({
         paid: false,
         orderTrackingId: paymentResponse.orderTrackingId,
         merchantReference: paymentResponse.merchantReference,
-        registrationId: registrationResult.registrationId
+        registrationId: registrationResult?.registrationId
       });
       
       setIsPaymentInitiated(true);

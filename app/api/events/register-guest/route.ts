@@ -9,9 +9,9 @@ const guestRegistrationSchema = z.object({
   lastName: z.string().min(2),
   email: z.string().email(),
   phone: z.string().min(10),
-  paymentMethod: z.enum(["MPESA", "CARD", "BANK_TRANSFER"]),
+  paymentMethod: z.enum(["MPESA", "CARD", "BANK_TRANSFER", "FREE"]),
   paymentTrackingId: z.string().optional(),
-  paymentStatus: z.enum(["PENDING", "PAID", "FAILED"]).optional(),
+  paymentStatus: z.enum(["PENDING", "PAID", "FAILED", "COMPLETED"]).optional(),
 });
 
 export async function POST(req: Request) {
@@ -88,18 +88,23 @@ export async function POST(req: Request) {
         paymentId = payment.id;
       }
       
-      // Insert the registration directly into the database
-      await prisma.$executeRaw`
-        INSERT INTO "event_registrations" (
-          "id", "eventId", "firstName", "lastName", "email", "phone", 
-          "paymentMethod", "paymentStatus", "isAttended", "createdAt", "updatedAt",
-          "paymentId"
-        ) VALUES (
-          ${registrationId}, ${eventId}, ${firstName}, ${lastName}, ${email}, ${phone}, 
-          ${paymentMethod}, ${paymentStatus || 'PENDING'}, false, ${new Date()}, ${new Date()},
-          ${paymentId}
-        )
-      `;
+      // Use Prisma's create method instead of raw SQL
+      const registration = await prisma.eventRegistration.create({
+        data: {
+          id: registrationId,
+          eventId: eventId,
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          phone: phone,
+          paymentMethod: paymentMethod,
+          paymentStatus: paymentStatus || 'PENDING',
+          isAttended: false,
+          paymentId: paymentId,
+        }
+      });
+
+      console.log(`Guest registration created: id=${registration.id}, eventId=${eventId}, email=${email}`);
 
       return NextResponse.json({
         success: true,
