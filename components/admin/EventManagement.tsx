@@ -42,12 +42,13 @@ import { useToast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { FaEdit, FaTrash } from "react-icons/fa";
-import { FaUsers, FaImages, FaNewspaper, FaHandshake, FaDonate, FaChartBar, FaCalendarAlt } from "react-icons/fa";
+import { FaEdit, FaTrash, FaUsers } from "react-icons/fa";
+import { FaImages, FaNewspaper, FaHandshake, FaDonate, FaChartBar, FaCalendarAlt } from "react-icons/fa";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { SimpleModal } from "./SimpleModal";
 import { CustomEventDialog } from "./CustomEventDialog";
 import { CustomDeleteDialog } from "./CustomDeleteDialog";
+import EventRegistrationsModal from "./EventRegistrationsModal";
 
 interface EventData {
   id: string;
@@ -137,6 +138,8 @@ export default function EventManagement() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
+  const [showRegistrationsModal, setShowRegistrationsModal] = useState(false);
+  const [selectedEventForRegistrations, setSelectedEventForRegistrations] = useState<EventData | null>(null);
   const router = useRouter();
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
@@ -374,6 +377,11 @@ export default function EventManagement() {
       setDeleteDialogOpen(false);
       setEventToDelete(null);
     }
+  };
+
+  const handleViewRegistrations = (event: EventData) => {
+    setSelectedEventForRegistrations(event);
+    setShowRegistrationsModal(true);
   };
 
   // Add this function to handle modal clicks
@@ -851,10 +859,20 @@ export default function EventManagement() {
                   <TableCell>
                     <div className="flex items-center justify-end gap-2">
                       <Button
+                        onClick={() => handleViewRegistrations(event)}
+                        size="sm"
+                        variant="outline"
+                        className="h-8 w-8 p-0 border-purple-400 text-purple-600 hover:bg-purple-50 hover:text-purple-700 transition-colors"
+                        title="View Registrations"
+                      >
+                        <FaUsers className="h-4 w-4" />
+                      </Button>
+                      <Button
                         onClick={() => handleEdit(event)}
                         size="sm"
                         variant="outline"
                         className="h-8 w-8 p-0 border-[#c22f63]/30 text-[#c22f63] hover:bg-[#c22f63]/5 hover:text-[#c22f63] transition-colors"
+                        title="Edit Event"
                       >
                         <FaEdit className="h-4 w-4" />
                       </Button>
@@ -863,6 +881,7 @@ export default function EventManagement() {
                         size="sm"
                         variant="destructive"
                         className="h-8 w-8 p-0 bg-red-600 hover:bg-red-700 transition-colors"
+                        title="Delete Event"
                       >
                         <FaTrash className="h-4 w-4" />
                       </Button>
@@ -874,6 +893,19 @@ export default function EventManagement() {
           </Table>
         </div>
       </div>
+      
+      {/* Event Registrations Modal */}
+      {showRegistrationsModal && selectedEventForRegistrations && (
+        <EventRegistrationsModal
+          isOpen={showRegistrationsModal}
+          onClose={() => {
+            setShowRegistrationsModal(false);
+            setSelectedEventForRegistrations(null);
+          }}
+          eventId={selectedEventForRegistrations.id}
+          eventTitle={selectedEventForRegistrations.title}
+        />
+      )}
     </AdminLayout>
   );
 } 

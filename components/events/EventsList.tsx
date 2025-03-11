@@ -182,10 +182,14 @@ export default function EventsList() {
       // Determine if this is a guest registration or a logged-in user
       const isGuestRegistration = !session?.user;
       
+      console.log(`Processing ${isGuestRegistration ? 'guest' : 'user'} registration for event: ${selectedEventId}`);
+      
       // If this is a guest registration, check if they're already registered
       if (isGuestRegistration) {
+        console.log(`Checking if guest with email ${formData.email} is already registered`);
         const isAlreadyRegistered = await checkGuestRegistration(selectedEventId, formData.email);
         if (isAlreadyRegistered) {
+          console.log(`Guest with email ${formData.email} is already registered for event ${selectedEventId}`);
           toast({
             title: "Already Registered",
             description: "This email is already registered for this event.",
@@ -211,9 +215,11 @@ export default function EventsList() {
       const isFreeEvent = !selectedEvent.memberPrice || selectedEvent.memberPrice <= 0;
       
       if (isFreeEvent) {
+        console.log(`Processing free event registration for ${isGuestRegistration ? 'guest' : 'user'}`);
         // For free events, directly register the user
         const endpoint = isGuestRegistration ? "/api/events/register-guest" : "/api/events/register";
         
+        console.log(`Sending registration request to ${endpoint}`);
         const response = await fetch(endpoint, {
           method: "POST",
           headers: {
@@ -232,9 +238,12 @@ export default function EventsList() {
         const data = await response.json();
 
         if (!response.ok) {
+          console.error(`Registration failed: ${data.error || "Unknown error"}`);
           throw new Error(data.error || "Failed to register for event");
         }
 
+        console.log(`Registration successful: ${JSON.stringify(data)}`);
+        
         toast({
           title: "Success",
           description: "You have been successfully registered for this event.",
@@ -247,6 +256,7 @@ export default function EventsList() {
             newSet.add(selectedEventId);
             return newSet;
           });
+          console.log(`Updated local state for user registration: ${selectedEventId}`);
         }
         
         // Close the modal
@@ -259,6 +269,7 @@ export default function EventsList() {
         // Return the registration ID
         return data.registrationId || '';
       } else {
+        console.log(`Processing paid event registration for ${isGuestRegistration ? 'guest' : 'user'}`);
         // For paid events, show the payment modal
         setShowRegistrationModal(false);
         setShowPaymentModal(true);
@@ -321,6 +332,7 @@ export default function EventsList() {
     // Update the local state if the user is logged in
     if (session?.user) {
       // First, try to fetch the latest registration status
+      console.log(`Checking registration status for event ${selectedEventId} after payment`);
       const isRegistered = await checkAndUpdateRegistrationStatus(selectedEventId);
       
       if (!isRegistered) {
@@ -337,9 +349,18 @@ export default function EventsList() {
       } else {
         console.log("Already registered, no need to poll");
       }
+    } else {
+      // For guest users, we don't have a way to track registration status in local state
+      // But we can show a success message
+      console.log("Guest payment completed, showing success message");
+      toast({
+        title: "Registration Successful",
+        description: "Your payment was successful and you are now registered for this event.",
+      });
     }
     
     // Refresh events list
+    console.log("Refreshing events list after payment");
     fetchEvents();
     
     // Force refresh user registrations

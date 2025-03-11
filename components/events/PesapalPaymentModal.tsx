@@ -74,7 +74,11 @@ export default function PesapalPaymentModal({
       setIsCheckingPayment(true);
       const result = await checkPaymentStatus(paymentStatus.orderTrackingId);
       
+      console.log(`Payment status check result: ${JSON.stringify(result)}`);
+      
       if (result.status === "COMPLETED") {
+        console.log(`Payment completed for order tracking ID: ${paymentStatus.orderTrackingId}`);
+        
         const updatedStatus = { 
           ...paymentStatus, 
           paid: true 
@@ -86,6 +90,9 @@ export default function PesapalPaymentModal({
         try {
           // Determine if user is logged in or guest
           const endpoint = userDetails.userId ? "/api/events/register" : "/api/events/register-guest";
+          
+          console.log(`Sending registration request to ${endpoint} after payment`);
+          console.log(`Registration details: eventId=${event.id}, email=${userDetails.email}, paymentTrackingId=${paymentStatus.orderTrackingId}`);
           
           const response = await fetch(endpoint, {
             method: "POST",
@@ -105,8 +112,11 @@ export default function PesapalPaymentModal({
           const data = await response.json();
 
           if (!response.ok) {
+            console.error(`Registration after payment failed: ${data.error || "Unknown error"}`);
             throw new Error(data.error || "Failed to register for event");
           }
+          
+          console.log(`Registration after payment successful: ${JSON.stringify(data)}`);
           
           toast({
             title: "Registration Successful",
@@ -126,11 +136,20 @@ export default function PesapalPaymentModal({
           // Even if registration fails, check if the user is already registered
           // This could happen if the payment callback already registered the user
           try {
-            const checkRegistrationResponse = await fetch(`/api/events/check-registration?eventId=${event.id}`);
+            console.log(`Checking if user is already registered after payment callback`);
+            const checkUrl = userDetails.userId 
+              ? `/api/events/check-registration?eventId=${event.id}`
+              : `/api/events/check-guest-registration?eventId=${event.id}&email=${encodeURIComponent(userDetails.email)}`;
+            
+            const checkRegistrationResponse = await fetch(checkUrl);
             const checkData = await checkRegistrationResponse.json();
+            
+            console.log(`Registration check result: ${JSON.stringify(checkData)}`);
             
             if (checkRegistrationResponse.ok && checkData.isRegistered) {
               // User is already registered, so consider this a success
+              console.log(`User is already registered for event ${event.id}`);
+              
               toast({
                 title: "Already Registered",
                 description: "Your payment was successful and you are registered for this event.",

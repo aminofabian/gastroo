@@ -67,9 +67,13 @@ export async function POST(req: Request) {
       // Create a unique ID for the registration
       const registrationId = `reg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
       
+      console.log(`Creating registration for user: ${session.user.id}, event: ${eventId}, email: ${email}`);
+      
       // Create payment record if payment info is provided
       let paymentId = null;
       if (paymentMethod !== "FREE" && paymentReference && paymentTrackingId) {
+        console.log(`Creating payment record for tracking ID: ${paymentTrackingId}`);
+        
         const payment = await prisma.payment.create({
           data: {
             amount: event.memberPrice || 0,
@@ -83,10 +87,11 @@ export async function POST(req: Request) {
         });
         
         paymentId = payment.id;
+        console.log(`Payment record created: id=${payment.id}, status=${payment.status}`);
       }
       
       // Use Prisma's create method instead of raw SQL
-      await prisma.eventRegistration.create({
+      const registration = await prisma.eventRegistration.create({
         data: {
           id: registrationId,
           eventId: eventId,
@@ -100,6 +105,43 @@ export async function POST(req: Request) {
           paymentId: paymentId,
         }
       });
+      
+      console.log(`Registration created successfully: id=${registration.id}, eventId=${eventId}, email=${email}, paymentStatus=${registration.paymentStatus}`);
+
+      // Verify that the registration was actually created
+      const verifyRegistration = await prisma.eventRegistration.findUnique({
+        where: { id: registrationId }
+      });
+      
+      if (!verifyRegistration) {
+        console.error(`Failed to verify registration creation: id=${registrationId}`);
+        throw new Error("Failed to verify registration creation");
+      }
+      
+      console.log(`Registration verified in database: id=${verifyRegistration.id}, status=${verifyRegistration.paymentStatus}`);
+
+      // Also add the user to the event's attendees if they're not already there
+      try {
+        const isAlreadyAttendee = await prisma.eventAttendees.findFirst({
+          where: {
+            A: eventId,
+            B: session.user.id
+          }
+        });
+        
+        if (!isAlreadyAttendee) {
+          await prisma.eventAttendees.create({
+            data: {
+              A: eventId,
+              B: session.user.id
+            }
+          });
+          console.log(`User ${session.user.id} added to event ${eventId} attendees`);
+        }
+      } catch (attendeeError) {
+        console.error("Error adding user to event attendees:", attendeeError);
+        // Continue even if this fails
+      }
 
       return NextResponse.json({
         success: true,

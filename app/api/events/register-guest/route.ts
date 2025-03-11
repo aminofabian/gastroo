@@ -70,9 +70,13 @@ export async function POST(req: Request) {
       // Create a unique ID for the registration
       const registrationId = `reg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
       
+      console.log(`Creating guest registration for event: ${eventId}, email: ${email}`);
+      
       // Create payment record if payment info is provided
       let paymentId = null;
       if (paymentMethod !== "FREE" && paymentTrackingId) {
+        console.log(`Creating payment record for tracking ID: ${paymentTrackingId}`);
+        
         const payment = await prisma.payment.create({
           data: {
             amount: event.nonMemberPrice || 0,
@@ -86,6 +90,7 @@ export async function POST(req: Request) {
         });
         
         paymentId = payment.id;
+        console.log(`Payment record created: id=${payment.id}, status=${payment.status}`);
       }
       
       // Use Prisma's create method instead of raw SQL
@@ -104,7 +109,19 @@ export async function POST(req: Request) {
         }
       });
 
-      console.log(`Guest registration created: id=${registration.id}, eventId=${eventId}, email=${email}`);
+      console.log(`Guest registration created successfully: id=${registration.id}, eventId=${eventId}, email=${email}, paymentStatus=${registration.paymentStatus}`);
+
+      // Verify that the registration was actually created
+      const verifyRegistration = await prisma.eventRegistration.findUnique({
+        where: { id: registrationId }
+      });
+      
+      if (!verifyRegistration) {
+        console.error(`Failed to verify guest registration creation: id=${registrationId}`);
+        throw new Error("Failed to verify registration creation");
+      }
+      
+      console.log(`Guest registration verified in database: id=${verifyRegistration.id}, status=${verifyRegistration.paymentStatus}`);
 
       return NextResponse.json({
         success: true,
