@@ -13,7 +13,17 @@ export async function POST(req: Request) {
     }
 
     const data = await req.json();
-    const { eventId, firstName, lastName, email, phone, paymentMethod } = data;
+    const { 
+      eventId, 
+      firstName, 
+      lastName, 
+      email, 
+      phone, 
+      paymentMethod,
+      paymentReference,
+      paymentTrackingId,
+      paymentStatus
+    } = data;
 
     if (!eventId || !firstName || !lastName || !email || !phone || !paymentMethod) {
       return NextResponse.json(
@@ -42,24 +52,58 @@ export async function POST(req: Request) {
       );
     }
 
+    // Check if the event requires payment
+    const requiresPayment = event.memberPrice && event.memberPrice > 0;
+    
+    // If event requires payment but no payment info is provided
+    if (requiresPayment && paymentMethod !== "FREE" && !paymentReference && !paymentTrackingId) {
+      return NextResponse.json(
+        { error: "Payment information is required for this event" },
+        { status: 400 }
+      );
+    }
+
     try {
       // Create a unique ID for the registration
       const registrationId = `reg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
       
-      // Insert the registration directly into the database
-      await prisma.$executeRaw`
-        INSERT INTO "event_registrations" (
-          "id", "eventId", "firstName", "lastName", "email", "phone", 
-          "paymentMethod", "paymentStatus", "isAttended", "createdAt", "updatedAt"
-        ) VALUES (
-          ${registrationId}, ${eventId}, ${firstName}, ${lastName}, ${email}, ${phone}, 
-          ${paymentMethod}, 'PENDING', false, ${new Date()}, ${new Date()}
-        )
-      `;
+      // Create payment record if payment info is provided
+      let paymentId = null;
+      if (paymentMethod !== "FREE" && paymentReference && paymentTrackingId) {
+        const payment = await prisma.payment.create({
+          data: {
+            amount: event.memberPrice || 0,
+            status: paymentStatus || 'PENDING',
+            transactionId: paymentTrackingId,
+            phoneNumber: phone,
+            description: `Event Registration: ${event.title}`,
+            userId: session.user.id,
+            currency: 'KES',
+          }
+        });
+        
+        paymentId = payment.id;
+      }
+      
+      // Use Prisma's create method instead of raw SQL
+      await prisma.eventRegistration.create({
+        data: {
+          id: registrationId,
+          eventId: eventId,
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          phone: phone,
+          paymentMethod: paymentMethod,
+          paymentStatus: paymentStatus || 'PENDING',
+          isAttended: false,
+          paymentId: paymentId,
+        }
+      });
 
       return NextResponse.json({
         success: true,
-        message: "Registration successful. Redirecting to payment...",
+        message: "Registration successful.",
         registrationId,
         event: {
           id: event.id,

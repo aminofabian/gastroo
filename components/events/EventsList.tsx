@@ -27,6 +27,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import EventRegistrationModal from "./EventRegistrationModal";
+import PesapalPaymentModal from "./PesapalPaymentModal";
 
 interface Event {
   id: string;
@@ -59,14 +60,111 @@ export default function EventsList() {
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [userRegistrations, setUserRegistrations] = useState<Set<string>>(new Set());
+  const [userDetails, setUserDetails] = useState<{
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    userId?: string;
+    registrationId?: string;
+  } | null>(null);
   const router = useRouter();
   const { toast } = useToast();
   const { data: session } = useSession();
 
   const handleRegister = async (eventId: string) => {
-    setSelectedEventId(eventId);
-    setShowRegistrationModal(true);
+    // Find the selected event
+    const selectedEvent = events.find(e => e.id === eventId);
+    
+    if (!selectedEvent) {
+      toast({
+        title: "Error",
+        description: "Event not found",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Check if user is already registered
+    if (isUserRegistered(eventId)) {
+      toast({
+        title: "Already Registered",
+        description: "You are already registered for this event.",
+      });
+      return;
+    }
+    
+    // Check if the event is free (no price or price is 0)
+    const isFreeEvent = !selectedEvent.memberPrice || selectedEvent.memberPrice <= 0;
+    
+    if (isFreeEvent && session?.user) {
+      // For free events with logged-in users, directly register without showing modal
+      try {
+        setIsLoading(eventId);
+        
+        // Make sure we have all required fields
+        if (!session.user.firstName || !session.user.lastName || !session.user.email) {
+          toast({
+            title: "Error",
+            description: "Your profile is incomplete. Please update your profile first.",
+            variant: "destructive",
+          });
+          setIsLoading(null);
+          return;
+        }
+        
+        const response = await fetch("/api/events/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            eventId: eventId,
+            firstName: session.user.firstName,
+            lastName: session.user.lastName,
+            email: session.user.email,
+            phone: (session.user as any).phone || "N/A", // Use type assertion for phone property
+            paymentMethod: "FREE"
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to register for event");
+        }
+
+        toast({
+          title: "Success",
+          description: "You have been successfully registered for this event.",
+        });
+        
+        // Update the local state to mark this event as registered
+        setUserRegistrations(prev => {
+          const newSet = new Set(prev);
+          newSet.add(eventId);
+          return newSet;
+        });
+        
+        fetchEvents(); // Refresh the events list
+      } catch (error) {
+        console.error("Registration error:", error);
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to register for event",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(null);
+      }
+    } else {
+      // For paid events or guest users (even for free events), show the registration modal
+      setSelectedEventId(eventId);
+      setShowRegistrationModal(true);
+    }
   };
 
   const handleRegistrationSubmit = async (formData: any) => {
@@ -75,33 +173,72 @@ export default function EventsList() {
     try {
       setIsLoading(selectedEventId);
       
-      const endpoint = session?.user ? "/api/events/register" : "/api/events/register-guest";
-      
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          eventId: selectedEventId,
-          paymentMethod: "PESAPAL"
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to register for event");
+      // Find the selected event to determine if it's free
+      const selectedEvent = events.find(e => e.id === selectedEventId);
+      if (!selectedEvent) {
+        throw new Error("Event not found");
       }
-
-      toast({
-        title: "Registration Submitted",
-        description: "Your registration has been submitted successfully.",
-      });
       
-      // Return the registration data for payment processing
-      return { registrationId: data.registrationId };
+      // Determine if the event is free
+      const isFreeEvent = !selectedEvent.memberPrice || selectedEvent.memberPrice <= 0;
+      
+      // For free events, register immediately
+      if (isFreeEvent) {
+        const endpoint = session?.user ? "/api/events/register" : "/api/events/register-guest";
+        
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...formData,
+            eventId: selectedEventId,
+            paymentMethod: "FREE"
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to register for event");
+        }
+
+        toast({
+          title: "Registration Successful",
+          description: "You have been successfully registered for this event.",
+        });
+        
+        // If the user is logged in, update the local state
+        if (session?.user) {
+          setUserRegistrations(prev => {
+            const newSet = new Set(prev);
+            newSet.add(selectedEventId);
+            return newSet;
+          });
+        }
+        
+        // Return the registration data
+        return { registrationId: data.registrationId };
+      } 
+      // For paid events, store user details and show payment modal
+      else {
+        // Store user details for payment
+        setUserDetails({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          userId: session?.user?.id // Include userId if user is logged in
+        });
+        
+        // Close registration modal and open payment modal
+        setShowRegistrationModal(false);
+        setShowPaymentModal(true);
+        
+        // Return empty registration ID as we'll create it after payment
+        return { registrationId: '' };
+      }
     } catch (error) {
       console.error("Registration error:", error);
       toast({
@@ -115,86 +252,56 @@ export default function EventsList() {
     }
   };
 
-  const initiatePayment = async (eventId: string, registrationId?: string) => {
-    try {
-      setIsLoading(eventId);
-      
-      const response = await fetch("/api/events/payment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          eventId, 
-          registrationId,
-          isGuest: registrationId ? true : false
-        }),
+  const handlePaymentComplete = async (paymentData: { paid: boolean; orderTrackingId?: string; merchantReference?: string; }) => {
+    if (!selectedEventId || !paymentData.paid) return;
+    
+    // Update the local state if the user is logged in
+    if (session?.user) {
+      setUserRegistrations(prev => {
+        const newSet = new Set(prev);
+        newSet.add(selectedEventId);
+        return newSet;
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to initiate payment");
-      }
-
-      // Open payment window in new tab
-      if (data.redirectUrl) {
-        window.open(data.redirectUrl, '_blank');
-        
-        toast({
-          title: "Payment Initiated",
-          description: "Please complete the payment in the new window. Your registration will be confirmed once payment is completed.",
-        });
-      }
-    } catch (error) {
-      console.error("[PAYMENT_ERROR]", error);
-      toast({
-        title: "Payment Error",
-        description: error instanceof Error ? error.message : "Failed to initiate payment",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(null);
     }
+    
+    // Refresh events list
+    fetchEvents();
   };
 
   const fetchEvents = async () => {
     try {
-      console.log("[EventsList] Starting to fetch events");
-      const response = await fetch("/api/events", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        cache: "no-cache"
-      });
+      setIsInitialLoading(true);
+      
+      // Fetch events
+      const response = await fetch("/api/events");
+      const data = await response.json();
       
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("[EventsList] API response not ok:", response.status, errorText);
-        throw new Error(`Failed to fetch events: ${errorText}`);
-      }
-
-      const data = await response.json();
-      console.log("[EventsList] Received events:", data?.length, "events");
-      
-      // Debug event data
-      if (data && data.length > 0) {
-        console.log("[EventsList] First event details:", {
-          id: data[0].id,
-          title: data[0].title,
-          memberPrice: data[0].memberPrice,
-          nonMemberPrice: data[0].nonMemberPrice,
-          attendees: data[0].attendees?.length || 0
-        });
+        throw new Error(data.error || "Failed to fetch events");
       }
       
-      setEvents(data || []);
+      setEvents(data);
+      
+      // If user is logged in, fetch their registrations
+      if (session?.user?.id) {
+        const registrationsResponse = await fetch(`/api/events/user-registrations`);
+        const registrationsData = await registrationsResponse.json();
+        
+        if (registrationsResponse.ok) {
+          // Extract event IDs as strings
+          const eventIds: string[] = registrationsData.map(
+            (registration: { eventId: string }) => registration.eventId
+          );
+          
+          // Create a new Set with the correct type
+          setUserRegistrations(new Set<string>(eventIds));
+        }
+      }
     } catch (error) {
-      console.error("[EventsList] Error fetching events:", error);
+      console.error("Error fetching events:", error);
       toast({
         title: "Error",
-        description: "Failed to fetch events. Please try refreshing the page.",
+        description: "Failed to fetch events",
         variant: "destructive",
       });
     } finally {
@@ -214,6 +321,11 @@ export default function EventsList() {
       MEETING: "bg-orange-100 text-orange-800 border-orange-200",
     };
     return colors[type];
+  };
+
+  // Check if user is registered for a specific event
+  const isUserRegistered = (eventId: string) => {
+    return userRegistrations.has(eventId);
   };
 
   if (isInitialLoading) {
@@ -236,22 +348,23 @@ export default function EventsList() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {events.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border">
           <p className="text-gray-500">No upcoming events at the moment.</p>
         </div>
       ) : (
         events.map((event) => {
-          const isRegistered = session ? event.attendees?.some(
-            (attendee) => attendee.id === session?.user?.id
-          ) : false;
-          const isRegistrationClosed = event.registrationDeadline 
-            ? new Date(event.registrationDeadline) < new Date() 
+          const isRegistrationClosed = event.registrationDeadline
+            ? new Date(event.registrationDeadline) < new Date()
             : false;
-          const isFull = event.capacity 
-            ? event.attendees?.length >= event.capacity 
+          
+          const isFull = event.capacity
+            ? event.attendees.length >= event.capacity
             : false;
+          
+          // Check if user is registered for this event
+          const isRegistered = isUserRegistered(event.id);
 
           return (
             <div key={event.id}>
@@ -435,13 +548,40 @@ export default function EventsList() {
         })
       )}
 
-      {/* Render modal outside the map function */}
+      {/* Render registration modal outside the map function */}
       {showRegistrationModal && selectedEventId && (
         <EventRegistrationModal
           isOpen={showRegistrationModal}
-          onClose={() => setShowRegistrationModal(false)}
-          onSubmit={handleRegistrationSubmit}
+          onClose={() => {
+            setShowRegistrationModal(false);
+            // Refresh events list after modal is closed (in case registration was successful)
+            fetchEvents();
+          }}
+          onSubmit={async (data: { firstName: string; lastName: string; email: string; phone: string; }) => {
+            const result = await handleRegistrationSubmit(data);
+            if (!result) return { registrationId: '' }; // Return empty string if undefined
+            return { registrationId: result.registrationId.toString() }; // Convert to string
+          }}
           event={events.find(e => e.id === selectedEventId)}
+        />
+      )}
+      
+      {/* Render payment modal */}
+      {showPaymentModal && selectedEventId && userDetails && (
+        <PesapalPaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => {
+            setShowPaymentModal(false);
+            setUserDetails(null);
+          }}
+          onPaymentComplete={(paymentData) => {
+            handlePaymentComplete(paymentData);
+            // Close the modal after payment is complete
+            setShowPaymentModal(false);
+            setUserDetails(null);
+          }}
+          event={events.find(e => e.id === selectedEventId)}
+          userDetails={userDetails}
         />
       )}
     </div>

@@ -62,11 +62,6 @@ export default function EventRegistrationModal({
   const { data: session } = useSession();
   const { toast } = useToast();
 
-  // If no event or the event is free, don't show the modal
-  if (!event || !event.memberPrice || event.memberPrice <= 0) {
-    return null;
-  }
-
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -76,6 +71,11 @@ export default function EventRegistrationModal({
       phone: "",
     },
   });
+
+  // If no event or the event is free, don't show the modal
+  if (!event || !event.memberPrice || event.memberPrice <= 0) {
+    return null;
+  }
 
   // Update form values when session changes
   useEffect(() => {
@@ -148,7 +148,24 @@ export default function EventRegistrationModal({
       // First register for the event
       const registrationResult = await onSubmit(data);
       
-      // Then initiate payment
+      // Check if the event is free
+      const isFreeEvent = !event.memberPrice || event.memberPrice <= 0;
+      
+      if (isFreeEvent) {
+        // For free events, skip payment and show success message
+        toast({
+          title: "Registration Successful",
+          description: "You have been successfully registered for this event.",
+        });
+        
+        // Close modal after successful registration
+        setTimeout(() => {
+          onClose();
+        }, 1500);
+        return;
+      }
+      
+      // For paid events, initiate payment
       const paymentResponse = await submitPayment({
         email: data.email,
         firstName: data.firstName,
@@ -210,19 +227,24 @@ export default function EventRegistrationModal({
           </DialogHeader>
           <div className="mt-4 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-emerald-400/30">
             <p className="text-lg font-semibold text-white">
-              Registration Fee: KES {event.memberPrice.toLocaleString()}
+              {!event.memberPrice || event.memberPrice <= 0 
+                ? "Registration: Free" 
+                : `Registration Fee: KES ${event.memberPrice.toLocaleString()}`
+              }
             </p>
-            <div className="flex items-center gap-2 mt-2 text-sm text-emerald-50">
-              <svg 
-                className="w-5 h-5" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-              Secure payment processing via PesaPal
-            </div>
+            {event.memberPrice > 0 && (
+              <div className="flex items-center gap-2 mt-2 text-sm text-emerald-50">
+                <svg 
+                  className="w-5 h-5" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                Secure payment processing via PesaPal
+              </div>
+            )}
           </div>
         </div>
         
@@ -384,16 +406,33 @@ export default function EventRegistrationModal({
                       </>
                     ) : (
                       <>
-                        <svg 
-                          className="w-5 h-5" 
-                          viewBox="0 0 24 24" 
-                          fill="none" 
-                          stroke="currentColor" 
-                          strokeWidth="2"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        Proceed to Payment
+                        {!event.memberPrice || event.memberPrice <= 0 ? (
+                          <>
+                            <svg 
+                              className="w-5 h-5" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="2"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Register Now
+                          </>
+                        ) : (
+                          <>
+                            <svg 
+                              className="w-5 h-5" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="2"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            Proceed to Payment
+                          </>
+                        )}
                       </>
                     )}
                   </Button>

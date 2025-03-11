@@ -10,116 +10,129 @@ const guestRegistrationSchema = z.object({
   email: z.string().email(),
   phone: z.string().min(10),
   paymentMethod: z.enum(["MPESA", "CARD", "BANK_TRANSFER"]),
+  paymentTrackingId: z.string().optional(),
+  paymentStatus: z.enum(["PENDING", "PAID", "FAILED"]).optional(),
 });
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const body = await request.json();
-    const validatedData = guestRegistrationSchema.parse(body);
+    const data = await req.json();
+    const { 
+      eventId, 
+      firstName, 
+      lastName, 
+      email, 
+      phone, 
+      paymentMethod,
+      paymentTrackingId,
+      paymentStatus
+    } = data;
 
-    // Check if the event exists
+    if (!eventId || !firstName || !lastName || !email || !phone || !paymentMethod) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Check if event exists
     const event = await prisma.event.findUnique({
-      where: { id: validatedData.eventId },
-      select: {
-        id: true,
-        title: true,
-        nonMemberPrice: true,
-        capacity: true,
-        registrationDeadline: true,
-        attendees: {
-          select: { id: true }
-        },
-        registrations: {
-          select: { id: true, email: true }
-        }
-      }
+      where: { id: eventId }
     });
 
     if (!event) {
-      return addCorsHeaders(NextResponse.json({ error: "Event not found" }, { status: 404 }));
+      return NextResponse.json(
+        { error: "Event not found" },
+        { status: 404 }
+      );
     }
 
-    // Check if registration is closed
+    // Check if registration deadline has passed
     if (event.registrationDeadline && new Date(event.registrationDeadline) < new Date()) {
-      return addCorsHeaders(NextResponse.json({ error: "Registration is closed for this event" }, { status: 400 }));
+      return NextResponse.json(
+        { error: "Registration is closed for this event" },
+        { status: 400 }
+      );
     }
 
-    // Check if event is at capacity
-    const totalRegistrations = event.attendees.length + event.registrations.length;
-    if (event.capacity && totalRegistrations >= event.capacity) {
-      return addCorsHeaders(NextResponse.json({ error: "Event is at full capacity" }, { status: 400 }));
-    }
-
-    // Check if guest is already registered
-    const isAlreadyRegistered = event.registrations.some(
-      (registration) => registration.email === validatedData.email
-    );
-
-    if (isAlreadyRegistered) {
-      return addCorsHeaders(NextResponse.json({ error: "Already registered for this event" }, { status: 400 }));
+    // Check if the event requires payment
+    const requiresPayment = event.nonMemberPrice && event.nonMemberPrice > 0;
+    
+    // If event requires payment but no payment info is provided
+    if (requiresPayment && paymentMethod !== "FREE" && !paymentTrackingId) {
+      return NextResponse.json(
+        { error: "Payment information is required for this event" },
+        { status: 400 }
+      );
     }
 
     try {
       // Create a unique ID for the registration
       const registrationId = `reg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
       
+      // Create payment record if payment info is provided
+      let paymentId = null;
+      if (paymentMethod !== "FREE" && paymentTrackingId) {
+        const payment = await prisma.payment.create({
+          data: {
+            amount: event.nonMemberPrice || 0,
+            status: paymentStatus || 'PENDING',
+            transactionId: paymentTrackingId,
+            phoneNumber: phone,
+            description: `Guest Registration: ${event.title}`,
+            userId: 'guest', // Use a placeholder for guest users
+            currency: 'KES',
+          }
+        });
+        
+        paymentId = payment.id;
+      }
+      
       // Insert the registration directly into the database
       await prisma.$executeRaw`
         INSERT INTO "event_registrations" (
           "id", "eventId", "firstName", "lastName", "email", "phone", 
-          "paymentMethod", "paymentStatus", "isAttended", "createdAt", "updatedAt"
+          "paymentMethod", "paymentStatus", "isAttended", "createdAt", "updatedAt",
+          "paymentId"
         ) VALUES (
-          ${registrationId}, ${validatedData.eventId}, ${validatedData.firstName}, 
-          ${validatedData.lastName}, ${validatedData.email}, ${validatedData.phone}, 
-          ${validatedData.paymentMethod}, 'PENDING', false, ${new Date()}, ${new Date()}
+          ${registrationId}, ${eventId}, ${firstName}, ${lastName}, ${email}, ${phone}, 
+          ${paymentMethod}, ${paymentStatus || 'PENDING'}, false, ${new Date()}, ${new Date()},
+          ${paymentId}
         )
       `;
 
-      // Return registration info with payment instructions
-      return addCorsHeaders(NextResponse.json({
+      return NextResponse.json({
         success: true,
-        message: "Registration successful",
+        message: "Registration successful.",
         registrationId,
         event: {
           id: event.id,
-          title: event.title,
-          price: event.nonMemberPrice
-        },
-        paymentInstructions: {
-          MPESA: "Please proceed to payment to complete your registration.",
-          CARD: "Please proceed to payment to complete your registration.",
-          BANK_TRANSFER: "Please proceed to payment to complete your registration."
-        }[validatedData.paymentMethod],
-        nextStep: "payment"
-      }));
+          title: event.title
+        }
+      });
     } catch (dbError) {
-      console.error("Database error during guest registration:", dbError);
+      console.error("Database error during registration:", dbError);
       
       // Check if it's a duplicate registration error
       if (dbError instanceof Error && dbError.message.includes("duplicate key")) {
-        return addCorsHeaders(NextResponse.json(
+        return NextResponse.json(
           { error: "You are already registered for this event" },
           { status: 400 }
-        ));
+        );
       }
       
-      return addCorsHeaders(NextResponse.json(
+      return NextResponse.json(
         { error: "Failed to create registration in database" },
         { status: 500 }
-      ));
+      );
     }
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return addCorsHeaders(NextResponse.json(
-        { error: "Invalid request data", details: error.errors },
-        { status: 400 }
-      ));
-    }
-
-    console.error("Error processing guest registration:", error);
-    return addCorsHeaders(NextResponse.json(
-      { error: "Failed to process registration" },
+    console.error("Registration error:", error);
+    return NextResponse.json(
+      { 
+        error: error instanceof Error ? error.message : "Failed to register for event"
+      },
       { status: 500 }
-    ));
+    );
   }
 } 
