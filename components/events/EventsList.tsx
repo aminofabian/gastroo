@@ -63,6 +63,7 @@ export default function EventsList() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [userRegistrations, setUserRegistrations] = useState<Set<string>>(new Set());
+  const [pollingEventId, setPollingEventId] = useState<string | null>(null);
   const [userDetails, setUserDetails] = useState<{
     firstName: string;
     lastName: string;
@@ -252,20 +253,118 @@ export default function EventsList() {
     }
   };
 
+  // Start polling for registration status
+  const startPollingRegistrationStatus = (eventId: string) => {
+    setPollingEventId(eventId);
+  };
+
+  // Stop polling for registration status
+  const stopPollingRegistrationStatus = () => {
+    setPollingEventId(null);
+  };
+
+  // Effect for polling registration status
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    
+    if (pollingEventId && session?.user) {
+      // Check immediately
+      checkAndUpdateRegistrationStatus(pollingEventId);
+      
+      // Then set up interval
+      intervalId = setInterval(async () => {
+        const isRegistered = await checkAndUpdateRegistrationStatus(pollingEventId);
+        if (isRegistered) {
+          // If registered, stop polling
+          stopPollingRegistrationStatus();
+        }
+      }, 5000); // Check every 5 seconds
+    }
+    
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [pollingEventId, session]);
+
+  // Modify handlePaymentComplete to start polling
   const handlePaymentComplete = async (paymentData: { paid: boolean; orderTrackingId?: string; merchantReference?: string; }) => {
     if (!selectedEventId || !paymentData.paid) return;
     
+    console.log("Payment completed:", paymentData);
+    
     // Update the local state if the user is logged in
     if (session?.user) {
-      setUserRegistrations(prev => {
-        const newSet = new Set(prev);
-        newSet.add(selectedEventId);
-        return newSet;
-      });
+      // First, try to fetch the latest registration status
+      const isRegistered = await checkAndUpdateRegistrationStatus(selectedEventId);
+      
+      if (!isRegistered) {
+        console.log("Not registered yet, starting polling");
+        // If not registered yet, start polling
+        startPollingRegistrationStatus(selectedEventId);
+        
+        // Also update manually for immediate feedback
+        setUserRegistrations(prev => {
+          const newSet = new Set(prev);
+          newSet.add(selectedEventId);
+          return newSet;
+        });
+      } else {
+        console.log("Already registered, no need to poll");
+      }
     }
     
     // Refresh events list
     fetchEvents();
+    
+    // Force refresh user registrations
+    if (session?.user) {
+      try {
+        console.log("Forcing refresh of user registrations after payment");
+        const registrationsResponse = await fetch(`/api/events/user-registrations`);
+        
+        if (!registrationsResponse.ok) {
+          throw new Error("Failed to fetch user registrations");
+        }
+        
+        const registrationsData = await registrationsResponse.json();
+        
+        // Extract event IDs as strings
+        const eventIds: string[] = registrationsData.map(
+          (registration: { eventId: string }) => registration.eventId
+        );
+        
+        console.log("Refreshed user registrations after payment:", eventIds);
+        
+        // Create a new Set with the correct type
+        setUserRegistrations(new Set<string>(eventIds));
+      } catch (error) {
+        console.error("Error fetching user registrations after payment:", error);
+      }
+    }
+  };
+
+  // Function to check and update registration status
+  const checkAndUpdateRegistrationStatus = async (eventId: string) => {
+    if (!session?.user) return false;
+    
+    try {
+      const response = await fetch(`/api/events/check-registration?eventId=${eventId}`);
+      const data = await response.json();
+      
+      if (response.ok && data.isRegistered) {
+        // Update the local state
+        setUserRegistrations(prev => {
+          const newSet = new Set(prev);
+          newSet.add(eventId);
+          return newSet;
+        });
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error checking registration status:", error);
+      return false;
+    }
   };
 
   const fetchEvents = async () => {
@@ -284,17 +383,31 @@ export default function EventsList() {
       
       // If user is logged in, fetch their registrations
       if (session?.user?.id) {
-        const registrationsResponse = await fetch(`/api/events/user-registrations`);
-        const registrationsData = await registrationsResponse.json();
-        
-        if (registrationsResponse.ok) {
+        try {
+          const registrationsResponse = await fetch(`/api/events/user-registrations`);
+          
+          if (!registrationsResponse.ok) {
+            throw new Error("Failed to fetch user registrations");
+          }
+          
+          const registrationsData = await registrationsResponse.json();
+          
           // Extract event IDs as strings
           const eventIds: string[] = registrationsData.map(
             (registration: { eventId: string }) => registration.eventId
           );
           
+          console.log("Fetched user registrations:", eventIds);
+          
           // Create a new Set with the correct type
           setUserRegistrations(new Set<string>(eventIds));
+        } catch (registrationError) {
+          console.error("Error fetching user registrations:", registrationError);
+          toast({
+            title: "Warning",
+            description: "Failed to fetch your event registrations. Some events may not show correct registration status.",
+            variant: "destructive",
+          });
         }
       }
     } catch (error) {
@@ -312,6 +425,41 @@ export default function EventsList() {
   useEffect(() => {
     fetchEvents();
   }, []);
+
+  // Add a useEffect to refresh registrations when session changes
+  useEffect(() => {
+    if (session?.user) {
+      // If user is logged in, fetch their registrations
+      const fetchUserRegistrations = async () => {
+        try {
+          const registrationsResponse = await fetch(`/api/events/user-registrations`);
+          
+          if (!registrationsResponse.ok) {
+            throw new Error("Failed to fetch user registrations");
+          }
+          
+          const registrationsData = await registrationsResponse.json();
+          
+          // Extract event IDs as strings
+          const eventIds: string[] = registrationsData.map(
+            (registration: { eventId: string }) => registration.eventId
+          );
+          
+          console.log("Refreshed user registrations:", eventIds);
+          
+          // Create a new Set with the correct type
+          setUserRegistrations(new Set<string>(eventIds));
+        } catch (error) {
+          console.error("Error fetching user registrations:", error);
+        }
+      };
+      
+      fetchUserRegistrations();
+    } else {
+      // If user is not logged in, clear registrations
+      setUserRegistrations(new Set<string>());
+    }
+  }, [session]);
 
   const getEventTypeColor = (type: Event["type"]) => {
     const colors = {

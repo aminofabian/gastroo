@@ -96,6 +96,7 @@ export default function PesapalPaymentModal({
               ...userDetails,
               eventId: event.id,
               paymentMethod: "PESAPAL",
+              paymentReference: paymentStatus.merchantReference,
               paymentTrackingId: paymentStatus.orderTrackingId,
               paymentStatus: "COMPLETED"
             }),
@@ -118,9 +119,38 @@ export default function PesapalPaymentModal({
           // Close modal after successful payment and registration
           setTimeout(() => {
             onClose();
-          }, 3000);
+          }, 2000);
         } catch (registrationError) {
           console.error("Registration after payment error:", registrationError);
+          
+          // Even if registration fails, check if the user is already registered
+          // This could happen if the payment callback already registered the user
+          try {
+            const checkRegistrationResponse = await fetch(`/api/events/check-registration?eventId=${event.id}`);
+            const checkData = await checkRegistrationResponse.json();
+            
+            if (checkRegistrationResponse.ok && checkData.isRegistered) {
+              // User is already registered, so consider this a success
+              toast({
+                title: "Already Registered",
+                description: "Your payment was successful and you are registered for this event.",
+              });
+              
+              // Notify parent component that payment is complete
+              onPaymentComplete(updatedStatus);
+              
+              // Close modal
+              setTimeout(() => {
+                onClose();
+              }, 2000);
+              
+              return;
+            }
+          } catch (checkError) {
+            console.error("Error checking registration status:", checkError);
+          }
+          
+          // If we get here, the registration truly failed
           toast({
             title: "Payment Successful, Registration Failed",
             description: "Your payment was successful, but we couldn't complete your registration. Please contact support.",

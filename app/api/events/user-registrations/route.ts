@@ -22,7 +22,9 @@ export async function GET(req: Request) {
       );
     }
 
-    // Find all registrations for this user
+    console.log(`Fetching registrations for user email: ${userEmail}`);
+
+    // Find all registrations for this user, regardless of payment status
     const registrations = await prisma.eventRegistration.findMany({
       where: {
         email: userEmail
@@ -30,8 +32,16 @@ export async function GET(req: Request) {
       select: {
         id: true,
         eventId: true,
-        paymentStatus: true
+        paymentStatus: true,
+        createdAt: true
       }
+    });
+
+    console.log(`Found ${registrations.length} registrations for user`);
+    
+    // Log each registration for debugging
+    registrations.forEach(reg => {
+      console.log(`Registration: eventId=${reg.eventId}, status=${reg.paymentStatus}, created=${reg.createdAt}`);
     });
 
     return NextResponse.json(registrations);
