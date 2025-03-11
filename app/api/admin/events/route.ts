@@ -44,6 +44,16 @@ export async function GET() {
             email: true,
           },
         },
+        registrations: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            paymentStatus: true,
+            isAttended: true,
+          },
+        },
       },
       orderBy: {
         startDate: 'desc',

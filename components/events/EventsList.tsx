@@ -46,7 +46,7 @@ interface Event {
   materials?: Record<string, string> | null;
   memberPrice?: number | null;
   nonMemberPrice?: number | null;
-  attendees: Array<{
+  registrations: Array<{
     id: string;
     firstName: string;
     lastName: string;
@@ -572,7 +572,7 @@ export default function EventsList() {
             : false;
           
           const isFull = event.capacity
-            ? event.attendees.length >= event.capacity
+            ? event.registrations.length >= event.capacity
             : false;
           
           // Check if user is registered for this event
@@ -648,7 +648,7 @@ export default function EventsList() {
                       <div className="flex items-center text-gray-600">
                         <Users className="w-5 h-5 mr-2 text-[#c22f61]" />
                         <span>
-                          {event.attendees?.length || 0} attendees
+                          {event.registrations?.length || 0} attendees
                           {event.capacity && ` / ${event.capacity} capacity`}
                         </span>
                       </div>

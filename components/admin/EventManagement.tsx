@@ -67,7 +67,7 @@ interface EventData {
   materials?: Record<string, any> | null;
   memberPrice?: number | null;
   nonMemberPrice?: number | null;
-  attendees: Array<{
+  registrations: Array<{
     id: string;
     firstName: string;
     lastName: string;
@@ -853,7 +853,7 @@ export default function EventManagement() {
                   </TableCell>
                   <TableCell>
                     <span className="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/20 shadow-sm">
-                      {event.attendees?.length || 0} registered
+                      {event.registrations?.length || 0} registered
                     </span>
                   </TableCell>
                   <TableCell>
