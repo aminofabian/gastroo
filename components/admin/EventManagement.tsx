@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { EventType } from "@prisma/client";
 import { format } from "date-fns";
@@ -46,7 +46,7 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import { FaUsers, FaImages, FaNewspaper, FaHandshake, FaDonate, FaChartBar, FaCalendarAlt } from "react-icons/fa";
 import AdminLayout from "@/components/admin/AdminLayout";
 
-interface Event {
+interface EventData {
   id: string;
   title: string;
   description: string;
@@ -127,15 +127,17 @@ const formSchema = z.object({
 });
 
 export default function EventManagement() {
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<EventData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<string | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
   const router = useRouter();
   const { toast } = useToast();
+  const formRef = useRef<HTMLFormElement>(null);
+  const deleteDialogRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -206,7 +208,7 @@ export default function EventManagement() {
     try {
       const response = await fetch("/api/admin/events");
       const data = await response.json();
-      setEvents(data);
+      setEvents(data as EventData[]);
     } catch (error) {
       console.error("Error fetching events:", error);
       toast({
@@ -246,11 +248,9 @@ export default function EventManagement() {
       if (values.capacity) formData.append("capacity", values.capacity.toString());
       if (values.registrationDeadline) formData.append("registrationDeadline", values.registrationDeadline);
       
-      // Handle price fields - explicitly handle null and undefined values
       formData.append("memberPrice", values.memberPrice === null || values.memberPrice === undefined ? 'null' : values.memberPrice.toString());
       formData.append("nonMemberPrice", values.nonMemberPrice === null || values.nonMemberPrice === undefined ? 'null' : values.nonMemberPrice.toString());
 
-      // Handle file uploads
       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
       if (fileInput && fileInput.files) {
         for (const file of Array.from(fileInput.files)) {
@@ -285,7 +285,7 @@ export default function EventManagement() {
     }
   };
 
-  const handleEdit = (event: Event) => {
+  const handleEdit = (event: EventData) => {
     setSelectedEvent(event);
     setOpen(true);
   };
@@ -336,10 +336,14 @@ export default function EventManagement() {
             <h1 className="text-3xl font-bold tracking-tight text-[#c22f63]">Event Management</h1>
             <p className="text-gray-500 mt-1">Create, edit and manage events for your organization</p>
           </div>
-          <Dialog open={open} onOpenChange={(isOpen) => {
-            setOpen(isOpen);
-            if (!isOpen) setSelectedEvent(null);
-          }}>
+          <Dialog 
+            open={open} 
+            onOpenChange={(isOpen: boolean) => {
+              setOpen(isOpen);
+              if (!isOpen) setSelectedEvent(null);
+            }}
+            modal={true}
+          >
             <DialogTrigger asChild>
               <Button size="lg" className="gap-2 bg-[#c22f63] hover:bg-[#b02a57] transition-all shadow-md">
                 <svg
@@ -358,7 +362,14 @@ export default function EventManagement() {
                 Add New Event
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto z-[100] bg-white border-2 border-[#c22f63]/20 shadow-2xl rounded-xl" onClick={(e) => e.stopPropagation()}>
+            <DialogContent 
+              className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto z-[100] bg-white border-2 border-[#c22f63]/20 shadow-2xl rounded-xl" 
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              onInteractOutside={(e) => {
+                e.preventDefault();
+              }}
+            >
               <DialogHeader className="space-y-3 mb-6 sticky top-0 bg-[#c22f63] text-white p-6 rounded-t-lg z-[101]">
                 <DialogTitle className="text-2xl font-bold">
                   {selectedEvent ? 'Edit Event' : 'Create New Event'}
@@ -368,7 +379,17 @@ export default function EventManagement() {
                 </p>
               </DialogHeader>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 px-8 pb-8">
+                <form 
+                  ref={formRef}
+                  onSubmit={form.handleSubmit(onSubmit)} 
+                  className="space-y-6 px-8 pb-8"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
                   <div className="grid grid-cols-2 gap-6">
                     <FormField
                       control={form.control}
@@ -377,7 +398,13 @@ export default function EventManagement() {
                         <FormItem>
                           <FormLabel className="text-sm font-semibold text-[#c22f63]">Title</FormLabel>
                           <FormControl>
-                            <Input className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm" {...field} />
+                            <Input 
+                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer" 
+                              {...field} 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                              }}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -394,7 +421,7 @@ export default function EventManagement() {
                             defaultValue={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm">
+                              <SelectTrigger className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer" onClick={(e) => e.stopPropagation()}>
                                 <SelectValue placeholder="Select event type" />
                               </SelectTrigger>
                             </FormControl>
@@ -419,7 +446,29 @@ export default function EventManagement() {
                       <FormItem>
                         <FormLabel className="text-sm font-semibold text-[#c22f63]">Description</FormLabel>
                         <FormControl>
-                          <Textarea className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm" {...field} />
+                          <Textarea 
+                            className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer" 
+                            {...field} 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                            }}
+                            onFocus={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                            }}
+                            onBlur={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                            }}
+                            onMouseDown={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                            }}
+                            onKeyDown={(e) => {
+                              e.stopPropagation();
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -434,7 +483,12 @@ export default function EventManagement() {
                         <FormItem>
                           <FormLabel className="text-sm font-semibold text-[#c22f63]">Start Date</FormLabel>
                           <FormControl>
-                            <Input type="datetime-local" className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm" {...field} />
+                            <Input 
+                              type="datetime-local" 
+                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer" 
+                              {...field} 
+                              onClick={(e) => e.stopPropagation()}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -447,7 +501,12 @@ export default function EventManagement() {
                         <FormItem>
                           <FormLabel className="text-sm font-semibold text-[#c22f63]">End Date</FormLabel>
                           <FormControl>
-                            <Input type="datetime-local" className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm" {...field} />
+                            <Input 
+                              type="datetime-local" 
+                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer" 
+                              {...field} 
+                              onClick={(e) => e.stopPropagation()}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -463,7 +522,11 @@ export default function EventManagement() {
                         <FormItem>
                           <FormLabel className="text-sm font-semibold text-[#c22f63]">Venue</FormLabel>
                           <FormControl>
-                            <Input className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm" {...field} />
+                            <Input 
+                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer" 
+                              {...field} 
+                              onClick={(e) => e.stopPropagation()}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -478,8 +541,9 @@ export default function EventManagement() {
                           <FormControl>
                             <Input 
                               type="number"
-                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm"
+                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer"
                               {...field} 
+                              onClick={(e) => e.stopPropagation()}
                               onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                               value={field.value}
                             />
@@ -500,9 +564,10 @@ export default function EventManagement() {
                           <FormControl>
                             <Input 
                               type="number"
-                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm"
+                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer"
                               placeholder="Enter amount"
                               {...field} 
+                              onClick={(e) => e.stopPropagation()}
                               onChange={(e) => {
                                 const value = e.target.value === '' ? null : parseFloat(e.target.value);
                                 field.onChange(value);
@@ -523,9 +588,10 @@ export default function EventManagement() {
                           <FormControl>
                             <Input 
                               type="number"
-                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm"
+                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer"
                               placeholder="Enter amount"
                               {...field} 
+                              onClick={(e) => e.stopPropagation()}
                               onChange={(e) => {
                                 const value = e.target.value === '' ? null : parseFloat(e.target.value);
                                 field.onChange(value);
@@ -548,9 +614,10 @@ export default function EventManagement() {
                           <FormLabel className="text-sm font-semibold text-[#c22f63]">Objectives</FormLabel>
                           <FormControl>
                             <Textarea 
-                              className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm"
+                              className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer"
                               placeholder="Enter objectives (one per line)"
                               value={field.value.join('\n')}
+                              onClick={(e) => e.stopPropagation()}
                               onChange={(e) => {
                                 const value = e.target.value.split('\n').filter(Boolean);
                                 field.onChange(value);
@@ -569,9 +636,10 @@ export default function EventManagement() {
                           <FormLabel className="text-sm font-semibold text-[#c22f63]">Speakers</FormLabel>
                           <FormControl>
                             <Textarea 
-                              className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm"
+                              className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer"
                               placeholder="Enter speakers (one per line)"
                               value={field.value.join('\n')}
+                              onClick={(e) => e.stopPropagation()}
                               onChange={(e) => {
                                 const value = e.target.value.split('\n').filter(Boolean);
                                 field.onChange(value);
@@ -593,9 +661,10 @@ export default function EventManagement() {
                           <FormLabel className="text-sm font-semibold text-[#c22f63]">Moderators</FormLabel>
                           <FormControl>
                             <Textarea 
-                              className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm"
+                              className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer"
                               placeholder="Enter moderators (one per line)"
                               value={field.value.join('\n')}
+                              onClick={(e) => e.stopPropagation()}
                               onChange={(e) => {
                                 const value = e.target.value.split('\n').filter(Boolean);
                                 field.onChange(value);
@@ -620,6 +689,7 @@ export default function EventManagement() {
                                   className="cursor-pointer file:cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#c22f63]/10 file:text-[#c22f63] hover:file:bg-[#c22f63]/20 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm"
                                   accept={Object.values(ACCEPTED_FILE_TYPES).join(',')}
                                   multiple
+                                  onClick={(e) => e.stopPropagation()}
                                   onChange={(e) => {
                                     const files = Array.from(e.target.files || []);
                                     const validFiles = files.filter(file => {
@@ -735,13 +805,19 @@ export default function EventManagement() {
           </Dialog>
         </div>
 
-        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <DialogContent className="bg-white border-2 border-red-200 shadow-2xl rounded-xl" onClick={(e) => e.stopPropagation()}>
+        <Dialog open={deleteDialogOpen} onOpenChange={(isOpen: boolean) => setDeleteDialogOpen(isOpen)} modal={true}>
+          <DialogContent 
+            className="bg-white border-2 border-red-200 shadow-2xl rounded-xl" 
+            onClick={(e) => e.stopPropagation()}
+            onInteractOutside={(e) => {
+              e.preventDefault();
+            }}
+          >
             <DialogHeader className="space-y-3 mb-6 bg-red-600 text-white p-6 rounded-t-lg">
               <DialogTitle className="text-2xl font-bold">Delete Event</DialogTitle>
               <p className="text-red-100">This action cannot be undone.</p>
             </DialogHeader>
-            <div className="space-y-6 px-6 pb-6">
+            <div className="space-y-6 px-6 pb-6" ref={deleteDialogRef} onClick={(e) => e.stopPropagation()}>
               <p className="text-gray-700">Are you sure you want to delete this event? All associated data will be permanently removed.</p>
               <div className="flex justify-end gap-3">
                 <Button

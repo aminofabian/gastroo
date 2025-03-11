@@ -92,7 +92,7 @@ export default function EventRegistrationModal({
   return (
     <Dialog 
       open={isOpen} 
-      onOpenChange={(open) => {
+      onOpenChange={(open: boolean) => {
         if (!open) onClose();
       }}
       modal={true}
