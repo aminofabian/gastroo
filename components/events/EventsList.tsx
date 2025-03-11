@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { 
   CalendarDays, 
@@ -74,9 +74,10 @@ export default function EventsList() {
 
     try {
       setIsLoading(selectedEventId);
-      console.log("[EVENT_REGISTRATION] Sending registration request for event:", selectedEventId);
-
-      const response = await fetch(session?.user ? "/api/events/register" : "/api/events/register-guest", {
+      
+      const endpoint = session?.user ? "/api/events/register" : "/api/events/register-guest";
+      
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,7 +110,7 @@ export default function EventsList() {
       
       fetchEvents();
     } catch (error) {
-      console.error("[EVENT_REGISTRATION_ERROR]", error);
+      console.error("Registration error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to register for event",
@@ -182,8 +183,18 @@ export default function EventsList() {
 
       const data = await response.json();
       console.log("[EventsList] Received events:", data?.length, "events");
-      console.log("[EventsList] Response headers:", Object.fromEntries(response.headers.entries()));
-      console.log("[EventsList] First event (if any):", data?.[0]);
+      
+      // Debug event data
+      if (data && data.length > 0) {
+        console.log("[EventsList] First event details:", {
+          id: data[0].id,
+          title: data[0].title,
+          memberPrice: data[0].memberPrice,
+          nonMemberPrice: data[0].nonMemberPrice,
+          attendees: data[0].attendees?.length || 0
+        });
+      }
+      
       setEvents(data || []);
     } catch (error) {
       console.error("[EventsList] Error fetching events:", error);
@@ -241,7 +252,6 @@ export default function EventsList() {
           const isRegistered = session ? event.attendees?.some(
             (attendee) => attendee.id === session?.user?.id
           ) : false;
-          const isExpanded = expandedEvent === event.id;
           const isRegistrationClosed = event.registrationDeadline 
             ? new Date(event.registrationDeadline) < new Date() 
             : false;
@@ -338,7 +348,7 @@ export default function EventsList() {
                     </div>
                   </div>
 
-                  {isExpanded && (
+                  {isRegistered && (
                     <div className="mt-6 pt-6 border-t">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -381,11 +391,11 @@ export default function EventsList() {
 
                   <div className="mt-6 flex items-center justify-between">
                     <Button
-                      onClick={() => setExpandedEvent(isExpanded ? null : event.id)}
+                      onClick={() => setExpandedEvent(isRegistered ? null : event.id)}
                       variant="ghost"
                       className="text-[#c22f61]"
                     >
-                      {isExpanded ? (
+                      {isRegistered ? (
                         <>
                           <ChevronUp className="w-4 h-4 mr-2" />
                           Show Less
@@ -397,63 +407,48 @@ export default function EventsList() {
                         </>
                       )}
                     </Button>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div>
-                            <Button
-                              onClick={() => handleRegister(event.id)}
-                              disabled={isLoading === event.id || isRegistered || isRegistrationClosed || isFull}
-                              className={`${
-                                isRegistered 
-                                  ? "bg-green-600 hover:bg-green-700"
-                                  : "bg-[#c22f61] hover:bg-[#004488]"
-                              }`}
-                            >
-                              {isLoading === event.id ? (
-                                <>
-                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                                  Registering...
-                                </>
-                              ) : isRegistered ? (
-                                "Already Registered"
-                              ) : isRegistrationClosed ? (
-                                "Registration Closed"
-                              ) : isFull ? (
-                                "Event Full"
-                              ) : (
-                                "Register Now"
-                              )}
-                            </Button>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {isRegistered ? (
-                            "You're already registered for this event"
-                          ) : isRegistrationClosed ? (
-                            "Registration deadline has passed"
-                          ) : isFull ? (
-                            "Event has reached maximum capacity"
-                          ) : (
-                            "Click to register for this event"
-                          )}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <div className="flex justify-end mt-4">
+                      <Button
+                        onClick={() => handleRegister(event.id)}
+                        disabled={isLoading === event.id || isRegistered || isRegistrationClosed || isFull}
+                        className={`${
+                          isRegistered 
+                            ? "bg-green-600 hover:bg-green-700"
+                            : "bg-[#c22f61] hover:bg-[#004488]"
+                        }`}
+                      >
+                        {isLoading === event.id ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                            Registering...
+                          </>
+                        ) : isRegistered ? (
+                          "Already Registered"
+                        ) : isRegistrationClosed ? (
+                          "Registration Closed"
+                        ) : isFull ? (
+                          "Event Full"
+                        ) : (
+                          "Register Now"
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
-              {selectedEventId === event.id && (
-                <EventRegistrationModal
-                  isOpen={showRegistrationModal}
-                  onClose={() => setShowRegistrationModal(false)}
-                  onSubmit={handleRegistrationSubmit}
-                  event={event}
-                />
-              )}
             </div>
           );
         })
+      )}
+
+      {/* Render modal outside the map function */}
+      {showRegistrationModal && selectedEventId && (
+        <EventRegistrationModal
+          isOpen={showRegistrationModal}
+          onClose={() => setShowRegistrationModal(false)}
+          onSubmit={handleRegistrationSubmit}
+          event={events.find(e => e.id === selectedEventId)}
+        />
       )}
     </div>
   );

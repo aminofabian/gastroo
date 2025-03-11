@@ -48,8 +48,8 @@ export default function EventRegistrationModal({
   const { data: session } = useSession();
   const { toast } = useToast();
 
-  // If the event is free (no member price), don't show the modal
-  if (!event?.memberPrice || event.memberPrice <= 0) {
+  // If no event or the event is free, don't show the modal
+  if (!event || !event.memberPrice || event.memberPrice <= 0) {
     return null;
   }
 
@@ -59,7 +59,7 @@ export default function EventRegistrationModal({
       firstName: session?.user?.firstName || "",
       lastName: session?.user?.lastName || "",
       email: session?.user?.email || "",
-      phone: session?.user?.phone || "",
+      phone: "",
     },
   });
 
@@ -69,7 +69,6 @@ export default function EventRegistrationModal({
       form.setValue("firstName", session.user.firstName || "");
       form.setValue("lastName", session.user.lastName || "");
       form.setValue("email", session.user.email || "");
-      form.setValue("phone", session.user.phone || "");
     }
   }, [session, form]);
 
@@ -79,7 +78,7 @@ export default function EventRegistrationModal({
       await onSubmit(data);
       onClose();
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error("Form submission error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to register for event",
@@ -91,7 +90,13 @@ export default function EventRegistrationModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog 
+      open={isOpen} 
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+      modal={true}
+    >
       <DialogContent className="sm:max-w-[500px] p-0 bg-white border-0 shadow-2xl">
         <div className="bg-emerald-600 p-6 text-white">
           <DialogHeader className="space-y-3">

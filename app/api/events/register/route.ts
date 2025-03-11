@@ -42,63 +42,46 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check if event has capacity limit
-    if (event.capacity) {
-      // Count existing registrations
-      const registrationCount = await prisma.eventRegistration.count({
-        where: { eventId }
-      });
+    try {
+      // Create a unique ID for the registration
+      const registrationId = `reg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      
+      // Insert the registration directly into the database
+      await prisma.$executeRaw`
+        INSERT INTO "event_registrations" (
+          "id", "eventId", "firstName", "lastName", "email", "phone", 
+          "paymentMethod", "paymentStatus", "isAttended", "createdAt", "updatedAt"
+        ) VALUES (
+          ${registrationId}, ${eventId}, ${firstName}, ${lastName}, ${email}, ${phone}, 
+          ${paymentMethod}, 'PENDING', false, ${new Date()}, ${new Date()}
+        )
+      `;
 
-      // Count attendees
-      const attendeeCount = await prisma.eventAttendees.count({
-        where: { A: eventId }
+      return NextResponse.json({
+        success: true,
+        message: "Registration successful. Redirecting to payment...",
+        registrationId,
+        event: {
+          id: event.id,
+          title: event.title
+        }
       });
-
-      if (registrationCount + attendeeCount >= event.capacity) {
+    } catch (dbError) {
+      console.error("Database error during registration:", dbError);
+      
+      // Check if it's a duplicate registration error
+      if (dbError instanceof Error && dbError.message.includes("duplicate key")) {
         return NextResponse.json(
-          { error: "Event is at full capacity" },
+          { error: "You are already registered for this event" },
           { status: 400 }
         );
       }
-    }
-
-    // Check if already registered
-    const existingRegistration = await prisma.eventRegistration.findFirst({
-      where: {
-        eventId,
-        email
-      }
-    });
-
-    if (existingRegistration) {
+      
       return NextResponse.json(
-        { error: "You are already registered for this event" },
-        { status: 400 }
+        { error: "Failed to create registration in database" },
+        { status: 500 }
       );
     }
-
-    // Create registration
-    const registration = await prisma.eventRegistration.create({
-      data: {
-        eventId,
-        firstName,
-        lastName,
-        email,
-        phone,
-        paymentMethod,
-        paymentStatus: "PENDING"
-      }
-    });
-
-    return NextResponse.json({
-      success: true,
-      message: "Registration successful. Redirecting to payment...",
-      registrationId: registration.id,
-      event: {
-        id: event.id,
-        title: event.title
-      }
-    });
   } catch (error) {
     console.error("Registration error:", error);
     return NextResponse.json(

@@ -330,10 +330,10 @@ export default function EventManagement() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6 p-8 bg-white min-h-screen">
-        <div className="flex items-center justify-between bg-white p-6 rounded-xl shadow-md border border-[#c22f63]/20">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between bg-white p-6 rounded-xl shadow-md border border-[#c22f61]/20">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-[#c22f63]">Event Management</h1>
+            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-[#c22f61] to-[#004488] bg-clip-text text-transparent">Event Management</h1>
             <p className="text-gray-500 mt-1">Create, edit and manage events for your organization</p>
           </div>
           <Dialog open={open} onOpenChange={(isOpen) => {
@@ -341,7 +341,7 @@ export default function EventManagement() {
             if (!isOpen) setSelectedEvent(null);
           }}>
             <DialogTrigger asChild>
-              <Button size="lg" className="gap-2 bg-[#c22f63] hover:bg-[#b02a57] transition-all shadow-md">
+              <Button size="lg" className="gap-2 bg-gradient-to-r from-[#c22f61] to-[#004488] hover:from-[#b02a57] hover:to-[#003a75] transition-all shadow-md">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -358,8 +358,8 @@ export default function EventManagement() {
                 Add New Event
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto z-[100] bg-white border-2 border-[#c22f63]/20 shadow-2xl rounded-xl" onClick={(e) => e.stopPropagation()}>
-              <DialogHeader className="space-y-3 mb-6 sticky top-0 bg-[#c22f63] text-white p-6 rounded-t-lg z-[101]">
+            <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto z-[100] bg-gradient-to-b from-white to-[#c22f61]/5 border-2 border-[#c22f61]/20 shadow-2xl rounded-xl" onClick={(e) => e.stopPropagation()}>
+              <DialogHeader className="space-y-3 mb-6 sticky top-0 bg-gradient-to-r from-[#c22f61] to-[#004488] text-white p-6 rounded-t-lg z-[101]">
                 <DialogTitle className="text-2xl font-bold">
                   {selectedEvent ? 'Edit Event' : 'Create New Event'}
                 </DialogTitle>
@@ -375,9 +375,9 @@ export default function EventManagement() {
                       name="title"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Title</FormLabel>
+                          <FormLabel className="text-sm font-semibold text-[#c22f61]">Title</FormLabel>
                           <FormControl>
-                            <Input className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm" {...field} />
+                            <Input className="h-10 border-[#c22f61]/20 focus:border-[#c22f61] focus:ring-[#c22f61] shadow-sm" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -388,13 +388,13 @@ export default function EventManagement() {
                       name="type"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Type</FormLabel>
+                          <FormLabel className="text-sm font-semibold text-[#c22f61]">Type</FormLabel>
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm">
+                              <SelectTrigger className="h-10 border-[#c22f61]/20 focus:border-[#c22f61] focus:ring-[#c22f61] shadow-sm">
                                 <SelectValue placeholder="Select event type" />
                               </SelectTrigger>
                             </FormControl>
@@ -417,9 +417,9 @@ export default function EventManagement() {
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-semibold text-[#c22f63]">Description</FormLabel>
+                        <FormLabel className="text-sm font-semibold text-blue-800">Description</FormLabel>
                         <FormControl>
-                          <Textarea className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm" {...field} />
+                          <Textarea className="min-h-[80px] resize-none border-blue-200 focus:border-blue-500 focus:ring-blue-500 shadow-sm" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -432,9 +432,9 @@ export default function EventManagement() {
                       name="startDate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Start Date</FormLabel>
+                          <FormLabel className="text-sm font-semibold text-blue-800">Start Date</FormLabel>
                           <FormControl>
-                            <Input type="datetime-local" className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm" {...field} />
+                            <Input type="datetime-local" className="h-10 border-blue-200 focus:border-blue-500 focus:ring-blue-500 shadow-sm" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -445,9 +445,9 @@ export default function EventManagement() {
                       name="endDate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">End Date</FormLabel>
+                          <FormLabel className="text-sm font-semibold text-blue-800">End Date</FormLabel>
                           <FormControl>
-                            <Input type="datetime-local" className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm" {...field} />
+                            <Input type="datetime-local" className="h-10 border-blue-200 focus:border-blue-500 focus:ring-blue-500 shadow-sm" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -461,9 +461,9 @@ export default function EventManagement() {
                       name="venue"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Venue</FormLabel>
+                          <FormLabel className="text-sm font-semibold text-blue-800">Venue</FormLabel>
                           <FormControl>
-                            <Input className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm" {...field} />
+                            <Input className="h-10 border-blue-200 focus:border-blue-500 focus:ring-blue-500 shadow-sm" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -474,11 +474,11 @@ export default function EventManagement() {
                       name="cpdPoints"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">CPD Points</FormLabel>
+                          <FormLabel className="text-sm font-semibold text-blue-800">CPD Points</FormLabel>
                           <FormControl>
                             <Input 
                               type="number"
-                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm"
+                              className="h-10 border-blue-200 focus:border-blue-500 focus:ring-blue-500 shadow-sm"
                               {...field} 
                               onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                               value={field.value}
@@ -496,11 +496,11 @@ export default function EventManagement() {
                       name="memberPrice"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Member Price (KES)</FormLabel>
+                          <FormLabel className="text-sm font-semibold text-blue-800">Member Price (KES)</FormLabel>
                           <FormControl>
                             <Input 
                               type="number"
-                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm"
+                              className="h-10 border-blue-200 focus:border-blue-500 focus:ring-blue-500 shadow-sm"
                               placeholder="Enter amount"
                               {...field} 
                               onChange={(e) => {
@@ -519,11 +519,11 @@ export default function EventManagement() {
                       name="nonMemberPrice"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Non-Member Price (KES)</FormLabel>
+                          <FormLabel className="text-sm font-semibold text-blue-800">Non-Member Price (KES)</FormLabel>
                           <FormControl>
                             <Input 
                               type="number"
-                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm"
+                              className="h-10 border-blue-200 focus:border-blue-500 focus:ring-blue-500 shadow-sm"
                               placeholder="Enter amount"
                               {...field} 
                               onChange={(e) => {
@@ -545,10 +545,10 @@ export default function EventManagement() {
                       name="objectives"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Objectives</FormLabel>
+                          <FormLabel className="text-sm font-semibold text-blue-800">Objectives</FormLabel>
                           <FormControl>
                             <Textarea 
-                              className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm"
+                              className="min-h-[80px] resize-none border-blue-200 focus:border-blue-500 focus:ring-blue-500 shadow-sm"
                               placeholder="Enter objectives (one per line)"
                               value={field.value.join('\n')}
                               onChange={(e) => {
@@ -566,10 +566,10 @@ export default function EventManagement() {
                       name="speakers"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Speakers</FormLabel>
+                          <FormLabel className="text-sm font-semibold text-blue-800">Speakers</FormLabel>
                           <FormControl>
                             <Textarea 
-                              className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm"
+                              className="min-h-[80px] resize-none border-blue-200 focus:border-blue-500 focus:ring-blue-500 shadow-sm"
                               placeholder="Enter speakers (one per line)"
                               value={field.value.join('\n')}
                               onChange={(e) => {
@@ -590,10 +590,10 @@ export default function EventManagement() {
                       name="moderators"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Moderators</FormLabel>
+                          <FormLabel className="text-sm font-semibold text-blue-800">Moderators</FormLabel>
                           <FormControl>
                             <Textarea 
-                              className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm"
+                              className="min-h-[80px] resize-none border-blue-200 focus:border-blue-500 focus:ring-blue-500 shadow-sm"
                               placeholder="Enter moderators (one per line)"
                               value={field.value.join('\n')}
                               onChange={(e) => {
@@ -611,13 +611,13 @@ export default function EventManagement() {
                       name="materials"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Documents</FormLabel>
+                          <FormLabel className="text-sm font-semibold text-blue-800">Documents</FormLabel>
                           <FormControl>
                             <div className="space-y-4">
                               <div className="flex items-center gap-4">
                                 <Input
                                   type="file"
-                                  className="cursor-pointer file:cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#c22f63]/10 file:text-[#c22f63] hover:file:bg-[#c22f63]/20 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm"
+                                  className="cursor-pointer file:cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border-blue-200 focus:border-blue-500 focus:ring-blue-500 shadow-sm"
                                   accept={Object.values(ACCEPTED_FILE_TYPES).join(',')}
                                   multiple
                                   onChange={(e) => {
@@ -645,12 +645,12 @@ export default function EventManagement() {
                                   {field.value.map((file, index) => (
                                     <div
                                       key={index}
-                                      className="flex items-center justify-between rounded-md border border-[#c22f63]/20 bg-[#c22f63]/5 px-3 py-2 shadow-sm"
+                                      className="flex items-center justify-between rounded-md border border-blue-200 bg-blue-50 px-3 py-2 shadow-sm"
                                     >
                                       <div className="flex items-center gap-2">
                                         <svg
                                           xmlns="http://www.w3.org/2000/svg"
-                                          className="h-5 w-5 text-[#c22f63]"
+                                          className="h-5 w-5 text-blue-600"
                                           viewBox="0 0 24 24"
                                           fill="none"
                                           stroke="currentColor"
@@ -660,8 +660,8 @@ export default function EventManagement() {
                                           <polyline points="14 2 14 8 20 8" />
                                         </svg>
                                         <div className="text-sm">
-                                          <p className="font-medium text-[#c22f63]">{file.name}</p>
-                                          <p className="text-[#c22f63]/70">{formatBytes(file.size)}</p>
+                                          <p className="font-medium text-blue-800">{file.name}</p>
+                                          <p className="text-blue-600">{formatBytes(file.size)}</p>
                                         </div>
                                       </div>
                                       <Button
@@ -691,7 +691,7 @@ export default function EventManagement() {
                                   ))}
                                 </div>
                               )}
-                              <p className="text-xs text-[#c22f63]/70">
+                              <p className="text-xs text-blue-600">
                                 Accepted file types: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX (Max 10MB per file)
                               </p>
                             </div>
@@ -702,19 +702,19 @@ export default function EventManagement() {
                     />
                   </div>
 
-                  <div className="flex justify-end space-x-4 pt-6 border-t border-[#c22f63]/10">
+                  <div className="flex justify-end space-x-4 pt-6 border-t border-blue-100">
                     <Button 
                       type="button" 
                       variant="outline" 
                       onClick={() => setOpen(false)}
-                      className="border-[#c22f63]/30 text-[#c22f63] hover:bg-[#c22f63]/5"
+                      className="border-blue-300 text-blue-700 hover:bg-blue-50"
                     >
                       Cancel
                     </Button>
                     <Button 
                       type="submit" 
                       disabled={isSubmitting}
-                      className="bg-[#c22f63] hover:bg-[#b02a57] transition-all shadow-md"
+                      className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 transition-all shadow-md"
                     >
                       {isSubmitting ? (
                         <>
@@ -736,8 +736,8 @@ export default function EventManagement() {
         </div>
 
         <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <DialogContent className="bg-white border-2 border-red-200 shadow-2xl rounded-xl" onClick={(e) => e.stopPropagation()}>
-            <DialogHeader className="space-y-3 mb-6 bg-red-600 text-white p-6 rounded-t-lg">
+          <DialogContent className="bg-gradient-to-b from-white to-red-50 border-2 border-red-200 shadow-2xl rounded-xl">
+            <DialogHeader className="space-y-3 mb-6 bg-gradient-to-r from-red-600 to-red-700 text-white p-6 rounded-t-lg">
               <DialogTitle className="text-2xl font-bold">Delete Event</DialogTitle>
               <p className="text-red-100">This action cannot be undone.</p>
             </DialogHeader>
@@ -756,7 +756,7 @@ export default function EventManagement() {
                 </Button>
                 <Button
                   variant="destructive"
-                  className="bg-red-600 hover:bg-red-700 transition-all shadow-md"
+                  className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 transition-all shadow-md"
                   onClick={confirmDelete}
                 >
                   Delete Event
@@ -766,10 +766,10 @@ export default function EventManagement() {
           </DialogContent>
         </Dialog>
 
-        <div className="rounded-lg border border-[#c22f63]/20 bg-white shadow-lg overflow-hidden">
+        <div className="rounded-lg border border-blue-200 bg-white shadow-lg overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow className="bg-[#c22f63]">
+              <TableRow className="bg-gradient-to-r from-blue-600 to-indigo-700">
                 <TableHead className="font-semibold text-white">Title</TableHead>
                 <TableHead className="font-semibold text-white">Type</TableHead>
                 <TableHead className="font-semibold text-white">Start Date</TableHead>
@@ -787,10 +787,10 @@ export default function EventManagement() {
             </TableHeader>
             <TableBody>
               {events.map((event) => (
-                <TableRow key={event.id} className="hover:bg-[#c22f63]/5 border-b border-[#c22f63]/10">
-                  <TableCell className="font-medium text-[#c22f63]">{event.title}</TableCell>
+                <TableRow key={event.id} className="hover:bg-blue-50/50 border-b border-blue-100">
+                  <TableCell className="font-medium text-blue-800">{event.title}</TableCell>
                   <TableCell>
-                    <span className="inline-flex items-center rounded-md bg-[#c22f63]/10 px-2 py-1 text-xs font-medium text-[#c22f63] ring-1 ring-inset ring-[#c22f63]/20 shadow-sm">
+                    <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/20 shadow-sm">
                       {event.type}
                     </span>
                   </TableCell>
@@ -807,12 +807,12 @@ export default function EventManagement() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <span className="inline-flex items-center rounded-md bg-[#c22f63]/10 px-2 py-1 text-xs font-medium text-[#c22f63] ring-1 ring-inset ring-[#c22f63]/20 shadow-sm">
+                    <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/20 shadow-sm">
                       {event.memberPrice !== null ? `KES ${event.memberPrice?.toLocaleString()}` : 'Free'}
                     </span>
                   </TableCell>
                   <TableCell>
-                    <span className="inline-flex items-center rounded-md bg-[#c22f63]/10 px-2 py-1 text-xs font-medium text-[#c22f63] ring-1 ring-inset ring-[#c22f63]/20 shadow-sm">
+                    <span className="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/20 shadow-sm">
                       {event.nonMemberPrice !== null ? `KES ${event.nonMemberPrice?.toLocaleString()}` : 'N/A'}
                     </span>
                   </TableCell>
@@ -842,7 +842,7 @@ export default function EventManagement() {
                         onClick={() => handleEdit(event)}
                         size="sm"
                         variant="outline"
-                        className="h-8 w-8 p-0 border-[#c22f63]/30 text-[#c22f63] hover:bg-[#c22f63]/5 hover:text-[#c22f63] transition-colors"
+                        className="h-8 w-8 p-0 border-blue-300 text-blue-700 hover:bg-blue-50 hover:text-blue-800 transition-colors"
                       >
                         <FaEdit className="h-4 w-4" />
                       </Button>
