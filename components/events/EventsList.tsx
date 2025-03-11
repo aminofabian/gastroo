@@ -96,19 +96,12 @@ export default function EventsList() {
       }
 
       toast({
-        title: "Success",
-        description: "Registration successful. Redirecting to payment...",
+        title: "Registration Submitted",
+        description: "Your registration has been submitted successfully.",
       });
-
-      // Close the registration modal
-      setShowRegistrationModal(false);
       
-      // Initiate payment if registration was successful
-      if (data.registrationId) {
-        await initiatePayment(selectedEventId, data.registrationId);
-      }
-      
-      fetchEvents();
+      // Return the registration data for payment processing
+      return { registrationId: data.registrationId };
     } catch (error) {
       console.error("Registration error:", error);
       toast({
@@ -116,6 +109,7 @@ export default function EventsList() {
         description: error instanceof Error ? error.message : "Failed to register for event",
         variant: "destructive",
       });
+      throw error; // Re-throw to be handled by the modal
     } finally {
       setIsLoading(null);
     }

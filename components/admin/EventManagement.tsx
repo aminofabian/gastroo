@@ -45,6 +45,9 @@ import * as z from "zod";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { FaUsers, FaImages, FaNewspaper, FaHandshake, FaDonate, FaChartBar, FaCalendarAlt } from "react-icons/fa";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { SimpleModal } from "./SimpleModal";
+import { CustomEventDialog } from "./CustomEventDialog";
+import { CustomDeleteDialog } from "./CustomDeleteDialog";
 
 interface EventData {
   id: string;
@@ -204,6 +207,55 @@ export default function EventManagement() {
     }
   }, [selectedEvent, form]);
 
+  useEffect(() => {
+    // Make sure all input fields are editable
+    if (open) {
+      setTimeout(() => {
+        const formElement = formRef.current;
+        if (formElement) {
+          // Handle input elements
+          const inputElements = formElement.querySelectorAll('input');
+          inputElements.forEach((input) => {
+            if (input instanceof HTMLInputElement) {
+              // Make sure the cursor is text
+              input.style.cursor = 'text';
+              
+              // Make sure the input is not disabled
+              input.disabled = false;
+              
+              // Make sure the input is not readonly
+              input.readOnly = false;
+              
+              // Make sure the input is focusable
+              input.tabIndex = 0;
+            }
+          });
+          
+          // Handle textarea elements
+          const textareaElements = formElement.querySelectorAll('textarea');
+          textareaElements.forEach((textarea) => {
+            if (textarea instanceof HTMLTextAreaElement) {
+              textarea.style.cursor = 'text';
+              textarea.disabled = false;
+              textarea.readOnly = false;
+              textarea.tabIndex = 0;
+            }
+          });
+          
+          // Handle select elements
+          const selectElements = formElement.querySelectorAll('select');
+          selectElements.forEach((select) => {
+            if (select instanceof HTMLSelectElement) {
+              select.style.cursor = 'pointer';
+              select.disabled = false;
+              select.tabIndex = 0;
+            }
+          });
+        }
+      }, 100); // Small delay to ensure the DOM is ready
+    }
+  }, [open]);
+
   const fetchEvents = async () => {
     try {
       const response = await fetch("/api/admin/events");
@@ -324,6 +376,12 @@ export default function EventManagement() {
     }
   };
 
+  // Add this function to handle modal clicks
+  const handleModalClick = (e: React.MouseEvent) => {
+    // Stop the event from propagating to prevent the modal from closing
+    e.stopPropagation();
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -336,137 +394,197 @@ export default function EventManagement() {
             <h1 className="text-3xl font-bold tracking-tight text-[#c22f63]">Event Management</h1>
             <p className="text-gray-500 mt-1">Create, edit and manage events for your organization</p>
           </div>
-          <Dialog 
-            open={open} 
-            onOpenChange={(isOpen: boolean) => {
-              setOpen(isOpen);
-              if (!isOpen) setSelectedEvent(null);
-            }}
-            modal={true}
+          
+          <Button 
+            size="lg" 
+            className="gap-2 bg-[#c22f63] hover:bg-[#b02a57] transition-all shadow-md"
+            onClick={() => setOpen(true)}
           >
-            <DialogTrigger asChild>
-              <Button size="lg" className="gap-2 bg-[#c22f63] hover:bg-[#b02a57] transition-all shadow-md">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-                Add New Event
-              </Button>
-            </DialogTrigger>
-            <DialogContent 
-              className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto z-[100] bg-white border-2 border-[#c22f63]/20 shadow-2xl rounded-xl" 
-              onClick={(e) => e.stopPropagation()}
-              onMouseDown={(e) => e.stopPropagation()}
-              onInteractOutside={(e) => {
-                e.preventDefault();
-              }}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <DialogHeader className="space-y-3 mb-6 sticky top-0 bg-[#c22f63] text-white p-6 rounded-t-lg z-[101]">
-                <DialogTitle className="text-2xl font-bold">
-                  {selectedEvent ? 'Edit Event' : 'Create New Event'}
-                </DialogTitle>
-                <p className="text-white/80">
-                  Fill in the details below to {selectedEvent ? 'update' : 'create'} an event.
-                </p>
-              </DialogHeader>
-              <Form {...form}>
-                <form 
-                  ref={formRef}
-                  onSubmit={form.handleSubmit(onSubmit)} 
-                  className="space-y-6 px-8 pb-8"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  onMouseDown={(e) => {
-                    e.stopPropagation();
-                  }}
-                >
-                  <div className="grid grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="title"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Title</FormLabel>
-                          <FormControl>
-                            <Input 
-                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer" 
-                              {...field} 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="type"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Type</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer" onClick={(e) => e.stopPropagation()}>
-                                <SelectValue placeholder="Select event type" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {Object.values(EventType).map((type) => (
-                                <SelectItem key={type} value={type}>
-                                  {type}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Add New Event
+          </Button>
+          
+          <CustomEventDialog
+            isOpen={open}
+            onClose={() => {
+              setOpen(false);
+              setSelectedEvent(null);
+            }}
+            title={selectedEvent ? 'Edit Event' : 'Create New Event'}
+            description={`Fill in the details below to ${selectedEvent ? 'update' : 'create'} an event.`}
+          >
+            <Form {...form}>
+              <form 
+                ref={formRef}
+                onSubmit={form.handleSubmit(onSubmit)} 
+                className="space-y-6"
+              >
+                <div className="grid grid-cols-2 gap-6">
                   <FormField
                     control={form.control}
-                    name="description"
+                    name="title"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-semibold text-[#c22f63]">Description</FormLabel>
+                        <FormLabel className="text-sm font-semibold text-[#c22f63]">Title</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer" 
+                          <Input 
+                            className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-text" 
                             {...field} 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                            }}
-                            onFocus={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                            }}
-                            onBlur={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                            }}
-                            onMouseDown={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                            }}
-                            onKeyDown={(e) => {
-                              e.stopPropagation();
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-[#c22f63]">Type</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger 
+                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer" 
+                            >
+                              <SelectValue placeholder="Select event type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Object.values(EventType).map((type) => (
+                              <SelectItem key={type} value={type}>
+                                {type}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold text-[#c22f63]">Description</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-text" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="startDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-[#c22f63]">Start Date</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="datetime-local" 
+                            className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-text" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="endDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-[#c22f63]">End Date</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="datetime-local" 
+                            className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-text" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="venue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-[#c22f63]">Venue</FormLabel>
+                        <FormControl>
+                          <Input 
+                            className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-text" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="cpdPoints"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-[#c22f63]">CPD Points</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-text" 
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="capacity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-[#c22f63]">Capacity</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-text" 
+                            value={field.value?.toString() || ''} 
+                            onChange={(e) => {
+                              const value = e.target.value === '' ? null : parseInt(e.target.value);
+                              field.onChange(value);
                             }}
                           />
                         </FormControl>
@@ -474,373 +592,191 @@ export default function EventManagement() {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="registrationDeadline"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-[#c22f63]">Registration Deadline</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="datetime-local" 
+                            className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-text" 
+                            value={field.value || ''} 
+                            onChange={(e) => field.onChange(e.target.value || null)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                  <div className="grid grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="startDate"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Start Date</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="datetime-local" 
-                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer" 
-                              {...field} 
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="endDate"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">End Date</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="datetime-local" 
-                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer" 
-                              {...field} 
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                <div className="grid grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="memberPrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-[#c22f63]">Member Price</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-text" 
+                            value={field.value?.toString() || ''} 
+                            onChange={(e) => {
+                              const value = e.target.value === '' ? null : parseFloat(e.target.value);
+                              field.onChange(value);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="nonMemberPrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-[#c22f63]">Non-Member Price</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-text" 
+                            value={field.value?.toString() || ''} 
+                            onChange={(e) => {
+                              const value = e.target.value === '' ? null : parseFloat(e.target.value);
+                              field.onChange(value);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                  <div className="grid grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="venue"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Venue</FormLabel>
-                          <FormControl>
-                            <Input 
-                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer" 
-                              {...field} 
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="cpdPoints"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">CPD Points</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="number"
-                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer"
-                              {...field} 
-                              onClick={(e) => e.stopPropagation()}
-                              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                              value={field.value}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                <FormField
+                  control={form.control}
+                  name="objectives"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold text-[#c22f63]">Objectives (one per line)</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-text" 
+                          value={field.value.join('\n')} 
+                          onChange={(e) => field.onChange(e.target.value.split('\n').filter(line => line.trim() !== ''))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <div className="grid grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="memberPrice"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Member Price (KES)</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="number"
-                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer"
-                              placeholder="Enter amount"
-                              {...field} 
-                              onClick={(e) => e.stopPropagation()}
-                              onChange={(e) => {
-                                const value = e.target.value === '' ? null : parseFloat(e.target.value);
-                                field.onChange(value);
-                              }}
-                              value={field.value === null ? '' : field.value}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="nonMemberPrice"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Non-Member Price (KES)</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="number"
-                              className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer"
-                              placeholder="Enter amount"
-                              {...field} 
-                              onClick={(e) => e.stopPropagation()}
-                              onChange={(e) => {
-                                const value = e.target.value === '' ? null : parseFloat(e.target.value);
-                                field.onChange(value);
-                              }}
-                              value={field.value === null ? '' : field.value}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                <div className="grid grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="speakers"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-[#c22f63]">Speakers (one per line)</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-text" 
+                            value={field.value.join('\n')} 
+                            onChange={(e) => field.onChange(e.target.value.split('\n').filter(line => line.trim() !== ''))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="moderators"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-[#c22f63]">Moderators (one per line)</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-text" 
+                            value={field.value.join('\n')} 
+                            onChange={(e) => field.onChange(e.target.value.split('\n').filter(line => line.trim() !== ''))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                  <div className="grid grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="objectives"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Objectives</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer"
-                              placeholder="Enter objectives (one per line)"
-                              value={field.value.join('\n')}
-                              onClick={(e) => e.stopPropagation()}
-                              onChange={(e) => {
-                                const value = e.target.value.split('\n').filter(Boolean);
-                                field.onChange(value);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="speakers"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Speakers</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer"
-                              placeholder="Enter speakers (one per line)"
-                              value={field.value.join('\n')}
-                              onClick={(e) => e.stopPropagation()}
-                              onChange={(e) => {
-                                const value = e.target.value.split('\n').filter(Boolean);
-                                field.onChange(value);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                <FormField
+                  control={form.control}
+                  name="materials"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold text-[#c22f63]">Materials</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="file" 
+                          className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer" 
+                          accept={Object.keys(ACCEPTED_FILE_TYPES).join(",")}
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files || []);
+                            field.onChange(files);
+                          }}
+                          multiple
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <div className="grid grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="moderators"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Moderators</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer"
-                              placeholder="Enter moderators (one per line)"
-                              value={field.value.join('\n')}
-                              onClick={(e) => e.stopPropagation()}
-                              onChange={(e) => {
-                                const value = e.target.value.split('\n').filter(Boolean);
-                                field.onChange(value);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="materials"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-semibold text-[#c22f63]">Documents</FormLabel>
-                          <FormControl>
-                            <div className="space-y-4">
-                              <div className="flex items-center gap-4">
-                                <Input
-                                  type="file"
-                                  className="cursor-pointer file:cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#c22f63]/10 file:text-[#c22f63] hover:file:bg-[#c22f63]/20 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm"
-                                  accept={Object.values(ACCEPTED_FILE_TYPES).join(',')}
-                                  multiple
-                                  onClick={(e) => e.stopPropagation()}
-                                  onChange={(e) => {
-                                    const files = Array.from(e.target.files || []);
-                                    const validFiles = files.filter(file => {
-                                      const isValidType = Object.keys(ACCEPTED_FILE_TYPES).includes(file.type);
-                                      const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB limit
-                                      return isValidType && isValidSize;
-                                    });
-
-                                    if (validFiles.length !== files.length) {
-                                      toast({
-                                        title: "Invalid files",
-                                        description: "Some files were skipped. Only documents up to 10MB are allowed.",
-                                        variant: "destructive",
-                                      });
-                                    }
-
-                                    field.onChange(validFiles);
-                                  }}
-                                />
-                              </div>
-                              {field.value && field.value.length > 0 && (
-                                <div className="space-y-2">
-                                  {field.value.map((file, index) => (
-                                    <div
-                                      key={index}
-                                      className="flex items-center justify-between rounded-md border border-[#c22f63]/20 bg-[#c22f63]/5 px-3 py-2 shadow-sm"
-                                    >
-                                      <div className="flex items-center gap-2">
-                                        <svg
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          className="h-5 w-5 text-[#c22f63]"
-                                          viewBox="0 0 24 24"
-                                          fill="none"
-                                          stroke="currentColor"
-                                          strokeWidth="2"
-                                        >
-                                          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                                          <polyline points="14 2 14 8 20 8" />
-                                        </svg>
-                                        <div className="text-sm">
-                                          <p className="font-medium text-[#c22f63]">{file.name}</p>
-                                          <p className="text-[#c22f63]/70">{formatBytes(file.size)}</p>
-                                        </div>
-                                      </div>
-                                      <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-8 w-8 p-0 text-red-500 hover:bg-red-50 hover:text-red-600"
-                                        onClick={() => {
-                                          const newFiles = Array.from(field.value || []).filter(
-                                            (_, i) => i !== index
-                                          );
-                                          field.onChange(newFiles);
-                                        }}
-                                      >
-                                        <svg
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          className="h-4 w-4"
-                                          viewBox="0 0 24 24"
-                                          fill="none"
-                                          stroke="currentColor"
-                                          strokeWidth="2"
-                                        >
-                                          <path d="M18 6L6 18M6 6l12 12" />
-                                        </svg>
-                                      </Button>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                              <p className="text-xs text-[#c22f63]/70">
-                                Accepted file types: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX (Max 10MB per file)
-                              </p>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="flex justify-end space-x-4 pt-6 border-t border-[#c22f63]/10">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => setOpen(false)}
-                      className="border-[#c22f63]/30 text-[#c22f63] hover:bg-[#c22f63]/5"
-                    >
-                      Cancel
-                    </Button>
-                    <Button 
-                      type="submit" 
-                      disabled={isSubmitting}
-                      className="bg-[#c22f63] hover:bg-[#b02a57] transition-all shadow-md"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          {selectedEvent ? 'Updating...' : 'Creating...'}
-                        </>
-                      ) : (
-                        <>{selectedEvent ? 'Update Event' : 'Create Event'}</>
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
+                <div className="flex justify-end space-x-4 pt-6 border-t border-[#c22f63]/10">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setOpen(false)}
+                    className="border-[#c22f63]/30 text-[#c22f63] hover:bg-[#c22f63]/5"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="bg-[#c22f63] hover:bg-[#b02a57] transition-all shadow-md"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        {selectedEvent ? 'Updating...' : 'Creating...'}
+                      </>
+                    ) : (
+                      <>{selectedEvent ? 'Update Event' : 'Create Event'}</>
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </CustomEventDialog>
         </div>
 
-        <Dialog open={deleteDialogOpen} onOpenChange={(isOpen: boolean) => setDeleteDialogOpen(isOpen)} modal={true}>
-          <DialogContent 
-            className="bg-white border-2 border-red-200 shadow-2xl rounded-xl" 
-            onClick={(e) => e.stopPropagation()}
-            onInteractOutside={(e) => {
-              e.preventDefault();
-            }}
-          >
-            <DialogHeader className="space-y-3 mb-6 bg-red-600 text-white p-6 rounded-t-lg">
-              <DialogTitle className="text-2xl font-bold">Delete Event</DialogTitle>
-              <p className="text-red-100">This action cannot be undone.</p>
-            </DialogHeader>
-            <div className="space-y-6 px-6 pb-6" ref={deleteDialogRef} onClick={(e) => e.stopPropagation()}>
-              <p className="text-gray-700">Are you sure you want to delete this event? All associated data will be permanently removed.</p>
-              <div className="flex justify-end gap-3">
-                <Button
-                  variant="outline"
-                  className="border-red-300 text-red-700 hover:bg-red-50"
-                  onClick={() => {
-                    setDeleteDialogOpen(false);
-                    setEventToDelete(null);
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  className="bg-red-600 hover:bg-red-700 transition-all shadow-md"
-                  onClick={confirmDelete}
-                >
-                  Delete Event
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <CustomDeleteDialog
+          isOpen={deleteDialogOpen}
+          onClose={() => {
+            setDeleteDialogOpen(false);
+            setEventToDelete(null);
+          }}
+          onConfirm={confirmDelete}
+          title="Delete Event"
+          description="This action cannot be undone."
+        />
 
         <div className="rounded-lg border border-[#c22f63]/20 bg-white shadow-lg overflow-hidden">
           <Table>
