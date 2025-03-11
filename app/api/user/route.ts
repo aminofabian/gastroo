@@ -28,6 +28,8 @@ export async function GET() {
         namePrefix: true,
         fullName: true,
         designation: true,
+        isOnboarded: true,
+        profileCompleteness: true,
         socialLinks: {
           select: {
             platform: true,
@@ -60,6 +62,6 @@ export async function GET() {
     return NextResponse.json(user);
   } catch (error) {
     console.error("Error fetching user:", error);
-    return new NextResponse("Error fetching user", { status: 500 });
+    return new NextResponse(`Error fetching user: ${error instanceof Error ? error.message : 'Unknown error'}`, { status: 500 });
   }
 } 

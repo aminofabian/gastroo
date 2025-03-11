@@ -6,6 +6,7 @@ import { MdPayments } from "react-icons/md";
 import RecentUpdatesList from "@/components/dashboard/RecentUpdatesList";
 import { auth } from "@/auth";
 import QuickLinkItem from "@/components/dashboard/QuickLinkItem";
+import DashboardClient from "@/components/dashboard/DashboardClient";
 
 const quickLinks = [
   {
@@ -71,37 +72,40 @@ export default async function DashboardPage() {
   const firstName = session?.user?.firstName || 'there';
 
   return (
-    <DashboardLayout>
-      {/* Welcome Section */}
-      <div className="relative overflow-hidden mb-8 bg-gradient-to-r from-[#c22f61] to-[#004488]">
-        <div className="absolute inset-0 bg-grid-white/10" />
-        <div className="relative p-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Welcome Back, {firstName}</h1>
-          <p className="text-white/80 mb-4">Stay updated with the latest in gastroenterology</p>
+    <>
+      <DashboardClient />
+      <DashboardLayout>
+        {/* Welcome Section */}
+        <div className="relative overflow-hidden mb-8 bg-gradient-to-r from-[#c22f61] to-[#004488]">
+          <div className="absolute inset-0 bg-grid-white/10" />
+          <div className="relative p-8">
+            <h1 className="text-3xl font-bold text-white mb-2">Welcome Back, {firstName}</h1>
+            <p className="text-white/80 mb-4">Stay updated with the latest in gastroenterology</p>
+          </div>
         </div>
-      </div>
 
-      {/* Quick Links Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-        {quickLinks.map((link, index) => (
-          <QuickLinkItem 
-            key={link.title} 
-            link={{
-              title: link.title,
-              description: link.description,
-              href: link.href,
-              gradient: link.gradient
-            }}
-            icon={link.icon}
-            index={index} 
-          />
-        ))}
-      </div>
+        {/* Quick Links Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+          {quickLinks.map((link, index) => (
+            <QuickLinkItem 
+              key={link.title} 
+              link={{
+                title: link.title,
+                description: link.description,
+                href: link.href,
+                gradient: link.gradient
+              }}
+              icon={link.icon}
+              index={index} 
+            />
+          ))}
+        </div>
 
-      {/* Recent Updates with Suspense */}
-      <Suspense fallback={<div className="bg-white p-6 shadow-lg animate-pulse h-64" />}>
-        <RecentUpdatesList />
-      </Suspense>
-    </DashboardLayout>
+        {/* Recent Updates with Suspense */}
+        <Suspense fallback={<div className="bg-white p-6 shadow-lg animate-pulse h-64" />}>
+          <RecentUpdatesList />
+        </Suspense>
+      </DashboardLayout>
+    </>
   );
 } 

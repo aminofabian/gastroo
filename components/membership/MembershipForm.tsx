@@ -133,22 +133,42 @@ export default function MembershipForm() {
 
   const onSubmit = async (values: z.infer<typeof membershipSchema>) => {
     setIsSubmitting(true);
+    setError(null);
+    
     try {
       const amount = values.membershipType === "new" ? 6500 : 5000;
       
       // First, update the user's onboarding status
-      const onboardingResponse = await fetch("/api/user/onboarding", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...values,
+      try {
+        // Create a copy of values without the email field
+        const { email, ...dataWithoutEmail } = values;
+        
+        // Prepare onboarding data without email
+        const onboardingData = {
+          ...dataWithoutEmail,
           isOnboarded: true,
+          profileCompleteness: 100, // Set profile completeness to 100%
           membershipType: values.membershipType,
-        }),
-      });
+        };
+        
+        const onboardingResponse = await fetch("/api/user/onboarding", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(onboardingData),
+        });
 
-      if (!onboardingResponse.ok) {
-        throw new Error("Failed to update onboarding status");
+        if (!onboardingResponse.ok) {
+          const errorData = await onboardingResponse.text();
+          console.error("Onboarding error:", errorData);
+          throw new Error(`Failed to update onboarding status: ${errorData}`);
+        }
+        
+        // Log success
+        console.log("Onboarding status updated successfully");
+      } catch (onboardingError: any) {
+        console.error("Error updating onboarding status:", onboardingError);
+        toast.error(`Onboarding error: ${onboardingError.message}`);
+        // Continue with payment even if onboarding fails
       }
 
       // Initialize PesaPal payment
@@ -174,6 +194,9 @@ export default function MembershipForm() {
         orderTrackingId: paymentResponse.orderTrackingId,
         merchantReference: paymentResponse.merchantReference
       });
+
+      // Refresh user data to update UI
+      router.refresh();
 
     } catch (error) {
       console.error("Error:", error);
@@ -249,9 +272,47 @@ export default function MembershipForm() {
       setError('Please complete payment before submitting application');
       return;
     }
-
+    
     setIsSubmitting(true);
-    // ... rest of your form submission logic
+    setError(null);
+    
+    try {
+      // Get form values
+      const formValues = form.getValues();
+      
+      // Create a copy of form values without the email field
+      const { email, ...dataWithoutEmail } = formValues;
+      
+      // Prepare onboarding data without email
+      const onboardingData = {
+        ...dataWithoutEmail,
+        isOnboarded: true,
+        profileCompleteness: 100, // Set profile completeness to 100%
+        membershipType: formValues.membershipType,
+      };
+      
+      // Update user profile with membership details and mark as onboarded
+      const response = await fetch("/api/user/onboarding", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(onboardingData),
+      });
+      
+      const responseText = await response.text();
+      
+      if (!response.ok) {
+        console.error("Error response:", responseText);
+        throw new Error(`Failed to update profile: ${responseText}`);
+      }
+      
+      toast.success("Membership application submitted successfully!");
+      router.push('/dashboard');
+    } catch (error: any) {
+      console.error("Submit error:", error);
+      setError(error.message || 'Failed to submit application');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

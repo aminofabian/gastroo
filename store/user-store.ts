@@ -15,6 +15,8 @@ interface User {
   namePrefix: string | null;
   fullName: string | null;
   designation: string | null;
+  isOnboarded: boolean;
+  profileCompleteness: number;
   socialLinks: Array<{ platform: string; url: string; }>;
   education: Array<{
     institution: string;
@@ -33,29 +35,48 @@ interface User {
 interface UserStore {
   user: User | null;
   notifications: any[];
+  isLoading: boolean;
+  error: string | null;
   setUser: (user: User | null) => void;
   fetchUserData: () => Promise<void>;
+  clearError: () => void;
 }
 
 export const useUserStore = create<UserStore>((set) => ({
   user: null,
   notifications: [],
+  isLoading: false,
+  error: null,
   setUser: (user) => set({ user }),
+  clearError: () => set({ error: null }),
   fetchUserData: async () => {
+    set({ isLoading: true, error: null });
+    
     try {
       const response = await fetch("/api/user");
-      if (!response.ok) throw new Error("Failed to fetch user data");
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch user data: ${errorText}`);
+      }
+      
       const userData = await response.json();
-      // Initialize arrays if they don't exist
+      
+      // Initialize arrays if they don't exist and set default values for new fields
       const user: User = {
         ...userData,
+        isOnboarded: userData.isOnboarded ?? false,
+        profileCompleteness: userData.profileCompleteness ?? 0,
         socialLinks: userData.socialLinks || [],
         education: userData.education || [],
         achievements: userData.achievements || []
       };
-      set({ user });
-    } catch (error) {
+      
+      set({ user, isLoading: false });
+    } catch (error: any) {
       console.error("Error fetching user data:", error);
+      set({ error: error.message, isLoading: false });
+      throw error; // Re-throw to allow components to handle the error
     }
   },
 })); 

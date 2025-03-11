@@ -25,6 +25,7 @@ export interface User {
   isProfilePublic?: boolean;
   hasActiveSubscription?: boolean;
   subscriptionEndDate?: Date;
+  isOnboarded?: boolean;
   socialLinks?: Array<{
     platform: string;
     url: string;
