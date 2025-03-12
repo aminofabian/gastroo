@@ -53,11 +53,16 @@ const Footer = () => {
           >
             <h3 className="text-base font-bold mb-6">Resources</h3>
             <ul className="space-y-3 text-base text-white/90">
-              {["Publications", "Meetings", "Training", "Research"].map((link) => (
-                <motion.li key={link} whileHover={{ x: 2 }}>
-                  <Link href="#" className="hover:text-white flex items-center gap-2">
+              {[
+                { name: "Publications", href: "#" },
+                { name: "Meetings", href: "#" },
+                { name: "Training", href: "#" },
+                { name: "Research", href: "/research" }
+              ].map((link) => (
+                <motion.li key={link.name} whileHover={{ x: 2 }}>
+                  <Link href={link.href} className="hover:text-white flex items-center gap-2">
                     <FaChevronRight className="text-xs" />
-                    {link}
+                    {link.name}
                   </Link>
                 </motion.li>
               ))}
@@ -89,7 +94,18 @@ const Footer = () => {
 
         {/* Copyright */}
         <div className="mt-12 pt-6 border-t border-white/10 text-center text-sm text-white/70">
-          © {new Date().getFullYear()} Gastroenterology Society of Kenya. All Rights Reserved.
+          <div className="mb-2">
+            © {new Date().getFullYear()} Gastroenterology Society of Kenya. All Rights Reserved.
+          </div>
+          <div className="flex justify-center space-x-4">
+            <Link href="/privacy-policy" className="hover:text-white transition-colors duration-300">
+              Privacy Policy
+            </Link>
+            <span>|</span>
+            <Link href="#" className="hover:text-white transition-colors duration-300">
+              Terms of Service
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
