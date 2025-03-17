@@ -23,27 +23,27 @@ const quickLinks = [
     gradient: "from-[#083c74] to-[#083c74]",
     icon: <FaStethoscope />
   },
-  {
-    title: "Research Papers",
-    description: "Latest publications",
-    href: "/dashboard/research",
-    gradient: "from-[#083c74] to-[#083c74]",
-    icon: <FaFileAlt />
-  },
-  {
-    title: "Learning Hub",
-    description: "Educational content",
-    href: "/dashboard/learning",
-    gradient: "from-[#083c74] to-[#083c74]",
-    icon: <FaGraduationCap />
-  },
-  {
-    title: "Certificates",
-    description: "View your certificates",
-    href: "/dashboard/certificates",
-    gradient: "from-[#083c74] to-[#083c74]",
-    icon: <FaCertificate />
-  },
+  // {
+  //   title: "Research Papers",
+  //   description: "Latest publications",
+  //   href: "/dashboard/research",
+  //   gradient: "from-[#083c74] to-[#083c74]",
+  //   icon: <FaFileAlt />
+  // },
+  // {
+  //   title: "Learning Hub",
+  //   description: "Educational content",
+  //   href: "/dashboard/learning",
+  //   gradient: "from-[#083c74] to-[#083c74]",
+  //   icon: <FaGraduationCap />
+  // },
+  // {
+  //   title: "Certificates",
+  //   description: "View your certificates",
+  //   href: "/dashboard/certificates",
+  //   gradient: "from-[#083c74] to-[#083c74]",
+  //   icon: <FaCertificate />
+  // },
   {
     title: "Payments",
     description: "Manage your payments",
@@ -51,13 +51,13 @@ const quickLinks = [
     gradient: "from-[#083c74] to-[#083c74]",
     icon: <MdPayments />
   },
-  {
-    title: "Documents",
-    description: "Access your documents",
-    href: "/dashboard/documents",
-    gradient: "from-[#083c74] to-[#083c74]",
-    icon: <FaFile />
-  },
+  // {
+  //   title: "Documents",
+  //   description: "Access your documents",
+  //   href: "/dashboard/documents",
+  //   gradient: "from-[#083c74] to-[#083c74]",
+  //   icon: <FaFile />
+  // },
   {
     title: "Profile",
     description: "Update your profile",
