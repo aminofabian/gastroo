@@ -35,9 +35,9 @@ const menuGroups = [
   {
     title: "Professional",
     items: [
-      { icon: FaCalendarAlt, label: "CME Events", href: "/dashboard/events" },
-      { icon: FaStethoscope, label: "Clinical Updates", href: "/dashboard/updates" },
-      { icon: FaMicroscope, label: "Research Hub", href: "/dashboard/research" },
+      { icon: FaCalendarAlt, label: "CME Events", href: "/events" },
+      { icon: FaStethoscope, label: "Clinical Updates", href: "/updates" },
+      { icon: FaMicroscope, label: "Research Hub", href: "/research" },
       { icon: FaGraduationCap, label: "Resources", href: "/dashboard/resources" },
     ]
   },
