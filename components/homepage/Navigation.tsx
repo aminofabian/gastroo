@@ -425,8 +425,8 @@ const Navigation = () => {
       title: 'Events',
       link: '/events',
       children: [
-        { title: 'Upcoming Conferences', link: '/conferences' },
-        { title: 'Workshops', link: '/workshops' }
+        { title: 'Upcoming Conferences', link: '/events' },
+        { title: 'Workshops', link: '/events' }
       ]
     } as StandardNavItem,
     { title: 'News', link: '/news' } as StandardNavItem,
