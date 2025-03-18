@@ -59,10 +59,12 @@ export default function HeroBannerManagement() {
   };
 
   const formatLink = (link: string) => {
-    // Remove any localhost:3000 prefix if present
-    const cleanLink = link.replace(/^https?:\/\/localhost:3000\//, '');
+    if (!link) return '/';
+
+    // Remove any domain prefix (localhost:3000 or actual domain)
+    const cleanLink = link.replace(/^https?:\/\/[^/]+\//, '');
     
-    // If it's already a fully qualified URL, return as is
+    // If it's already a fully qualified URL (after cleaning), return as is
     if (cleanLink.match(/^https?:\/\//)) {
       return cleanLink;
     }
