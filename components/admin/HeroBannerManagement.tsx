@@ -54,8 +54,26 @@ export default function HeroBannerManagement() {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'link' ? value.replace(/^https?:\/\/localhost:3000/, '') : value,
+      [name]: name === 'link' ? formatLink(value) : value,
     }));
+  };
+
+  const formatLink = (link: string) => {
+    // Remove any localhost:3000 prefix if present
+    const cleanLink = link.replace(/^https?:\/\/localhost:3000\//, '');
+    
+    // If it's already a fully qualified URL, return as is
+    if (cleanLink.match(/^https?:\/\//)) {
+      return cleanLink;
+    }
+    
+    // If it looks like a domain name (contains dots and no slashes), add https://
+    if (cleanLink.match(/^[^/]+\.[^/]+/)) {
+      return `https://${cleanLink}`;
+    }
+    
+    // Otherwise treat as internal link
+    return cleanLink.startsWith('/') ? cleanLink : `/${cleanLink}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

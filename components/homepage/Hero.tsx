@@ -386,6 +386,24 @@ const SwipeCarousel = ({ banners }: { banners: Banner[] }) => {
 };
 
 const Images = ({ banners, imgIndex }: { banners: Banner[]; imgIndex: number }) => {
+  const formatLink = (link: string) => {
+    // First remove any localhost:3000 prefix if present
+    const cleanLink = link.replace(/^https?:\/\/localhost:3000\//, '');
+    
+    // If it's already a fully qualified URL, return as is
+    if (cleanLink.match(/^https?:\/\//)) {
+      return cleanLink;
+    }
+    
+    // If it looks like a domain name (contains dots and no slashes), add https://
+    if (cleanLink.match(/^[^/]+\.[^/]+/)) {
+      return `https://${cleanLink}`;
+    }
+    
+    // Otherwise treat as internal link
+    return cleanLink.startsWith('/') ? cleanLink : `/${cleanLink}`;
+  };
+
   return (
     <>
       {banners.map((banner, index) => (
@@ -406,8 +424,10 @@ const Images = ({ banners, imgIndex }: { banners: Banner[]; imgIndex: number }) 
           <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
             <h3 className="text-2xl font-bold mb-2">{banner.title}</h3>
             <a
-              href={banner.link.replace(/^https?:\/\/localhost:3000/, '')}
+              href={formatLink(banner.link)}
               className="inline-block bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors"
+              target={formatLink(banner.link).includes('://') ? '_blank' : undefined}
+              rel={formatLink(banner.link).includes('://') ? 'noopener noreferrer' : undefined}
             >
               {banner.cta}
             </a>
