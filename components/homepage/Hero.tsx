@@ -406,7 +406,7 @@ const Images = ({ banners, imgIndex }: { banners: Banner[]; imgIndex: number }) 
           <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
             <h3 className="text-2xl font-bold mb-2">{banner.title}</h3>
             <a
-              href={banner.link}
+              href={banner.link.replace(/^https?:\/\/localhost:3000/, '')}
               className="inline-block bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors"
             >
               {banner.cta}

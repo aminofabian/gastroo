@@ -54,7 +54,7 @@ export default function HeroBannerManagement() {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === 'link' ? value.replace(/^https?:\/\/localhost:3000/, '') : value,
     }));
   };
 
