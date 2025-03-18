@@ -412,7 +412,7 @@ const Navigation = () => {
       children: [
         {
           title: 'Resources',
-          link: '/education/resources',
+          link: '/membership',
           children: [
             { title: 'Clinical Guidelines', link: '/guidelines' },
             { title: 'Training Programs', link: '/training' },
@@ -429,9 +429,9 @@ const Navigation = () => {
         { title: 'Workshops', link: '/events' }
       ]
     } as StandardNavItem,
-    { title: 'News', link: '/news' } as StandardNavItem,
-    { title: 'Pricing', link: '/pricing' } as StandardNavItem,
-    { title: 'Payment Details', link: '/payment' } as StandardNavItem,
+    // { title: 'News', link: '/news' } as StandardNavItem,
+    // { title: 'Pricing', link: '/pricing' } as StandardNavItem,
+    // { title: 'Payment Details', link: '/payment' } as StandardNavItem,
     {
       title: 'Membership',
       link: '/membership',
