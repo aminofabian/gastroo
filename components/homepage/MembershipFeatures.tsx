@@ -77,10 +77,8 @@ const MembershipFeatures = () => {
                       <p className="text-white/80 mb-8 text-lg">
                         {feature.description}
                       </p>
-                      <motion.a 
-                        href={feature.link}
-                        className="inline-flex items-center text-white group-hover:text-emerald-200 transition-all duration-300 text-lg font-medium"
-                        whileHover={{ x: 5 }}
+                      <motion.span 
+                        className="inline-flex items-center text-white/50 cursor-not-allowed transition-all duration-300 text-lg font-medium"
                       >
                         Learn More 
                         <motion.span 
@@ -90,7 +88,7 @@ const MembershipFeatures = () => {
                         >
                           →
                         </motion.span>
-                      </motion.a>
+                      </motion.span>
                     </div>
                   </div>
                 </div>
