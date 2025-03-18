@@ -439,14 +439,14 @@ const Navigation = () => {
       image: '/meeting/75B_6035.jpg',
       description: 'Discussion among doctors - Membership: More than 16,000 professionals worldwide call GSK their professional home.',
       items: [
-        { title: 'Join GSK', link: '/membership/join', description: 'Join our diverse mix of professionals.' },
-        { title: 'Renew Membership', link: '/membership/renew', description: 'Continue to receive exclusive benefits and discounts.' },
+        { title: 'Join GSK', link: '/membership', description: 'Join our diverse mix of professionals.' },
+        { title: 'Renew Membership', link: '/membership', description: 'Continue to receive exclusive benefits and discounts.' },
         { title: 'Benefits', link: '/membership/benefits', description: 'Unrivaled by any other GI organization.' },
-        { title: 'Membership Directory', link: '/membership/directory', description: 'Contact other GSK members.' },
-        { title: 'Recognition Awards', link: '/membership/awards', description: 'We honor our esteemed members.' },
-        { title: 'Initiatives & Programs', link: '/membership/initiatives', description: 'Advancing the science and practice of GI.' },
-        { title: 'Get Involved with GSK', link: '/membership/get-involved', description: 'Help us achieve a world free from digestive diseases.' },
-        { title: 'Advocacy & GSK PAC', link: '/membership/advocacy', description: 'Advancing public policies that support gastroenterology.' }
+        { title: 'Membership Directory', link: '/membership', description: 'Contact other GSK members.' },
+        { title: 'Recognition Awards', link: '/membership', description: 'We honor our esteemed members.' },
+        { title: 'Initiatives & Programs', link: '/membership', description: 'Advancing the science and practice of GI.' },
+        { title: 'Get Involved with GSK', link: '/membership', description: 'Help us achieve a world free from digestive diseases.' },
+        { title: 'Advocacy & GSK PAC', link: '/membership', description: 'Advancing public policies that support gastroenterology.' }
       ]
     } as FeaturedNavItem
   ];
