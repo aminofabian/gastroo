@@ -2,6 +2,7 @@
 export const ALLOWED_ADMIN_EMAILS = [
   "fabianngaira@gmail.com",
   "aminofabian@gmail.com",
+  "fabianngaira@gmail.com",
   // Add more admin emails here
 ];
 
