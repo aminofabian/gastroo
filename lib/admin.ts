@@ -3,10 +3,8 @@ export const ALLOWED_ADMIN_EMAILS = [
   "fabianngaira@gmail.com",
   "aminofab@gmail.com",
   "noorwex@gmail.com",
-  "secretatygsk@gmail.com",
-
-  // Add more admin emails here
-];
+  "secretatygsk@gmail.com'
+  ];
 
 export const isAllowedAdmin = (email: string | null | undefined): boolean => {
   if (!email) return false;
