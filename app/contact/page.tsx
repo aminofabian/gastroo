@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { sendFormDataEmail } from "@/lib/mail";
+import { toast } from "sonner";
 
 const supportCategories = [
   { 
@@ -77,7 +79,7 @@ export default function HelpDeskPage() {
     category: '',
     subject: '',
     message: '',
-    priority: 'normal',
+    priority: 'medium',
     ticketType: 'support'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -87,13 +89,29 @@ export default function HelpDeskPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    
     try {
-      // TODO: Implement ticket submission logic
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Send the form data via email
+      await sendFormDataEmail(formData, "aminofab@gmail.com");
+      
+      // Reset form and show success message
+      setFormData({
+        name: '',
+        email: '',
+        category: '',
+        subject: '',
+        message: '',
+        priority: 'medium',
+        ticketType: 'support'
+      });
+      setSelectedCategory('');
       setSubmitStatus('success');
       setShowFaqs(true);
+      toast.success('Your message has been sent successfully!');
     } catch (error) {
+      console.error('Error sending form:', error);
       setSubmitStatus('error');
+      toast.error('Failed to send message. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

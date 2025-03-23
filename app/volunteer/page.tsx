@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { toast } from "sonner";
 
 const volunteerRoles = [
   {
@@ -92,12 +93,40 @@ export default function VolunteerPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    
     try {
-      // TODO: Implement form submission logic
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Send the form data via our API route
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ formData }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send email');
+      }
+      
+      // Reset form and show success message
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        profession: '',
+        specialization: '',
+        role: '',
+        experience: '',
+        motivation: '',
+        availability: 'part-time'
+      });
+      
       setSubmitStatus('success');
+      toast.success('Your volunteer application has been submitted successfully!');
     } catch (error) {
+      console.error('Error submitting form:', error);
       setSubmitStatus('error');
+      toast.error('Failed to submit application. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -346,7 +375,7 @@ export default function VolunteerPage() {
               {submitStatus === 'success' && (
                 <div className="bg-green-50 border border-green-200 rounded-md p-4">
                   <p className="text-green-600 text-center">
-                    Thank you for your interest! We will review your application and get back to you soon.
+                    Thank you for your submitting your application. We will review your application and get back to you soon.
                   </p>
                 </div>
               )}

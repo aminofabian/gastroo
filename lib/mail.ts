@@ -75,4 +75,30 @@ export const sendVerificationEmail = async (
   });
 };
 
+export const sendFormDataEmail = async (
+  formData: any,
+  recipientEmail: string = "secretarygsk@gmail.com"
+) => {
+  const formattedData = Object.entries(formData)
+    .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
+    .join('<br>');
+
+  await resend.emails.send({
+    from: "hello@gastro.or.ke",
+    to: recipientEmail,
+    subject: "New Form Submission - GSK",
+    html: emailTemplate(
+      "New Form Submission",
+      `<div style="font-family: Arial, sans-serif;">
+        <p>A new form submission has been received:</p>
+        <div style="margin: 20px 0; padding: 15px; background-color: #f5f5f5; border-radius: 5px;">
+          ${formattedData}
+        </div>
+      </div>`,
+      "#",
+      "View Details"
+    )
+  });
+};
+
 
