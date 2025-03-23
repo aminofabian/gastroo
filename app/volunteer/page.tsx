@@ -346,7 +346,7 @@ export default function VolunteerPage() {
               {submitStatus === 'success' && (
                 <div className="bg-green-50 border border-green-200 rounded-md p-4">
                   <p className="text-green-600 text-center">
-                    Thank you for your interest! We&alsquo;ll review your application and get back to you soon.
+                    Thank you for your interest! We will review your application and get back to you soon.
                   </p>
                 </div>
               )}
