@@ -1,46 +1,43 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-
-// Validate environment variables
-const requiredEnvVars = [
-  'AWS_REGION',
-  'AWS_ACCESS_KEY_ID',
-  'AWS_SECRET_ACCESS_KEY',
-  'AWS_S3_BUCKET_NAME'
-] as const;
-
-for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
-    throw new Error(`Missing required environment variable: ${envVar}`);
-  }
-}
-
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION!,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
-
-export async function uploadToS3(file: File): Promise<string> {
+export async function uploadToS3(
+  file: File,
+  fileName: string,
+  contentType: string
+): Promise<string> {
   try {
-    const fileBuffer = await file.arrayBuffer();
-    const bytes = new Uint8Array(fileBuffer);
-    
-    const key = `banners/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
-    
-    await s3Client.send(
-      new PutObjectCommand({
-        Bucket: process.env.AWS_S3_BUCKET_NAME,
-        Key: key,
-        Body: bytes,
-        ContentType: file.type
-      })
-    );
+    // Get pre-signed URL from our API
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        fileName,
+        fileType: contentType,
+      }),
+    });
 
-    return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    if (!response.ok) {
+      throw new Error('Failed to get upload URL');
+    }
+
+    const { uploadUrl, fileUrl } = await response.json();
+
+    // Upload file directly to S3 using the pre-signed URL
+    const uploadResponse = await fetch(uploadUrl, {
+      method: 'PUT',
+      body: file,
+      headers: {
+        'Content-Type': contentType,
+      },
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error('Failed to upload file');
+    }
+
+    return fileUrl;
   } catch (error) {
-    console.error("S3 upload error:", error);
-    throw new Error("Failed to upload file to S3");
+    console.error("Error uploading to S3:", error);
+    throw new Error("Failed to upload file");
   }
 } 

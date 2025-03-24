@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { auth } from "@/auth";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION!,
@@ -10,48 +10,33 @@ const s3Client = new S3Client({
   },
 });
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
+    const { fileName, fileType } = await request.json();
 
-    const formData = await req.formData();
-    const file = formData.get("file") as File;
-    
-    if (!file) {
-      return new NextResponse("No file provided", { status: 400 });
-    }
+    // Create unique file name
+    const uniqueFileName = `${Date.now()}-${fileName}`;
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      return new NextResponse("File must be an image", { status: 400 });
-    }
+    // Create the command
+    const command = new PutObjectCommand({
+      Bucket: process.env.AWS_S3_BUCKET_NAME!,
+      Key: uniqueFileName,
+      ContentType: fileType,
+    });
 
-    // Validate file size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      return new NextResponse("File size must be less than 5MB", { status: 400 });
-    }
+    // Generate pre-signed URL
+    const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const fileExtension = file.type.split('/')[1];
-    const fileName = `profiles/${session.user.email}/profile-${Date.now()}.${fileExtension}`;
-
-    await s3Client.send(
-      new PutObjectCommand({
-        Bucket: process.env.AWS_S3_BUCKET_NAME!,
-        Key: fileName,
-        Body: buffer,
-        ContentType: file.type,
-      })
-    );
-
-    const imageUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
-
-    return NextResponse.json({ url: imageUrl });
+    // Return the pre-signed URL and the final URL where the file will be accessible
+    return NextResponse.json({
+      uploadUrl: presignedUrl,
+      fileUrl: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${uniqueFileName}`,
+    });
   } catch (error) {
-    console.error("Error uploading file:", error);
-    return new NextResponse("Error uploading file", { status: 500 });
+    console.error('Error generating pre-signed URL:', error);
+    return NextResponse.json(
+      { error: 'Failed to generate upload URL' },
+      { status: 500 }
+    );
   }
 } 

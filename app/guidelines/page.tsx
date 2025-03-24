@@ -17,46 +17,11 @@ export default function GuidelinesPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="clinical" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="clinical">Clinical Guidelines</TabsTrigger>
+      <Tabs defaultValue="procedural" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="procedural">Procedural Guidelines</TabsTrigger>
           <TabsTrigger value="resources">Additional Resources</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="clinical" className="space-y-6 mt-6">
-          <h2 className="text-2xl font-semibold mb-4">Clinical Practice Guidelines</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <GuidelineCard 
-              title="Gastroesophageal Reflux Disease (GERD)"
-              description="Diagnosis and management of GERD in the Kenyan context"
-              lastUpdated="February 2023"
-              link="#"
-            />
-            
-            <GuidelineCard 
-              title="Inflammatory Bowel Disease"
-              description="Comprehensive approach to Crohn's disease and ulcerative colitis"
-              lastUpdated="January 2023"
-              link="#"
-            />
-            
-            <GuidelineCard 
-              title="Colorectal Cancer Screening"
-              description="Risk assessment and screening protocols for colorectal cancer"
-              lastUpdated="March 2023"
-              link="#"
-            />
-            
-            <GuidelineCard 
-              title="Peptic Ulcer Disease"
-              description="Diagnosis and management of peptic ulcer disease"
-              lastUpdated="December 2022"
-              link="#"
-            />
-          </div>
-        </TabsContent>
         
         <TabsContent value="procedural" className="space-y-6 mt-6">
           <h2 className="text-2xl font-semibold mb-4">Procedural Guidelines</h2>

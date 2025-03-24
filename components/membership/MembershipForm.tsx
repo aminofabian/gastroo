@@ -15,6 +15,7 @@ import { Check, Loader2, AlertCircle } from "lucide-react";
 import { submitPayment } from '@/lib/pesapal';
 import { usePaymentStatus } from '@/lib/hooks/usePaymentStatus';
 import TestPaymentButton from './TestPaymentButton';
+import { uploadToS3 } from "@/lib/s3-upload";
 
 // Form Schema
 const membershipSchema = z.object({
@@ -35,6 +36,11 @@ const membershipSchema = z.object({
   city: z.string().min(2, "City must be at least 2 characters"),
   county: z.string().min(2, "County must be at least 2 characters"),
   postalCode: z.string().optional(),
+  
+  // Document URLs
+  cvUrl: z.string().optional(),
+  licenseUrl: z.string().optional(),
+  otherDocumentsUrls: z.array(z.string()).optional(),
   
   // Add payment information
   membershipType: z.enum(["new", "renewal"], {
@@ -58,6 +64,12 @@ const steps = [
     title: "Professional Details",
     description: "Tell us about your medical practice",
     fields: ["designation", "specialization", "licenseNumber", "hospital"],
+  },
+  {
+    id: "documents",
+    title: "Required Documents",
+    description: "Upload your CV and medical license",
+    fields: ["cvUrl", "licenseUrl", "otherDocumentsUrls"],
   },
   {
     id: "contact",
@@ -87,6 +99,7 @@ export default function MembershipForm() {
   const [error, setError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [hasExistingPayment, setHasExistingPayment] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
 
   const form = useForm<z.infer<typeof membershipSchema>>({
     resolver: zodResolver(membershipSchema),
@@ -105,6 +118,9 @@ export default function MembershipForm() {
       postalCode: "",
       membershipType: "new",
       customAmount: "",
+      cvUrl: "",
+      licenseUrl: "",
+      otherDocumentsUrls: [],
     },
   });
 
@@ -396,6 +412,33 @@ export default function MembershipForm() {
     }
   };
 
+  const handleFileUpload = async (file: File, type: 'cv' | 'license' | 'other') => {
+    try {
+      setUploadingFiles(true);
+      const url = await uploadToS3(file, file.name, file.type);
+      
+      switch (type) {
+        case 'cv':
+          form.setValue('cvUrl', url);
+          break;
+        case 'license':
+          form.setValue('licenseUrl', url);
+          break;
+        case 'other':
+          const currentUrls = form.getValues('otherDocumentsUrls') || [];
+          form.setValue('otherDocumentsUrls', [...currentUrls, url]);
+          break;
+      }
+      
+      toast.success(`${type.toUpperCase()} uploaded successfully`);
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Failed to upload file');
+    } finally {
+      setUploadingFiles(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Progress Indicator */}
@@ -634,6 +677,124 @@ export default function MembershipForm() {
                     <FormControl>
                       <Input {...field} className="h-12" />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {currentFields.includes("cvUrl") && (
+              <FormField
+                control={form.control}
+                name="cvUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CV/Resume</FormLabel>
+                    <FormControl>
+                      <div className="space-y-2">
+                        <Input
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              handleFileUpload(file, 'cv');
+                            }
+                          }}
+                          className="h-12"
+                          disabled={uploadingFiles}
+                        />
+                        {field.value && (
+                          <div className="flex items-center space-x-2 text-sm text-gray-500">
+                            <Check className="w-4 h-4 text-green-500" />
+                            <span>CV uploaded successfully</span>
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Please upload your CV in PDF or Word format
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {currentFields.includes("licenseUrl") && (
+              <FormField
+                control={form.control}
+                name="licenseUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Medical License</FormLabel>
+                    <FormControl>
+                      <div className="space-y-2">
+                        <Input
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              handleFileUpload(file, 'license');
+                            }
+                          }}
+                          className="h-12"
+                          disabled={uploadingFiles}
+                        />
+                        {field.value && (
+                          <div className="flex items-center space-x-2 text-sm text-gray-500">
+                            <Check className="w-4 h-4 text-green-500" />
+                            <span>License uploaded successfully</span>
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Upload a scanned copy of your medical license
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {currentFields.includes("otherDocumentsUrls") && (
+              <FormField
+                control={form.control}
+                name="otherDocumentsUrls"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Additional Documents (Optional)</FormLabel>
+                    <FormControl>
+                      <div className="space-y-2">
+                        <Input
+                          type="file"
+                          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              handleFileUpload(file, 'other');
+                            }
+                          }}
+                          className="h-12"
+                          disabled={uploadingFiles}
+                        />
+                        {field.value && field.value.length > 0 && (
+                          <div className="space-y-2">
+                            {field.value.map((url, index) => (
+                              <div key={index} className="flex items-center space-x-2 text-sm text-gray-500">
+                                <Check className="w-4 h-4 text-green-500" />
+                                <span>Document {index + 1} uploaded successfully</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Upload any additional supporting documents
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
