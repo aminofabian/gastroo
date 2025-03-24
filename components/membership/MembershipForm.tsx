@@ -821,7 +821,7 @@ export default function MembershipForm() {
                       >
                         <div className="flex flex-col items-center">
                           <span className="font-bold">New Membership</span>
-                          <span className="text-sm">KES 6,500/=</span>
+                          <span className="text-sm">KES 10,000/=</span>
                         </div>
                         {paymentStatus.paid && field.value === 'new' && (
                           <div className="absolute inset-0 bg-green-500/90 flex items-center justify-center">
@@ -841,7 +841,7 @@ export default function MembershipForm() {
                       >
                         <div className="flex flex-col items-center">
                           <span className="font-bold">Membership Renewal</span>
-                          <span className="text-sm">KES 5,000/=</span>
+                          <span className="text-sm">KES 20,000/=</span>
                         </div>
                         {paymentStatus.paid && field.value === 'renewal' && (
                           <div className="absolute inset-0 bg-green-500/90 flex items-center justify-center">

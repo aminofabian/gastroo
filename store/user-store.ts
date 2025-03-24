@@ -16,6 +16,7 @@ interface User {
   fullName: string | null;
   designation: string | null;
   isOnboarded: boolean;
+  isMember: boolean;
   profileCompleteness: number;
   socialLinks: Array<{ platform: string; url: string; }>;
   education: Array<{
@@ -66,6 +67,7 @@ export const useUserStore = create<UserStore>((set) => ({
       const user: User = {
         ...userData,
         isOnboarded: userData.isOnboarded ?? false,
+        isMember: userData.isMember ?? false,
         profileCompleteness: userData.profileCompleteness ?? 0,
         socialLinks: userData.socialLinks || [],
         education: userData.education || [],

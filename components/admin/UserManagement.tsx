@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FaEdit, FaTrash, FaCheck, FaTimes } from "react-icons/fa";
+import { FaEdit, FaTrash, FaCheck, FaTimes, FaFileAlt, FaFilePdf, FaFileImage, FaExternalLinkAlt } from "react-icons/fa";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 // Add MembershipStatus enum to match Prisma schema
 enum MembershipStatus {
@@ -12,13 +13,17 @@ enum MembershipStatus {
 }
 
 interface MembershipApplication {
-  status: MembershipStatus;  // Update to use enum
-  submissionDate: Date;
+  id: string;
+  status: string;
+  createdAt: Date | null;
   specialization: string | null;
-  yearsOfExperience: number | null;
   licenseNumber: string | null;
-  education: string | null;
-  workplace: string | null;
+  hospital: string | null;
+  address: string | null;
+  city: string | null;
+  county: string | null;
+  postalCode: string | null;
+  userId: string;
 }
 
 interface User {
@@ -39,7 +44,9 @@ interface User {
   isProfilePublic: boolean;
   hasActiveSubscription: boolean;
   subscriptionEndDate: Date | null;
+  phone: string | null;
   membershipApplication: MembershipApplication | null;
+  isMember: boolean;
 }
 
 export default function UserManagement() {
@@ -47,24 +54,27 @@ export default function UserManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [editingApplication, setEditingApplication] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [showUserModal, setShowUserModal] = useState(false);
+
+  // Define fetchUsers as a function that can be called from anywhere in the component
+  const fetchUsers = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/users");
+      if (!response.ok) {
+        throw new Error("Failed to fetch users");
+      }
+      const data = await response.json();
+      setUsers(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch("/api/users");
-        if (!response.ok) {
-          throw new Error("Failed to fetch users");
-        }
-        const data = await response.json();
-        setUsers(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchUsers();
   }, []);
 
@@ -76,9 +86,12 @@ export default function UserManagement() {
       false
   );
 
-  const handleApplicationUpdate = async (userId: string, status: MembershipStatus) => {
+  const handleApplicationUpdate = async (userId: string, status: string) => {
     try {
-      const response = await fetch(`/api/users/${userId}/membership`, {
+      // Show loading toast
+      toast.loading('Updating application status...');
+      
+      const response = await fetch(`/api/users/${userId}/approval`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -87,26 +100,66 @@ export default function UserManagement() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update application status');
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || 'Failed to update application status');
       }
 
-      setUsers(users.map(user => {
-        if (user.id === userId && user.membershipApplication) {
-          return {
-            ...user,
-            membershipApplication: {
-              ...user.membershipApplication,
-              status,
-            },
-          };
-        }
-        return user;
-      }));
+      // Dismiss loading toast
+      toast.dismiss();
+      
+      // Update the local state immediately to reflect changes
+      setUsers(prevUsers => 
+        prevUsers.map(user => {
+          if (user.id === userId) {
+            // Update the user object
+            return {
+              ...user,
+              isMember: status === 'APPROVED',
+              membershipApplication: user.membershipApplication ? {
+                ...user.membershipApplication,
+                status: status
+              } : null
+            };
+          }
+          return user;
+        })
+      );
 
-      setEditingApplication(null);
+      // Also fetch all users again to ensure data is up to date
+      fetchUsers();
+      
+      // Show success message
+      toast.success(`User ${status === 'APPROVED' ? 'approved' : status === 'REJECTED' ? 'rejected' : 'set to pending'} successfully`);
+      
+      // If a user modal is open, update the selected user
+      if (selectedUser && selectedUser.id === userId) {
+        setSelectedUser(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            isMember: status === 'APPROVED',
+            membershipApplication: prev.membershipApplication ? {
+              ...prev.membershipApplication,
+              status: status
+            } : null
+          };
+        });
+      }
     } catch (err) {
+      // Dismiss loading toast
+      toast.dismiss();
+      
+      // Show error toast
+      toast.error(err instanceof Error ? err.message : 'Failed to update application');
+      
+      console.error('Error updating application:', err);
       setError(err instanceof Error ? err.message : 'Failed to update application');
     }
+  };
+
+  const openUserModal = (user: User) => {
+    setSelectedUser(user);
+    setShowUserModal(true);
   };
 
   if (error) {
@@ -167,7 +220,8 @@ export default function UserManagement() {
                 <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Role</th>
                 <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
                 <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Last Active</th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Membership</th>
+                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Member Status</th>
+                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Application Status</th>
                 <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Actions</th>
               </tr>
             </thead>
@@ -204,52 +258,61 @@ export default function UserManagement() {
                     {user.lastActive ? format(new Date(user.lastActive), 'MMM d, yyyy') : 'Never'}
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm">
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 text-xs font-semibold leading-5 
+                      ${user.isMember 
+                        ? "bg-green-100 text-green-800" 
+                        : "bg-gray-100 text-gray-800"}`}>
+                      {user.isMember ? <FaCheck className="text-xs" /> : <FaTimes className="text-xs" />}
+                      {user.isMember ? "Member" : "Not a Member"}
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-sm">
                     {user.membershipApplication ? (
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={user.membershipApplication.status}
-                          onChange={(e) => handleApplicationUpdate(user.id, e.target.value as MembershipStatus)}
-                          className={`text-xs font-semibold px-2 py-1 rounded-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                            user.membershipApplication.status === MembershipStatus.APPROVED
-                              ? 'bg-green-100 text-green-800 border-green-200 focus:ring-green-500'
-                              : user.membershipApplication.status === MembershipStatus.REJECTED
-                              ? 'bg-red-100 text-red-800 border-red-200 focus:ring-red-500'
-                              : 'bg-yellow-100 text-yellow-800 border-yellow-200 focus:ring-yellow-500'
-                          }`}
-                        >
-                          <option 
-                            value={MembershipStatus.PENDING}
-                            className="bg-white text-gray-900 hover:bg-gray-100"
+                      <div className="flex flex-col gap-1">
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2 text-xs font-semibold leading-5 
+                          ${user.membershipApplication.status === 'APPROVED' 
+                            ? "bg-green-100 text-green-800" 
+                            : user.membershipApplication.status === 'REJECTED'
+                            ? "bg-red-100 text-red-800"
+                            : "bg-yellow-100 text-yellow-800"}`}>
+                          {user.membershipApplication.status === 'APPROVED' && <FaCheck className="text-xs" />}
+                          {user.membershipApplication.status === 'REJECTED' && <FaTimes className="text-xs" />}
+                          {user.membershipApplication.status === 'PENDING' && <span className="inline-block w-2 h-2 rounded-full bg-yellow-400 mr-1"></span>}
+                          {user.membershipApplication.status || "UNKNOWN"}
+                        </span>
+                        <div className="flex items-center">
+                          <span className="text-xs text-gray-500">
+                            {user.membershipApplication.createdAt 
+                              ? (() => {
+                                  try {
+                                    return `Applied: ${format(new Date(user.membershipApplication.createdAt), 'MMM d, yyyy')}`;
+                                  } catch (error) {
+                                    return 'Recently applied';
+                                  }
+                                })()
+                              : 'Recently applied'}
+                          </span>
+                          <button
+                            onClick={() => openUserModal(user)}
+                            className="ml-2 text-blue-600 hover:text-blue-800 text-xs underline"
                           >
-                            PENDING
-                          </option>
-                          <option 
-                            value={MembershipStatus.APPROVED}
-                            className="bg-white text-gray-900 hover:bg-gray-100"
-                          >
-                            APPROVED
-                          </option>
-                          <option 
-                            value={MembershipStatus.REJECTED}
-                            className="bg-white text-gray-900 hover:bg-gray-100"
-                          >
-                            REJECTED
-                          </option>
-                        </select>
-                        <button
-                          onClick={() => setEditingApplication(user.id)}
-                          className="text-blue-600 hover:text-blue-800 text-xs underline"
-                        >
-                          Details
-                        </button>
+                            Details
+                          </button>
+                        </div>
                       </div>
                     ) : (
-                      <span className="text-gray-400 text-xs">No application</span>
+                      <span className="inline-flex items-center gap-1 rounded-full px-2 text-xs font-semibold leading-5 bg-gray-100 text-gray-800">
+                        <FaTimes className="text-xs" />
+                        No Application
+                      </span>
                     )}
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm">
                     <div className="flex items-center gap-2">
-                      <button className="text-emerald-600 hover:text-emerald-800 transition-colors">
+                      <button 
+                        className="text-emerald-600 hover:text-emerald-800 transition-colors"
+                        onClick={() => openUserModal(user)}
+                      >
                         <FaEdit className="w-4 h-4" />
                       </button>
                       <button className="text-red-600 hover:text-red-800 transition-colors">
@@ -264,48 +327,217 @@ export default function UserManagement() {
         </div>
       )}
 
-      {/* Application Details Modal */}
-      {editingApplication && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg max-w-2xl w-full mx-4">
-            <h3 className="text-xl font-bold mb-4">Membership Application Details</h3>
-            {users.find(u => u.id === editingApplication)?.membershipApplication && (
-              <div className="space-y-4">
+      {/* User Details Modal */}
+      {showUserModal && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold">
+                User Details: {selectedUser.fullName || `${selectedUser.firstName || ''} ${selectedUser.lastName || ''}`}
+              </h3>
+              <button 
+                onClick={() => {
+                  setShowUserModal(false);
+                  setSelectedUser(null);
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Personal Information */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-semibold text-lg mb-3">Personal Information</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Specialization</label>
-                    <p className="mt-1">{users.find(u => u.id === editingApplication)?.membershipApplication?.specialization}</p>
+                    <label className="block text-sm font-medium text-gray-700">First Name</label>
+                    <p className="mt-1">{selectedUser.firstName || 'N/A'}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Years of Experience</label>
-                    <p className="mt-1">{users.find(u => u.id === editingApplication)?.membershipApplication?.yearsOfExperience}</p>
+                    <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                    <p className="mt-1">{selectedUser.lastName || 'N/A'}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">License Number</label>
-                    <p className="mt-1">{users.find(u => u.id === editingApplication)?.membershipApplication?.licenseNumber}</p>
+                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                    <p className="mt-1">{selectedUser.email || 'N/A'}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Education</label>
-                    <p className="mt-1">{users.find(u => u.id === editingApplication)?.membershipApplication?.education}</p>
+                    <label className="block text-sm font-medium text-gray-700">Phone</label>
+                    <p className="mt-1">{selectedUser.phone || 'N/A'}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Workplace</label>
-                    <p className="mt-1">{users.find(u => u.id === editingApplication)?.membershipApplication?.workplace}</p>
+                    <label className="block text-sm font-medium text-gray-700">Role</label>
+                    <p className="mt-1">{selectedUser.role || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Member Status</label>
+                    <p className="mt-1">{selectedUser.isMember ? 'Member' : 'Not a Member'}</p>
                   </div>
                 </div>
               </div>
-            )}
+
+              {/* Professional Information */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-semibold text-lg mb-3">Professional Information</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Title</label>
+                    <p className="mt-1">{selectedUser.title || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Specialization</label>
+                    <p className="mt-1">{selectedUser.specialization || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Hospital</label>
+                    <p className="mt-1">{selectedUser.hospital || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Designation</label>
+                    <p className="mt-1">{selectedUser.designation || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Membership Application */}
+              {selectedUser.membershipApplication && (
+                <div className="bg-gray-50 p-4 rounded-lg md:col-span-2">
+                  <h4 className="font-semibold text-lg mb-3">Membership Application</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Status</label>
+                      <div className="mt-1 flex space-x-2">
+                        <button
+                          onClick={() => handleApplicationUpdate(selectedUser.id, 'APPROVED')}
+                          className={`px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                            selectedUser.membershipApplication.status === 'APPROVED'
+                              ? 'bg-green-600 text-white ring-2 ring-green-500'
+                              : 'bg-green-100 text-green-800 hover:bg-green-200'
+                          }`}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => handleApplicationUpdate(selectedUser.id, 'REJECTED')}
+                          className={`px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                            selectedUser.membershipApplication.status === 'REJECTED'
+                              ? 'bg-red-600 text-white ring-2 ring-red-500'
+                              : 'bg-red-100 text-red-800 hover:bg-red-200'
+                          }`}
+                        >
+                          Reject
+                        </button>
+                        <button
+                          onClick={() => handleApplicationUpdate(selectedUser.id, 'PENDING')}
+                          className={`px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                            selectedUser.membershipApplication.status === 'PENDING'
+                              ? 'bg-yellow-600 text-white ring-2 ring-yellow-500'
+                              : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                          }`}
+                        >
+                          Pending
+                        </button>
+                      </div>
+                      <p className="mt-2 text-sm text-gray-500">
+                        Current status: <span className={`font-medium ${
+                          selectedUser.membershipApplication.status === 'APPROVED'
+                            ? 'text-green-600'
+                            : selectedUser.membershipApplication.status === 'REJECTED'
+                            ? 'text-red-600'
+                            : 'text-yellow-600'
+                        }`}>{selectedUser.membershipApplication.status}</span>
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Submission Date</label>
+                      <p className="mt-1">
+                        {selectedUser.membershipApplication.createdAt 
+                          ? format(new Date(selectedUser.membershipApplication.createdAt), 'MMM d, yyyy') 
+                          : 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">License Number</label>
+                      <p className="mt-1">{selectedUser.membershipApplication.licenseNumber || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Address</label>
+                      <p className="mt-1">{selectedUser.membershipApplication.address || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">City</label>
+                      <p className="mt-1">{selectedUser.membershipApplication.city || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">County</label>
+                      <p className="mt-1">{selectedUser.membershipApplication.county || 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Documents Section - Placeholder for now */}
+              <div className="bg-gray-50 p-4 rounded-lg md:col-span-2">
+                <h4 className="font-semibold text-lg mb-3">Uploaded Documents</h4>
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="border border-gray-200 rounded-md p-3 flex items-center justify-between">
+                    <div className="flex items-center">
+                      <FaFilePdf className="text-red-500 mr-2 text-xl" />
+                      <span>CV Document</span>
+                    </div>
+                    <a href="#" className="text-blue-600 hover:text-blue-800 flex items-center">
+                      <span className="mr-1">View</span>
+                      <FaExternalLinkAlt className="text-xs" />
+                    </a>
+                  </div>
+                  <div className="border border-gray-200 rounded-md p-3 flex items-center justify-between">
+                    <div className="flex items-center">
+                      <FaFilePdf className="text-red-500 mr-2 text-xl" />
+                      <span>Medical License</span>
+                    </div>
+                    <a href="#" className="text-blue-600 hover:text-blue-800 flex items-center">
+                      <span className="mr-1">View</span>
+                      <FaExternalLinkAlt className="text-xs" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="mt-6 flex justify-end gap-4">
               <button
-                onClick={() => setEditingApplication(null)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                onClick={() => {
+                  setShowUserModal(false);
+                  setSelectedUser(null);
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
               >
                 Close
               </button>
+              {selectedUser.membershipApplication && selectedUser.membershipApplication.status === 'PENDING' && (
+                <>
+                  <button
+                    onClick={() => handleApplicationUpdate(selectedUser.id, 'APPROVED')}
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleApplicationUpdate(selectedUser.id, 'REJECTED')}
+                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                  >
+                    Reject
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
       )}
     </div>
   );
-} 
+}

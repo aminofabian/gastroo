@@ -21,6 +21,7 @@ export async function GET() {
       return new NextResponse("Forbidden", { status: 403 });
     }
 
+    // Get all users with their membership applications
     const users = await prisma.user.findMany({
       select: {
         id: true,
@@ -28,7 +29,6 @@ export async function GET() {
         firstName: true,
         lastName: true,
         role: true,
-        image: true,
         title: true,
         specialization: true,
         hospital: true,
@@ -41,9 +41,25 @@ export async function GET() {
         isProfilePublic: true,
         hasActiveSubscription: true,
         subscriptionEndDate: true,
+        phone: true,
+        isMember: true,
+        membershipApplication: {
+          select: {
+            id: true,
+            status: true,
+            createdAt: true,
+            specialization: true,
+            licenseNumber: true,
+            hospital: true,
+            address: true,
+            city: true,
+            county: true,
+            postalCode: true
+          }
+        }
       },
       orderBy: {
-        lastName: 'asc'
+        lastActive: 'desc'
       }
     });
 
@@ -52,4 +68,4 @@ export async function GET() {
     console.error("Error fetching users:", error);
     return new NextResponse("Error fetching users", { status: 500 });
   }
-} 
+}

@@ -44,6 +44,12 @@ model User {
   membershipType        String?
   membershipNumber      String?                 @unique
   subscriptionStartDate DateTime?
+  approvalStatus        MembershipStatus?       @default(PENDING)
+  approvedAt            DateTime?
+  approvedBy            String?
+  cvUrl                 String?
+  licenseUrl            String?
+  otherDocumentsUrls    String[]                @default([])
   subscriptions         Subscription[]
   accounts              Account[]
   membershipApplication MembershipApplication[]
@@ -101,7 +107,7 @@ model PasswordResetToken {
 }
 
 model MembershipApplication {
-  id             String   @id @default(cuid())
+  id             String           @id @default(cuid())
   userId         String
   phone          String
   designation    String
@@ -112,10 +118,16 @@ model MembershipApplication {
   city           String
   county         String
   postalCode     String?
-  status         String   @default("PENDING")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status         MembershipStatus @default(PENDING)
+  submissionDate DateTime         @default(now())
+  approvedAt     DateTime?
+  approvedBy     String?
+  cvUrl          String?
+  licenseUrl     String?
+  otherDocumentsUrls String[]     @default([])
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("membership_applications")
 }
@@ -343,6 +355,22 @@ model EventRegistration {
   @@map("event_registrations")
 }
 
+model Resource {
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  type        ResourceType
+  category    String
+  fileUrl     String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  user        User         @relation(fields: [userId], references: [id])
+  userId      String
+
+  @@index([userId])
+  @@map("resources")
+}
+
 enum UserRole {
   ADMIN
   USER
@@ -426,20 +454,4 @@ enum ResourceType {
   VIDEO
   ARTICLE
   EBOOK
-}
-
-model Resource {
-  id          String       @id @default(cuid())
-  title       String
-  description String
-  type        ResourceType
-  category    String
-  fileUrl     String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  user        User         @relation(fields: [userId], references: [id])
-  userId      String
-
-  @@index([userId])
-  @@map("resources")
 }
