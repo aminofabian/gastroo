@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     
     if (file) {
       console.log("Uploading file to S3...");
-      image = await uploadToS3(file);
+      image = await uploadToS3(file, file.name, file.type);
       console.log("File uploaded successfully:", image);
     }
     
