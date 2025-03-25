@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { uploadToS3 } from "@/lib/s3-upload";
+import { uploadToS3 } from "@/lib/s3";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -37,7 +37,9 @@ export async function POST(request: Request) {
     
     if (file) {
       console.log("Uploading file to S3...");
-      image = await uploadToS3(file, file.name, file.type);
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const fileName = `banners/${Date.now()}-${file.name}`;
+      image = await uploadToS3(buffer, fileName, file.type);
       console.log("File uploaded successfully:", image);
     }
     
