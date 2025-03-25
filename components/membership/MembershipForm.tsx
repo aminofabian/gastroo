@@ -68,7 +68,7 @@ const steps = [
   {
     id: "documents",
     title: "Required Documents",
-    description: "Upload your CV and medical license",
+    description: "Upload your required documentation",
     fields: ["cvUrl", "licenseUrl", "otherDocumentsUrls"],
   },
   {
@@ -412,27 +412,33 @@ export default function MembershipForm() {
     }
   };
 
-  const handleFileUpload = async (file: File, type: 'cv' | 'license' | 'other') => {
+  const handleFileUpload = async (file: File, type: 'doc1' | 'doc2' | 'doc3') => {
     try {
       setUploadingFiles(true);
+      console.log(`Starting upload for ${type}:`, { fileName: file.name, fileType: file.type, fileSize: file.size });
+      
       const url = await uploadToS3(file, file.name, file.type);
+      console.log(`Upload successful for ${type}:`, url);
       
       switch (type) {
-        case 'cv':
+        case 'doc1':
           form.setValue('cvUrl', url);
+          console.log('Set cvUrl in form:', url);
           break;
-        case 'license':
+        case 'doc2':
           form.setValue('licenseUrl', url);
+          console.log('Set licenseUrl in form:', url);
           break;
-        case 'other':
+        case 'doc3':
           const currentUrls = form.getValues('otherDocumentsUrls') || [];
           form.setValue('otherDocumentsUrls', [...currentUrls, url]);
+          console.log('Updated otherDocumentsUrls in form:', [...currentUrls, url]);
           break;
       }
       
-      toast.success(`${type.toUpperCase()} uploaded successfully`);
+      toast.success(`Document ${type === 'doc1' ? '1' : type === 'doc2' ? '2' : '3'} uploaded successfully`);
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error(`Upload error for ${type}:`, error);
       toast.error('Failed to upload file');
     } finally {
       setUploadingFiles(false);
@@ -689,16 +695,16 @@ export default function MembershipForm() {
                 name="cvUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>CV/Resume</FormLabel>
+                    <FormLabel>Document 1</FormLabel>
                     <FormControl>
                       <div className="space-y-2">
                         <Input
                           type="file"
-                          accept=".pdf,.doc,.docx"
+                          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              handleFileUpload(file, 'cv');
+                              handleFileUpload(file, 'doc1');
                             }
                           }}
                           className="h-12"
@@ -707,13 +713,13 @@ export default function MembershipForm() {
                         {field.value && (
                           <div className="flex items-center space-x-2 text-sm text-gray-500">
                             <Check className="w-4 h-4 text-green-500" />
-                            <span>CV uploaded successfully</span>
+                            <span>Document 1 uploaded successfully</span>
                           </div>
                         )}
                       </div>
                     </FormControl>
                     <FormDescription>
-                      Please upload your CV in PDF or Word format
+                      Please upload your document in PDF, Word, or image format
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -727,16 +733,16 @@ export default function MembershipForm() {
                 name="licenseUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Medical License</FormLabel>
+                    <FormLabel>Document 2</FormLabel>
                     <FormControl>
                       <div className="space-y-2">
                         <Input
                           type="file"
-                          accept=".pdf,.jpg,.jpeg,.png"
+                          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              handleFileUpload(file, 'license');
+                              handleFileUpload(file, 'doc2');
                             }
                           }}
                           className="h-12"
@@ -745,13 +751,13 @@ export default function MembershipForm() {
                         {field.value && (
                           <div className="flex items-center space-x-2 text-sm text-gray-500">
                             <Check className="w-4 h-4 text-green-500" />
-                            <span>License uploaded successfully</span>
+                            <span>Document 2 uploaded successfully</span>
                           </div>
                         )}
                       </div>
                     </FormControl>
                     <FormDescription>
-                      Upload a scanned copy of your medical license
+                      Upload any required document in PDF, Word, or image format
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -765,7 +771,7 @@ export default function MembershipForm() {
                 name="otherDocumentsUrls"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Additional Documents (Optional)</FormLabel>
+                    <FormLabel>Document 3 (Optional)</FormLabel>
                     <FormControl>
                       <div className="space-y-2">
                         <Input
@@ -774,7 +780,7 @@ export default function MembershipForm() {
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              handleFileUpload(file, 'other');
+                              handleFileUpload(file, 'doc3');
                             }
                           }}
                           className="h-12"
@@ -785,7 +791,7 @@ export default function MembershipForm() {
                             {field.value.map((url, index) => (
                               <div key={index} className="flex items-center space-x-2 text-sm text-gray-500">
                                 <Check className="w-4 h-4 text-green-500" />
-                                <span>Document {index + 1} uploaded successfully</span>
+                                <span>Document 3 uploaded successfully</span>
                               </div>
                             ))}
                           </div>
@@ -793,7 +799,7 @@ export default function MembershipForm() {
                       </div>
                     </FormControl>
                     <FormDescription>
-                      Upload any additional supporting documents
+                      Upload any additional supporting document
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
