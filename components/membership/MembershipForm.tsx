@@ -15,7 +15,6 @@ import { Check, Loader2, AlertCircle } from "lucide-react";
 import { submitPayment } from '@/lib/pesapal';
 import { usePaymentStatus } from '@/lib/hooks/usePaymentStatus';
 import TestPaymentButton from './TestPaymentButton';
-import { uploadToS3 } from "@/lib/s3-upload";
 
 // Form Schema
 const membershipSchema = z.object({
@@ -421,8 +420,31 @@ export default function MembershipForm() {
       
       console.log(`Starting upload for ${type}:`, { fileName: file.name, fileType: file.type, fileSize: file.size });
       
-      const url = await uploadToS3(file, file.name, file.type);
-      console.log(`Upload successful for ${type}:`, url);
+      // Create a FormData instance
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('docType', type);
+      
+      // Upload file using the new document upload API endpoint
+      const response = await fetch('/api/documents', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Document upload failed:', response.status, errorData);
+        throw new Error(`Document upload failed: ${response.status} ${errorData}`);
+      }
+      
+      const data = await response.json();
+      console.log(`Upload successful for ${type}:`, data);
+      
+      if (!data.success || !data.fileUrl) {
+        throw new Error(`Document upload failed: No file URL returned`);
+      }
+      
+      const url = data.fileUrl;
       
       switch (type) {
         case 'doc1':
