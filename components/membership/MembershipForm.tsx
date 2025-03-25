@@ -100,6 +100,7 @@ export default function MembershipForm() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [hasExistingPayment, setHasExistingPayment] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [currentlyUploading, setCurrentlyUploading] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof membershipSchema>>({
     resolver: zodResolver(membershipSchema),
@@ -415,6 +416,9 @@ export default function MembershipForm() {
   const handleFileUpload = async (file: File, type: 'doc1' | 'doc2' | 'doc3') => {
     try {
       setUploadingFiles(true);
+      // Set which field is currently uploading
+      setCurrentlyUploading(type === 'doc1' ? 'cvUrl' : type === 'doc2' ? 'licenseUrl' : 'otherDocumentsUrls');
+      
       console.log(`Starting upload for ${type}:`, { fileName: file.name, fileType: file.type, fileSize: file.size });
       
       const url = await uploadToS3(file, file.name, file.type);
@@ -442,6 +446,7 @@ export default function MembershipForm() {
       toast.error('Failed to upload file');
     } finally {
       setUploadingFiles(false);
+      setCurrentlyUploading(null);
     }
   };
 
@@ -710,6 +715,12 @@ export default function MembershipForm() {
                           className="h-12"
                           disabled={uploadingFiles}
                         />
+                        {uploadingFiles && currentlyUploading === 'cvUrl' && (
+                          <div className="flex items-center space-x-2 text-sm text-gray-500">
+                            <Loader2 className="w-4 h-4 animate-spin text-[#c22f61]" />
+                            <span>Uploading document 1...</span>
+                          </div>
+                        )}
                         {field.value && (
                           <div className="flex items-center space-x-2 text-sm text-gray-500">
                             <Check className="w-4 h-4 text-green-500" />
@@ -748,6 +759,12 @@ export default function MembershipForm() {
                           className="h-12"
                           disabled={uploadingFiles}
                         />
+                        {uploadingFiles && currentlyUploading === 'licenseUrl' && (
+                          <div className="flex items-center space-x-2 text-sm text-gray-500">
+                            <Loader2 className="w-4 h-4 animate-spin text-[#c22f61]" />
+                            <span>Uploading document 2...</span>
+                          </div>
+                        )}
                         {field.value && (
                           <div className="flex items-center space-x-2 text-sm text-gray-500">
                             <Check className="w-4 h-4 text-green-500" />
@@ -786,6 +803,12 @@ export default function MembershipForm() {
                           className="h-12"
                           disabled={uploadingFiles}
                         />
+                        {uploadingFiles && currentlyUploading === 'otherDocumentsUrls' && (
+                          <div className="flex items-center space-x-2 text-sm text-gray-500">
+                            <Loader2 className="w-4 h-4 animate-spin text-[#c22f61]" />
+                            <span>Uploading document 3...</span>
+                          </div>
+                        )}
                         {field.value && field.value.length > 0 && (
                           <div className="space-y-2">
                             {field.value.map((url, index) => (
