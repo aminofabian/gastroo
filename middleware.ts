@@ -76,6 +76,7 @@ export default auth(async (req) => {
 export const config = {
   matcher: [
     "/admin/:path*",
+    "/research",
     "/api/admin/:path*",
     "/membership",
     "/login",

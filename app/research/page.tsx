@@ -9,9 +9,9 @@ import Link from 'next/link';
 const ResearchHero = () => {
   const [currentImage, setCurrentImage] = React.useState(0);
   const images = [
-    '/ban/19195.jpg',
-    '/ban/Business-Facebook-Cover-01.jpg',
-    '/ban/SL-122519-26430-01.jpg'
+"/publication/abdomen-8762848_1280.jpg",
+"/publication\ambitious-and-ready-to-prove-it-2024-05-14-00-48-15-utc.jpg",
+"/publication\anatomy-7111055_1280.jpg"
   ];
 
   React.useEffect(() => {
@@ -153,28 +153,28 @@ const Publications = () => (
             authors: "Kimani J, Ogutu E, Wangari M, et al.",
             journal: "East African Medical Journal",
             year: "2023",
-            link: "#"
+            link: "/research/publications/hpylori-infection-kenya"
           },
           {
             title: "Endoscopic Management of Gastrointestinal Bleeding: A Retrospective Analysis of Cases in Nairobi",
             authors: "Omondi L, Njoroge P, Kamau W, et al.",
             journal: "World Journal of Gastroenterology",
             year: "2022",
-            link: "#"
+            link: "/research/publications/gi-bleeding-nairobi"
           },
           {
             title: "Hepatitis B Vaccination Coverage Among Healthcare Workers in Kenyan Hospitals",
             authors: "Mwangi A, Githinji G, Wanjiku C, et al.",
             journal: "Journal of Viral Hepatitis",
             year: "2022",
-            link: "#"
+            link: "/research/publications/hepb-vaccination-kenya"
           },
           {
             title: "Colorectal Cancer Screening Practices in Kenya: Challenges and Opportunities",
             authors: "Ndegwa S, Kariuki P, Otieno F, et al.",
             journal: "African Journal of Cancer",
             year: "2021",
-            link: "#"
+            link: "/research/publications/colorectal-screening-kenya"
           }
         ].map((pub, index) => (
           <motion.div
@@ -208,7 +208,7 @@ const Publications = () => (
         viewport={{ once: true }}
         className="mt-12 text-center"
       >
-        <Link href="#" className="inline-block bg-[#c22f61] text-white px-8 py-3 rounded-md hover:bg-[#004488] transition-colors duration-300 shadow-lg">
+        <Link href="/research/publications" className="inline-block bg-[#c22f61] text-white px-8 py-3 rounded-md hover:bg-[#004488] transition-colors duration-300 shadow-lg">
           View All Publications
         </Link>
       </motion.div>
@@ -276,13 +276,7 @@ const ResearchOpportunities = () => (
               </motion.li>
             ))}
           </ul>
-          <motion.button 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-[#c22f61] text-white px-8 py-3 rounded-md hover:bg-[#004488] transition-colors duration-300 shadow-lg"
-          >
-            Apply for Research Opportunities
-          </motion.button>
+        
         </motion.div>
       </div>
     </div>
@@ -307,20 +301,7 @@ const CallToAction = () => (
           Join our research community and help advance the field of gastroenterology in Kenya. Whether you're a seasoned researcher or just starting your career, there's a place for you in our collaborative network.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <motion.button 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-white text-[#c22f61] px-8 py-3 rounded-md hover:bg-gray-100 transition-colors duration-300 shadow-lg font-medium"
-          >
-            Submit Research Proposal
-          </motion.button>
-          <motion.button 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-transparent text-white border border-white px-8 py-3 rounded-md hover:bg-white/10 transition-colors duration-300 shadow-lg font-medium"
-          >
-            Join Research Network
-          </motion.button>
+        
         </div>
       </motion.div>
     </div>
