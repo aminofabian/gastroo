@@ -18,6 +18,19 @@ interface User {
   isOnboarded: boolean;
   isMember: boolean;
   profileCompleteness: number;
+  approvalStatus: string | null;
+  membershipApplication: {
+    id: string;
+    status: string;
+    createdAt: string;
+    specialization: string;
+    licenseNumber: string | null;
+    hospital: string;
+    address: string;
+    city: string;
+    county: string;
+    postalCode: string | null;
+  } | null;
   socialLinks: Array<{ platform: string; url: string; }>;
   education: Array<{
     institution: string;
@@ -71,7 +84,8 @@ export const useUserStore = create<UserStore>((set) => ({
         profileCompleteness: userData.profileCompleteness ?? 0,
         socialLinks: userData.socialLinks || [],
         education: userData.education || [],
-        achievements: userData.achievements || []
+        achievements: userData.achievements || [],
+        membershipApplication: userData.membershipApplication || null,
       };
       
       set({ user, isLoading: false });

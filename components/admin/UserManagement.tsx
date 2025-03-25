@@ -278,7 +278,8 @@ export default function UserManagement() {
                           {user.membershipApplication.status === 'APPROVED' && <FaCheck className="text-xs" />}
                           {user.membershipApplication.status === 'REJECTED' && <FaTimes className="text-xs" />}
                           {user.membershipApplication.status === 'PENDING' && <span className="inline-block w-2 h-2 rounded-full bg-yellow-400 mr-1"></span>}
-                          {user.membershipApplication.status || "UNKNOWN"}
+                          {user.membershipApplication.status === 'APPROVED' ? 'APPROVED' : 
+                           user.membershipApplication.status === 'REJECTED' ? 'REJECTED' : 'PENDING'}
                         </span>
                         <div className="flex items-center">
                           <span className="text-xs text-gray-500">

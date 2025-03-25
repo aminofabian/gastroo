@@ -36,8 +36,26 @@ export default function DashboardClient() {
   // Check if user is onboarded using type assertion
   const isUserOnboarded = user ? (user as any).isOnboarded === true : false;
   
-  // Check if user is approved
-  const isUserApproved = user ? (user as any).isMember === true : false;
+  // Check if user is approved - either isMember is true OR membership application status is APPROVED
+  const isUserApproved = user ? 
+    (user.isMember === true || 
+    (user.membershipApplication && 
+     user.membershipApplication.status === 'APPROVED')) 
+    : false;
+
+  // For debugging - log the approval status
+  useEffect(() => {
+    if (user) {
+      console.log("User approval status:", {
+        isMember: user.isMember,
+        membershipApplication: user.membershipApplication ? {
+          status: user.membershipApplication.status,
+          id: user.membershipApplication.id
+        } : null,
+        isUserApproved
+      });
+    }
+  }, [user, isUserApproved]);
 
   // If user data is loaded and user is not onboarded, redirect to membership page
   useEffect(() => {

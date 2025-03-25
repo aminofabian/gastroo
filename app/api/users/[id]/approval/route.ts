@@ -47,31 +47,30 @@ export async function PATCH(
         console.log("Found membership application:", membershipApplication.id);
         
         // Use a transaction to ensure both updates succeed or fail together
-        const result = await prisma.$transaction([
-          // Update the membership application status
-          prisma.membershipApplication.update({
-            where: { id: membershipApplication.id },
-            data: { 
-              // Use explicit casting for the enum value
-              status: status === "APPROVED" ? "APPROVED" : 
-                     status === "REJECTED" ? "REJECTED" : 
-                     "PENDING"
-            }
-          }),
+        const result = await prisma.$transaction(async (tx) => {
+          // First, update the membership application status using raw SQL for proper enum handling
+          await tx.$executeRaw`
+            UPDATE "membership_applications" 
+            SET "status" = ${status}::"MembershipStatus"
+            WHERE "id" = ${membershipApplication.id}
+          `;
           
-          // Update the user's isMember status
-          prisma.user.update({
+          // Then, update the user's isMember status and approvalStatus
+          const updatedUser = await tx.user.update({
             where: { id: userId },
             data: {
-              isMember: status === "APPROVED"
+              isMember: status === "APPROVED",
+              approvalStatus: status as "PENDING" | "APPROVED" | "REJECTED"
             }
-          })
-        ]);
+          });
+          
+          return updatedUser;
+        });
         
         console.log("Transaction result:", result);
         
         // Return the updated user from the transaction
-        return NextResponse.json(result[1]);
+        return NextResponse.json(result);
       } catch (err) {
         console.error("Error in transaction:", err);
         return new NextResponse(`Error updating application: ${err instanceof Error ? err.message : 'Unknown error'}`, { status: 500 });
@@ -83,7 +82,8 @@ export async function PATCH(
       const updatedUser = await prisma.user.update({
         where: { id: userId },
         data: {
-          isMember: status === "APPROVED"
+          isMember: status === "APPROVED",
+          approvalStatus: status as "PENDING" | "APPROVED" | "REJECTED"
         }
       });
       
