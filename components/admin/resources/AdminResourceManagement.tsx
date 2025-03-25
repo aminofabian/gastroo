@@ -19,6 +19,7 @@ export default function AdminResourceManagement() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -43,35 +44,78 @@ export default function AdminResourceManagement() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUploadError(null);
+    
     if (e.target.files && e.target.files[0]) {
-      setFormData({ ...formData, file: e.target.files[0] });
+      const file = e.target.files[0];
+      
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        setUploadError('File size must be less than 10MB');
+        return;
+      }
+      
+      // Validate file type based on resource type
+      const allowedTypes: Record<string, string[]> = {
+        PDF: ['application/pdf'],
+        VIDEO: ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm'],
+        ARTICLE: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        EBOOK: ['application/pdf', 'application/epub+zip']
+      };
+      
+      const currentType = formData.type;
+      if (allowedTypes[currentType] && !allowedTypes[currentType].includes(file.type)) {
+        setUploadError(`Invalid file type for ${currentType}. Please upload a valid file.`);
+        return;
+      }
+      
+      setFormData({ ...formData, file });
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.file) return;
+    if (!formData.file) {
+      setUploadError('Please select a file to upload');
+      return;
+    }
 
     setIsUploading(true);
+    setUploadError(null);
+    
     try {
-      const presignedUrlResponse = await fetch('/api/resources/presigned-url', {
+      // Create a FormData instance for file upload
+      const fileFormData = new FormData();
+      fileFormData.append('file', formData.file);
+      fileFormData.append('resourceType', formData.type);
+      
+      console.log('Uploading resource file:', {
+        name: formData.file.name,
+        type: formData.file.type,
+        size: formData.file.size
+      });
+      
+      // Upload file using our new direct upload endpoint
+      const uploadResponse = await fetch('/api/resources/upload', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileName: formData.file.name,
-          fileType: formData.file.type,
-        }),
+        body: fileFormData,
       });
-      const { url, fileKey, publicUrl } = await presignedUrlResponse.json();
-
-      await fetch(url, {
-        method: 'PUT',
-        body: formData.file,
-        headers: {
-          'Content-Type': formData.file.type,
-        },
-      });
-
+      
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error('Resource file upload failed:', uploadResponse.status, errorText);
+        throw new Error(`Resource file upload failed: ${uploadResponse.status} ${errorText}`);
+      }
+      
+      const uploadData = await uploadResponse.json();
+      
+      if (!uploadData.success || !uploadData.fileUrl) {
+        throw new Error('Failed to upload resource file: No file URL returned');
+      }
+      
+      console.log('File uploaded successfully, creating resource record');
+      
+      // Create the resource record with the file URL
       const response = await fetch('/api/resources', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -80,7 +124,7 @@ export default function AdminResourceManagement() {
           description: formData.description,
           type: formData.type,
           category: formData.category,
-          fileUrl: publicUrl,
+          fileUrl: uploadData.fileUrl,
         }),
       });
 
@@ -94,9 +138,13 @@ export default function AdminResourceManagement() {
           category: '',
           file: null,
         });
+      } else {
+        const errorData = await response.text();
+        throw new Error(`Failed to create resource: ${errorData}`);
       }
     } catch (error) {
       console.error('Error uploading resource:', error);
+      setUploadError(error instanceof Error ? error.message : 'Failed to upload resource');
       toast.error('Failed to upload resource');
     } finally {
       setIsUploading(false);
@@ -188,20 +236,30 @@ export default function AdminResourceManagement() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">File</label>
-            <input
-              type="file"
-              onChange={handleFileChange}
-              required
-              className="mt-1 block w-full text-sm text-gray-500
-                file:mr-4 file:py-2.5 file:px-4
-                file:rounded-lg file:border-0
-                file:text-sm file:font-medium
-                file:bg-gradient-to-r file:from-emerald-50 file:to-emerald-100
-                file:text-emerald-700
-                hover:file:bg-gradient-to-r hover:file:from-emerald-100 hover:file:to-emerald-200
-                focus:outline-none
-                transition-all duration-200"
-            />
+            <div className="mt-1">
+              <input
+                type="file"
+                onChange={handleFileChange}
+                required
+                className="mt-1 block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2.5 file:px-4
+                  file:rounded-lg file:border-0
+                  file:text-sm file:font-medium
+                  file:bg-gradient-to-r file:from-emerald-50 file:to-emerald-100
+                  file:text-emerald-700
+                  hover:file:bg-gradient-to-r hover:file:from-emerald-100 hover:file:to-emerald-200
+                  focus:outline-none
+                  transition-all duration-200"
+              />
+              {formData.file && (
+                <div className="mt-2 text-sm text-emerald-600 flex items-center">
+                  <svg className="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  {formData.file.name} ({Math.round(formData.file.size / 1024)} KB)
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -312,6 +370,17 @@ export default function AdminResourceManagement() {
           )}
         </div>
       </div>
+
+      {uploadError && (
+        <div className="mt-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 mr-2 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {uploadError}
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
