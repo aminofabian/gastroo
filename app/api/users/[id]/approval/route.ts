@@ -48,23 +48,31 @@ export async function PATCH(
         
         // Use a transaction to ensure both updates succeed or fail together
         const result = await prisma.$transaction(async (tx) => {
-          // First, update the membership application status using raw SQL for proper enum handling
-          await tx.$executeRaw`
-            UPDATE "membership_applications" 
-            SET "status" = ${status}::"MembershipStatus"
-            WHERE "id" = ${membershipApplication.id}
-          `;
+          // Update the membership application using the update method instead of raw SQL
+          const updatedApplication = await tx.membershipApplication.update({
+            where: { id: membershipApplication.id },
+            data: { 
+              status: status as "PENDING" | "APPROVED" | "REJECTED",
+              // If status is APPROVED, also set the approval timestamp
+              approvedAt: status === "APPROVED" ? new Date() : null,
+              approvedBy: status === "APPROVED" ? currentUser.id : null
+            }
+          });
+          
+          console.log("Updated application:", updatedApplication);
           
           // Then, update the user's isMember status and approvalStatus
           const updatedUser = await tx.user.update({
             where: { id: userId },
             data: {
               isMember: status === "APPROVED",
-              approvalStatus: status as "PENDING" | "APPROVED" | "REJECTED"
+              approvalStatus: status as "PENDING" | "APPROVED" | "REJECTED",
+              approvedAt: status === "APPROVED" ? new Date() : null,
+              approvedBy: status === "APPROVED" ? currentUser.id : null
             }
           });
           
-          return updatedUser;
+          return { user: updatedUser, application: updatedApplication };
         });
         
         console.log("Transaction result:", result);
@@ -83,7 +91,9 @@ export async function PATCH(
         where: { id: userId },
         data: {
           isMember: status === "APPROVED",
-          approvalStatus: status as "PENDING" | "APPROVED" | "REJECTED"
+          approvalStatus: status as "PENDING" | "APPROVED" | "REJECTED",
+          approvedAt: status === "APPROVED" ? new Date() : null,
+          approvedBy: status === "APPROVED" ? currentUser.id : null
         }
       });
       

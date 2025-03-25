@@ -104,6 +104,9 @@ export default function UserManagement() {
         throw new Error(errorData?.message || 'Failed to update application status');
       }
 
+      // Get the response data
+      const responseData = await response.json();
+      
       // Dismiss loading toast
       toast.dismiss();
       
@@ -111,22 +114,26 @@ export default function UserManagement() {
       setUsers(prevUsers => 
         prevUsers.map(user => {
           if (user.id === userId) {
-            // Update the user object
+            // Update the user object with response data when available
+            const updatedUser = responseData.user || responseData;
             return {
               ...user,
               isMember: status === 'APPROVED',
               membershipApplication: user.membershipApplication ? {
                 ...user.membershipApplication,
-                status: status
-              } : null
+                status: status,
+                // Add approvedAt and approvedBy if they're in the response
+                ...(updatedUser.approvedAt && { approvedAt: updatedUser.approvedAt }),
+                ...(updatedUser.approvedBy && { approvedBy: updatedUser.approvedBy })
+              } : null,
+              approvalStatus: status,
+              ...(updatedUser.approvedAt && { approvedAt: updatedUser.approvedAt }),
+              ...(updatedUser.approvedBy && { approvedBy: updatedUser.approvedBy })
             };
           }
           return user;
         })
       );
-
-      // Also fetch all users again to ensure data is up to date
-      fetchUsers();
       
       // Show success message
       toast.success(`User ${status === 'APPROVED' ? 'approved' : status === 'REJECTED' ? 'rejected' : 'set to pending'} successfully`);
@@ -135,13 +142,19 @@ export default function UserManagement() {
       if (selectedUser && selectedUser.id === userId) {
         setSelectedUser(prev => {
           if (!prev) return null;
+          
+          // Get the updated application from response if available
+          const updatedApplication = 
+            responseData.application || 
+            (prev.membershipApplication ? {...prev.membershipApplication, status} : null);
+            
           return {
             ...prev,
             isMember: status === 'APPROVED',
-            membershipApplication: prev.membershipApplication ? {
-              ...prev.membershipApplication,
-              status: status
-            } : null
+            membershipApplication: updatedApplication,
+            approvalStatus: status,
+            ...(responseData.user?.approvedAt && { approvedAt: responseData.user.approvedAt }),
+            ...(responseData.user?.approvedBy && { approvedBy: responseData.user.approvedBy })
           };
         });
       }
