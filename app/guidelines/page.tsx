@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -31,28 +32,28 @@ export default function GuidelinesPage() {
               title="Endoscopy Standards"
               description="Quality indicators and best practices for upper GI endoscopy"
               lastUpdated="January 2023"
-              link="#"
+              link="/guidelines/endoscopy-standards"
             />
             
             <GuidelineCard 
               title="Colonoscopy Standards"
               description="Quality indicators and best practices for colonoscopy"
               lastUpdated="February 2023"
-              link="#"
+              link="/guidelines/colonoscopy-standards"
             />
             
             <GuidelineCard 
               title="ERCP Guidelines"
               description="Indications, contraindications, and technical considerations for ERCP"
               lastUpdated="November 2022"
-              link="#"
+              link="/guidelines/ercp-guidelines"
             />
             
             <GuidelineCard 
               title="Endoscopic Ultrasound"
               description="Procedural guidelines for diagnostic and therapeutic EUS"
               lastUpdated="March 2023"
-              link="#"
+              link="/guidelines/endoscopic-ultrasound"
             />
           </div>
         </TabsContent>
@@ -65,28 +66,28 @@ export default function GuidelinesPage() {
               title="Patient Education Materials"
               description="Downloadable resources for patient education on common GI conditions"
               lastUpdated="Ongoing updates"
-              link="#"
+              link="/guidelines/patient-education"
             />
             
             <GuidelineCard 
               title="Medication Formulary"
               description="Recommended medications for gastroenterological conditions in Kenya"
               lastUpdated="January 2023"
-              link="#"
+              link="/guidelines/medication-formulary"
             />
             
             <GuidelineCard 
               title="Research Protocols"
               description="Standardized protocols for gastroenterology research in Kenya"
               lastUpdated="February 2023"
-              link="#"
+              link="/guidelines/research-protocols"
             />
             
             <GuidelineCard 
               title="International Guidelines"
               description="Links to relevant international gastroenterology guidelines"
               lastUpdated="Regularly updated"
-              link="#"
+              link="/guidelines/international-guidelines"
             />
           </div>
         </TabsContent>
@@ -127,12 +128,12 @@ function GuidelineCard({ title, description, lastUpdated, link }: {
       <CardContent>
         <div className="flex justify-between items-center">
           <span className="text-sm text-muted-foreground">Last updated: {lastUpdated}</span>
-          <a 
+          <Link 
             href={link} 
             className="text-primary hover:underline font-medium"
           >
             View guideline →
-          </a>
+          </Link>
         </div>
       </CardContent>
     </Card>
