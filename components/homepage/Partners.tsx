@@ -152,9 +152,9 @@ const Partners = () => {
         {/* Stats Section */}
         <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { number: '50+', label: 'Global Partners' },
+            { number: '10+', label: 'Global Partners' },
             { number: '10+', label: 'Years of Excellence' },
-            { number: '1000+', label: 'Success Stories' },
+            { number: '200+', label: 'Success Stories' },
           ].map((stat, index) => (
             <div key={index} className="text-center">
               <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8">

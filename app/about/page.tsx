@@ -8,10 +8,8 @@ import { motion } from 'framer-motion';
 const AboutHero = () => {
   const [currentImage, setCurrentImage] = React.useState(0);
   const images = [
-    '/ban/19195.jpg',
-    '/ban/Business-Facebook-Cover-01.jpg',
-    '/ban/SL-122519-26430-01.jpg'
-  ];
+    '/publication/abdomen-8762848_1280.jpg',
+      ];
 
   React.useEffect(() => {
     const interval = setInterval(() => {
@@ -135,13 +133,7 @@ const Mission = () => (
           <p className="text-gray-600 text-lg mb-8 font-serif leading-relaxed">
             Our mission is to advance the practice of gastroenterology through education, research, and the dissemination of knowledge, improving the prevention, diagnosis, treatment, and management of gastrointestinal diseases in Kenya.
           </p>
-          <motion.button 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-[#c22f61] text-white px-8 py-3 rounded-md hover:bg-[#004488] transition-colors duration-300 shadow-lg"
-          >
-            Learn More
-          </motion.button>
+        
         </motion.div>
       </div>
     </div>
@@ -190,13 +182,7 @@ const WorkWithMe = () => (
             <p className="text-white/80 leading-relaxed">
               {item.description}
             </p>
-            <motion.button 
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="mt-6 text-white border border-white/30 px-6 py-2 rounded-md hover:bg-white hover:text-[#c22f61] transition-colors duration-300"
-            >
-              Learn More
-            </motion.button>
+           
           </motion.div>
         ))}
       </div>
