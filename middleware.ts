@@ -43,10 +43,16 @@ export default auth(async (req) => {
     userId
   });
 
-  const isAuthPage = nextUrl.pathname === "/login";
+  const isAuthPage = nextUrl.pathname === "/login" || nextUrl.pathname.startsWith("/auth/");
   const isMembershipPage = nextUrl.pathname === "/membership";
   const isDashboardPage = nextUrl.pathname === "/dashboard" || nextUrl.pathname.startsWith("/dashboard/");
   const isAdminRoute = nextUrl.pathname.startsWith("/admin") || nextUrl.pathname.startsWith("/api/admin");
+
+  // If trying to access dashboard while not logged in, redirect to login page
+  if (isDashboardPage && !isLoggedIn) {
+    console.log("Redirecting to login page - User not logged in");
+    return Response.redirect(new URL("/auth/login?callbackUrl=" + nextUrl.pathname, nextUrl));
+  }
 
   // If trying to access admin routes without admin privileges
   if (isAdminRoute && (!isLoggedIn || !isAdmin)) {
@@ -80,6 +86,7 @@ export const config = {
     "/api/admin/:path*",
     "/membership",
     "/login",
+    "/auth/:path*",
     "/dashboard",
     "/dashboard/:path*"
   ]

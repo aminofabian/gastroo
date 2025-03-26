@@ -15,7 +15,7 @@ interface User {
 }
 
 interface UserMenuDropdownProps {
-  user?: User;
+  user: User;
 }
 
 export default function UserMenuDropdown({ user }: UserMenuDropdownProps) {
@@ -57,7 +57,7 @@ export default function UserMenuDropdown({ user }: UserMenuDropdownProps) {
         <div className="border-t border-gray-100 my-2" />
         
         <button
-          onClick={() => signOut()}
+          onClick={() => signOut({ callbackUrl: "/auth/login" })}
           className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
         >
           <FaSignOutAlt className="text-red-400" />

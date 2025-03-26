@@ -16,11 +16,12 @@ export async function POST() {
     }
     
     // Force sign out to clear the session
-    await signOut();
+    await signOut({ redirectTo: "/auth/login" });
     
     return NextResponse.json({
       success: true,
-      message: "Session refreshed. Please sign in again to update your session data."
+      message: "Session refreshed. Please sign in again to update your session data.",
+      redirectUrl: "/auth/login"
     });
   } catch (error: any) {
     console.error("Error refreshing session:", error);
