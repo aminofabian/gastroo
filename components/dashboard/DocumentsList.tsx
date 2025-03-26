@@ -115,49 +115,58 @@ export default function DocumentsList() {
               }
               
               // 4. Check if user has a membership application with documents
-              if (userData.membershipApplication && userData.membershipApplication.length > 0) {
-                const application = userData.membershipApplication[0];
+              // Make sure we can handle both array and single object formats
+              if (userData.membershipApplication) {
+                // Handle if it's an array
+                const applications = Array.isArray(userData.membershipApplication) 
+                  ? userData.membershipApplication 
+                  : [userData.membershipApplication];
                 
-                // Add CV/Resume document if available from application
-                if (application.cvUrl) {
-                  allDocuments.push({
-                    id: 'app-cv-' + application.id,
-                    title: 'CV/Resume from Application',
-                    description: 'CV/Resume Document',
-                    type: 'PDF',
-                    category: 'Membership',
-                    fileUrl: application.cvUrl,
-                    createdAt: application.createdAt || new Date().toISOString()
-                  });
-                }
-                
-                // Add license document if available from application
-                if (application.licenseUrl) {
-                  allDocuments.push({
-                    id: 'app-license-' + application.id,
-                    title: 'Medical License from Application',
-                    description: 'Medical License Document',
-                    type: 'PDF',
-                    category: 'Membership',
-                    fileUrl: application.licenseUrl,
-                    createdAt: application.createdAt || new Date().toISOString()
-                  });
-                }
-                
-                // Add other documents if available from application
-                if (application.otherDocumentsUrls && application.otherDocumentsUrls.length > 0) {
-                  application.otherDocumentsUrls.forEach((url: string, index: number) => {
+                // Process each application
+                applications.forEach(application => {
+                  if (!application) return;
+                  
+                  // Add CV/Resume document if available from application
+                  if (application.cvUrl) {
                     allDocuments.push({
-                      id: `app-other-${application.id}-${index}`,
-                      title: `Supporting Document ${index + 1}`,
-                      description: 'Additional Supporting Document',
+                      id: 'app-cv-' + application.id,
+                      title: 'CV/Resume from Application',
+                      description: 'CV/Resume Document',
                       type: 'PDF',
                       category: 'Membership',
-                      fileUrl: url,
+                      fileUrl: application.cvUrl,
                       createdAt: application.createdAt || new Date().toISOString()
                     });
-                  });
-                }
+                  }
+                  
+                  // Add license document if available from application
+                  if (application.licenseUrl) {
+                    allDocuments.push({
+                      id: 'app-license-' + application.id,
+                      title: 'Medical License from Application',
+                      description: 'Medical License Document',
+                      type: 'PDF',
+                      category: 'Membership',
+                      fileUrl: application.licenseUrl,
+                      createdAt: application.createdAt || new Date().toISOString()
+                    });
+                  }
+                  
+                  // Add other documents if available from application
+                  if (application.otherDocumentsUrls && application.otherDocumentsUrls.length > 0) {
+                    application.otherDocumentsUrls.forEach((url: string, index: number) => {
+                      allDocuments.push({
+                        id: `app-other-${application.id}-${index}`,
+                        title: `Supporting Document ${index + 1}`,
+                        description: 'Additional Supporting Document',
+                        type: 'PDF',
+                        category: 'Membership',
+                        fileUrl: url,
+                        createdAt: application.createdAt || new Date().toISOString()
+                      });
+                    });
+                  }
+                });
               }
             }
           } else {
