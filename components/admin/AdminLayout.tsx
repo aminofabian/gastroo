@@ -14,7 +14,7 @@ const adminMenuItems = [
   // { icon: FaNewspaper, label: "News & Updates", href: "/admin/news" },
   // { icon: FaHandshake, label: "Partners", href: "/admin/partners" },
   // { icon: FaDonate, label: "Donations", href: "/admin/donations" },
-  // { icon: FaImages, label: "Slider Info", href: "/admin/slider" },
+  { icon: FaImages, label: "Slider Info", href: "/admin/slider" },
   { icon: FaNewspaper, label: "Resource Management", href: "/admin/resources" },
 
 ];
