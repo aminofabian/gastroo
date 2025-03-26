@@ -24,6 +24,9 @@ interface MembershipApplication {
   county: string | null;
   postalCode: string | null;
   userId: string;
+  cvUrl: string | null;
+  licenseUrl: string | null;
+  otherDocumentsUrls: string[] | null;
 }
 
 interface User {
@@ -45,7 +48,7 @@ interface User {
   hasActiveSubscription: boolean;
   subscriptionEndDate: Date | null;
   phone: string | null;
-  membershipApplication: MembershipApplication | null;
+  membershipApplication: MembershipApplication[] | null;
   isMember: boolean;
 }
 
@@ -66,6 +69,30 @@ export default function UserManagement() {
         throw new Error("Failed to fetch users");
       }
       const data = await response.json();
+      
+      // Debug the API response
+      console.log('Users data received:', data.length, 'users');
+      
+      // Check if any users have document URLs
+      const usersWithDocs = data.filter((user: User) => 
+        user.membershipApplication && 
+        user.membershipApplication.length > 0 && 
+        (user.membershipApplication[0]?.cvUrl || 
+         user.membershipApplication[0]?.licenseUrl || 
+         (user.membershipApplication[0]?.otherDocumentsUrls && 
+          user.membershipApplication[0].otherDocumentsUrls.length > 0))
+      );
+      
+      console.log('Users with document URLs:', usersWithDocs.length);
+      if (usersWithDocs.length > 0) {
+        console.log('Sample user with docs:', {
+          email: usersWithDocs[0].email,
+          cvUrl: usersWithDocs[0].membershipApplication[0]?.cvUrl,
+          licenseUrl: usersWithDocs[0].membershipApplication[0]?.licenseUrl,
+          otherDocs: usersWithDocs[0].membershipApplication[0]?.otherDocumentsUrls
+        });
+      }
+      
       setUsers(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -119,13 +146,15 @@ export default function UserManagement() {
             return {
               ...user,
               isMember: status === 'APPROVED',
-              membershipApplication: user.membershipApplication ? {
-                ...user.membershipApplication,
-                status: status,
-                // Add approvedAt and approvedBy if they're in the response
-                ...(updatedUser.approvedAt && { approvedAt: updatedUser.approvedAt }),
-                ...(updatedUser.approvedBy && { approvedBy: updatedUser.approvedBy })
-              } : null,
+              membershipApplication: user.membershipApplication && user.membershipApplication.length > 0 
+                ? user.membershipApplication.map(app => ({
+                    ...app,
+                    status: status,
+                    // Add approvedAt and approvedBy if they're in the response
+                    ...(updatedUser.approvedAt && { approvedAt: updatedUser.approvedAt }),
+                    ...(updatedUser.approvedBy && { approvedBy: updatedUser.approvedBy })
+                  }))
+                : null,
               approvalStatus: status,
               ...(updatedUser.approvedAt && { approvedAt: updatedUser.approvedAt }),
               ...(updatedUser.approvedBy && { approvedBy: updatedUser.approvedBy })
@@ -143,15 +172,18 @@ export default function UserManagement() {
         setSelectedUser(prev => {
           if (!prev) return null;
           
-          // Get the updated application from response if available
-          const updatedApplication = 
-            responseData.application || 
-            (prev.membershipApplication ? {...prev.membershipApplication, status} : null);
-            
+          // Update the application in the selected user
           return {
             ...prev,
             isMember: status === 'APPROVED',
-            membershipApplication: updatedApplication,
+            membershipApplication: prev.membershipApplication && prev.membershipApplication.length > 0
+              ? prev.membershipApplication.map(app => ({
+                  ...app,
+                  status: status,
+                  ...(responseData.user?.approvedAt && { approvedAt: responseData.user.approvedAt }),
+                  ...(responseData.user?.approvedBy && { approvedBy: responseData.user.approvedBy })
+                }))
+              : null,
             approvalStatus: status,
             ...(responseData.user?.approvedAt && { approvedAt: responseData.user.approvedAt }),
             ...(responseData.user?.approvedBy && { approvedBy: responseData.user.approvedBy })
@@ -171,6 +203,18 @@ export default function UserManagement() {
   };
 
   const openUserModal = (user: User) => {
+    // Debug the membership application document URLs
+    console.log('Opening user modal for:', user.email);
+    if (user.membershipApplication && user.membershipApplication.length > 0) {
+      console.log('Membership application found:', {
+        cvUrl: user.membershipApplication[0]?.cvUrl,
+        licenseUrl: user.membershipApplication[0]?.licenseUrl,
+        otherDocumentsUrls: user.membershipApplication[0]?.otherDocumentsUrls
+      });
+    } else {
+      console.log('No membership application found for this user.');
+    }
+    
     setSelectedUser(user);
     setShowUserModal(true);
   };
@@ -280,26 +324,26 @@ export default function UserManagement() {
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm">
-                    {user.membershipApplication ? (
+                    {user.membershipApplication && user.membershipApplication.length > 0 ? (
                       <div className="flex flex-col gap-1">
                         <span className={`inline-flex items-center gap-1 rounded-full px-2 text-xs font-semibold leading-5 
-                          ${user.membershipApplication.status === 'APPROVED' 
+                          ${user.membershipApplication[0].status === 'APPROVED' 
                             ? "bg-green-100 text-green-800" 
-                            : user.membershipApplication.status === 'REJECTED'
+                            : user.membershipApplication[0].status === 'REJECTED'
                             ? "bg-red-100 text-red-800"
                             : "bg-yellow-100 text-yellow-800"}`}>
-                          {user.membershipApplication.status === 'APPROVED' && <FaCheck className="text-xs" />}
-                          {user.membershipApplication.status === 'REJECTED' && <FaTimes className="text-xs" />}
-                          {user.membershipApplication.status === 'PENDING' && <span className="inline-block w-2 h-2 rounded-full bg-yellow-400 mr-1"></span>}
-                          {user.membershipApplication.status === 'APPROVED' ? 'APPROVED' : 
-                           user.membershipApplication.status === 'REJECTED' ? 'REJECTED' : 'PENDING'}
+                          {user.membershipApplication[0].status === 'APPROVED' && <FaCheck className="text-xs" />}
+                          {user.membershipApplication[0].status === 'REJECTED' && <FaTimes className="text-xs" />}
+                          {user.membershipApplication[0].status === 'PENDING' && <span className="inline-block w-2 h-2 rounded-full bg-yellow-400 mr-1"></span>}
+                          {user.membershipApplication[0].status === 'APPROVED' ? 'APPROVED' : 
+                           user.membershipApplication[0].status === 'REJECTED' ? 'REJECTED' : 'PENDING'}
                         </span>
                         <div className="flex items-center">
                           <span className="text-xs text-gray-500">
-                            {user.membershipApplication.createdAt 
+                            {user.membershipApplication[0].createdAt 
                               ? (() => {
                                   try {
-                                    return `Applied: ${format(new Date(user.membershipApplication.createdAt), 'MMM d, yyyy')}`;
+                                    return `Applied: ${format(new Date(user.membershipApplication[0].createdAt), 'MMM d, yyyy')}`;
                                   } catch (error) {
                                     return 'Recently applied';
                                   }
@@ -418,7 +462,7 @@ export default function UserManagement() {
               </div>
 
               {/* Membership Application */}
-              {selectedUser.membershipApplication && (
+              {selectedUser.membershipApplication && selectedUser.membershipApplication.length > 0 && (
                 <div className="bg-gray-50 p-4 rounded-lg md:col-span-2">
                   <h4 className="font-semibold text-lg mb-3">Membership Application</h4>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -428,7 +472,7 @@ export default function UserManagement() {
                         <button
                           onClick={() => handleApplicationUpdate(selectedUser.id, 'APPROVED')}
                           className={`px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                            selectedUser.membershipApplication.status === 'APPROVED'
+                            selectedUser.membershipApplication[0]?.status === 'APPROVED'
                               ? 'bg-green-600 text-white ring-2 ring-green-500'
                               : 'bg-green-100 text-green-800 hover:bg-green-200'
                           }`}
@@ -438,7 +482,7 @@ export default function UserManagement() {
                         <button
                           onClick={() => handleApplicationUpdate(selectedUser.id, 'REJECTED')}
                           className={`px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                            selectedUser.membershipApplication.status === 'REJECTED'
+                            selectedUser.membershipApplication[0]?.status === 'REJECTED'
                               ? 'bg-red-600 text-white ring-2 ring-red-500'
                               : 'bg-red-100 text-red-800 hover:bg-red-200'
                           }`}
@@ -448,7 +492,7 @@ export default function UserManagement() {
                         <button
                           onClick={() => handleApplicationUpdate(selectedUser.id, 'PENDING')}
                           className={`px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                            selectedUser.membershipApplication.status === 'PENDING'
+                            selectedUser.membershipApplication[0]?.status === 'PENDING'
                               ? 'bg-yellow-600 text-white ring-2 ring-yellow-500'
                               : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
                           }`}
@@ -458,66 +502,137 @@ export default function UserManagement() {
                       </div>
                       <p className="mt-2 text-sm text-gray-500">
                         Current status: <span className={`font-medium ${
-                          selectedUser.membershipApplication.status === 'APPROVED'
+                          selectedUser.membershipApplication[0]?.status === 'APPROVED'
                             ? 'text-green-600'
-                            : selectedUser.membershipApplication.status === 'REJECTED'
+                            : selectedUser.membershipApplication[0]?.status === 'REJECTED'
                             ? 'text-red-600'
                             : 'text-yellow-600'
-                        }`}>{selectedUser.membershipApplication.status}</span>
+                        }`}>{selectedUser.membershipApplication[0]?.status}</span>
                       </p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Submission Date</label>
                       <p className="mt-1">
-                        {selectedUser.membershipApplication.createdAt 
-                          ? format(new Date(selectedUser.membershipApplication.createdAt), 'MMM d, yyyy') 
+                        {selectedUser.membershipApplication[0]?.createdAt 
+                          ? format(new Date(selectedUser.membershipApplication[0]?.createdAt), 'MMM d, yyyy') 
                           : 'N/A'}
                       </p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">License Number</label>
-                      <p className="mt-1">{selectedUser.membershipApplication.licenseNumber || 'N/A'}</p>
+                      <p className="mt-1">{selectedUser.membershipApplication[0]?.licenseNumber || 'N/A'}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Address</label>
-                      <p className="mt-1">{selectedUser.membershipApplication.address || 'N/A'}</p>
+                      <p className="mt-1">{selectedUser.membershipApplication[0]?.address || 'N/A'}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">City</label>
-                      <p className="mt-1">{selectedUser.membershipApplication.city || 'N/A'}</p>
+                      <p className="mt-1">{selectedUser.membershipApplication[0]?.city || 'N/A'}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">County</label>
-                      <p className="mt-1">{selectedUser.membershipApplication.county || 'N/A'}</p>
+                      <p className="mt-1">{selectedUser.membershipApplication[0]?.county || 'N/A'}</p>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Documents Section - Placeholder for now */}
+              {/* Documents Section */}
               <div className="bg-gray-50 p-4 rounded-lg md:col-span-2">
                 <h4 className="font-semibold text-lg mb-3">Uploaded Documents</h4>
                 <div className="grid grid-cols-1 gap-4">
-                  <div className="border border-gray-200 rounded-md p-3 flex items-center justify-between">
-                    <div className="flex items-center">
-                      <FaFilePdf className="text-red-500 mr-2 text-xl" />
-                      <span>CV Document</span>
+                  {selectedUser.membershipApplication && selectedUser.membershipApplication.length > 0 && (
+                    <div className="border border-gray-200 rounded-md p-3">
+                      <p className="text-gray-500 mb-2 text-sm">Debug Information:</p>
+                      <pre className="text-xs bg-gray-100 p-2 overflow-auto max-h-32 rounded">
+                        {JSON.stringify({
+                          cvUrl: selectedUser.membershipApplication[0]?.cvUrl,
+                          licenseUrl: selectedUser.membershipApplication[0]?.licenseUrl,
+                          otherUrls: selectedUser.membershipApplication[0]?.otherDocumentsUrls,
+                        }, null, 2)}
+                      </pre>
                     </div>
-                    <a href="#" className="text-blue-600 hover:text-blue-800 flex items-center">
-                      <span className="mr-1">View</span>
-                      <FaExternalLinkAlt className="text-xs" />
-                    </a>
-                  </div>
-                  <div className="border border-gray-200 rounded-md p-3 flex items-center justify-between">
-                    <div className="flex items-center">
-                      <FaFilePdf className="text-red-500 mr-2 text-xl" />
-                      <span>Medical License</span>
+                  )}
+                
+                  {selectedUser.membershipApplication && selectedUser.membershipApplication.length > 0 && selectedUser.membershipApplication[0]?.cvUrl ? (
+                    <div className="border border-gray-200 rounded-md p-3 flex items-center justify-between">
+                      <div className="flex items-center">
+                        <FaFilePdf className="text-red-500 mr-2 text-xl" />
+                        <span>CV Document</span>
+                      </div>
+                      <a 
+                        href={selectedUser.membershipApplication[0]?.cvUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-blue-600 hover:text-blue-800 flex items-center"
+                      >
+                        <span className="mr-1">View</span>
+                        <FaExternalLinkAlt className="text-xs" />
+                      </a>
                     </div>
-                    <a href="#" className="text-blue-600 hover:text-blue-800 flex items-center">
-                      <span className="mr-1">View</span>
-                      <FaExternalLinkAlt className="text-xs" />
-                    </a>
-                  </div>
+                  ) : (
+                    <div className="border border-gray-200 rounded-md p-3 flex items-center justify-between bg-gray-100">
+                      <div className="flex items-center">
+                        <FaFileAlt className="text-gray-400 mr-2 text-xl" />
+                        <span className="text-gray-500">CV Document - Not Uploaded</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {selectedUser.membershipApplication && selectedUser.membershipApplication.length > 0 && selectedUser.membershipApplication[0]?.licenseUrl ? (
+                    <div className="border border-gray-200 rounded-md p-3 flex items-center justify-between">
+                      <div className="flex items-center">
+                        <FaFilePdf className="text-red-500 mr-2 text-xl" />
+                        <span>Medical License</span>
+                      </div>
+                      <a 
+                        href={selectedUser.membershipApplication[0]?.licenseUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-blue-600 hover:text-blue-800 flex items-center"
+                      >
+                        <span className="mr-1">View</span>
+                        <FaExternalLinkAlt className="text-xs" />
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="border border-gray-200 rounded-md p-3 flex items-center justify-between bg-gray-100">
+                      <div className="flex items-center">
+                        <FaFileAlt className="text-gray-400 mr-2 text-xl" />
+                        <span className="text-gray-500">Medical License - Not Uploaded</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {selectedUser.membershipApplication && selectedUser.membershipApplication.length > 0 && 
+                   selectedUser.membershipApplication[0]?.otherDocumentsUrls && 
+                   selectedUser.membershipApplication[0]?.otherDocumentsUrls.length > 0 ? (
+                    selectedUser.membershipApplication[0].otherDocumentsUrls.map((url, index) => (
+                      <div key={index} className="border border-gray-200 rounded-md p-3 flex items-center justify-between">
+                        <div className="flex items-center">
+                          <FaFilePdf className="text-red-500 mr-2 text-xl" />
+                          <span>Additional Document {index + 1}</span>
+                        </div>
+                        <a 
+                          href={url} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="text-blue-600 hover:text-blue-800 flex items-center"
+                        >
+                          <span className="mr-1">View</span>
+                          <FaExternalLinkAlt className="text-xs" />
+                        </a>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="border border-gray-200 rounded-md p-3 flex items-center justify-between bg-gray-100">
+                      <div className="flex items-center">
+                        <FaFileAlt className="text-gray-400 mr-2 text-xl" />
+                        <span className="text-gray-500">Additional Documents - None Uploaded</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -532,7 +647,9 @@ export default function UserManagement() {
               >
                 Close
               </button>
-              {selectedUser.membershipApplication && selectedUser.membershipApplication.status === 'PENDING' && (
+              {selectedUser.membershipApplication && 
+               selectedUser.membershipApplication.length > 0 && 
+               selectedUser.membershipApplication[0]?.status === 'PENDING' && (
                 <>
                   <button
                     onClick={() => handleApplicationUpdate(selectedUser.id, 'APPROVED')}

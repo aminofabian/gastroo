@@ -54,7 +54,10 @@ export async function GET() {
             address: true,
             city: true,
             county: true,
-            postalCode: true
+            postalCode: true,
+            cvUrl: true,
+            licenseUrl: true,
+            otherDocumentsUrls: true
           }
         }
       },

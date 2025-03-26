@@ -28,10 +28,10 @@ export async function PUT(request: Request) {
       return new NextResponse("Invalid request body", { status: 400 });
     }
 
-    const { isOnboarded, profileCompleteness, email, ...profileData } = data;
+    const { isOnboarded, profileCompleteness, email, cvUrl, licenseUrl, otherDocumentsUrls, ...profileData } = data;
 
     // Log the data being processed
-    console.log("Processing onboarding data:", { userId, profileData });
+    console.log("Processing onboarding data:", { userId, profileData, documentUrls: { cvUrl, licenseUrl, otherDocumentsUrls } });
 
     try {
       // Update user profile and onboarding status by ID
@@ -50,6 +50,62 @@ export async function PUT(request: Request) {
           membershipType: profileData.membershipType || undefined,
         },
       });
+
+      // Check if user already has a membership application
+      const existingApplication = await prisma.membershipApplication.findFirst({
+        where: { userId }
+      });
+
+      // Create or update membership application with document URLs
+      if (existingApplication) {
+        // Update existing application
+        await prisma.membershipApplication.update({
+          where: { id: existingApplication.id },
+          data: {
+            phone: profileData.phone || undefined,
+            designation: profileData.designation || undefined,
+            specialization: profileData.specialization || undefined,
+            licenseNumber: profileData.licenseNumber || undefined,
+            hospital: profileData.hospital || undefined,
+            address: profileData.address || undefined,
+            city: profileData.city || undefined,
+            county: profileData.county || undefined,
+            postalCode: profileData.postalCode || undefined,
+            // Save document URLs explicitly
+            cvUrl: cvUrl || undefined,
+            licenseUrl: licenseUrl || undefined,
+            otherDocumentsUrls: otherDocumentsUrls || [],
+            updatedAt: new Date()
+          }
+        });
+        
+        console.log("Updated existing membership application with document URLs");
+      } else {
+        // Create new application
+        await prisma.membershipApplication.create({
+          data: {
+            userId,
+            status: "PENDING",
+            phone: profileData.phone || "",
+            designation: profileData.designation || "",
+            specialization: profileData.specialization || "",
+            licenseNumber: profileData.licenseNumber || "",
+            hospital: profileData.hospital || "",
+            address: profileData.address || "",
+            city: profileData.city || "",
+            county: profileData.county || "",
+            postalCode: profileData.postalCode || "",
+            // Save document URLs explicitly
+            cvUrl: cvUrl || null,
+            licenseUrl: licenseUrl || null,
+            otherDocumentsUrls: otherDocumentsUrls || [],
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }
+        });
+        
+        console.log("Created new membership application with document URLs");
+      }
 
       return NextResponse.json({ success: true, user: updatedUser });
     } catch (dbError: any) {
