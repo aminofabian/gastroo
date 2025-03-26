@@ -11,10 +11,10 @@ const adminMenuItems = [
   { icon: FaUsers, label: "User Management", href: "/admin/users" },
   { icon: FaImages, label: "Hero Banners", href: "/admin/hero-banners" },
   { icon: FaCalendarAlt, label: "Events", href: "/admin/events" },
-  { icon: FaNewspaper, label: "News & Updates", href: "/admin/news" },
-  { icon: FaHandshake, label: "Partners", href: "/admin/partners" },
-  { icon: FaDonate, label: "Donations", href: "/admin/donations" },
-  { icon: FaImages, label: "Slider Info", href: "/admin/slider" },
+  // { icon: FaNewspaper, label: "News & Updates", href: "/admin/news" },
+  // { icon: FaHandshake, label: "Partners", href: "/admin/partners" },
+  // { icon: FaDonate, label: "Donations", href: "/admin/donations" },
+  // { icon: FaImages, label: "Slider Info", href: "/admin/slider" },
   { icon: FaNewspaper, label: "Resource Management", href: "/admin/resources" },
 
 ];
