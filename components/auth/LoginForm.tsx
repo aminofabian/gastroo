@@ -6,7 +6,7 @@ import { Button } from "../ui/button";
 import FormError from "../common/FormError";
 import FormSuccess from "../common/FormSuccess";
 import { login } from "@/actions/login";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Logo from "../homepage/Logo";
@@ -24,6 +24,52 @@ import {
   FormField,
   FormMessage,
 } from "../ui/form";
+
+// Success Message Component - Extracted to solve hooks ordering issue
+const SuccessMessage = ({ successData }: { successData: string }) => {
+  const successInfo = JSON.parse(successData);
+  const [countdown, setCountdown] = useState(successInfo.countdownFrom);
+  
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown]);
+  
+  return (
+    <div className="rounded-lg overflow-hidden border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50">
+      <div className="p-4 flex items-center space-x-3">
+        <div className="flex-shrink-0 h-12 w-12 flex items-center justify-center rounded-full bg-emerald-100">
+          <svg className="h-8 w-8 text-emerald-600 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div className="flex-1">
+          <h3 className="font-display text-xl font-semibold text-emerald-700">
+            {successInfo.title}
+          </h3>
+          <p className="mt-1 text-sm text-emerald-600">
+            {successInfo.message}
+          </p>
+        </div>
+      </div>
+      
+      {/* Loading bar */}
+      <div className="relative h-1 bg-emerald-100">
+        <div 
+          className="absolute left-0 top-0 h-full bg-emerald-500 transition-all duration-300 ease-in-out"
+          style={{ width: `${((successInfo.countdownFrom - countdown) / successInfo.countdownFrom) * 100}%` }}
+        />
+      </div>
+      
+      {/* Footer with countdown */}
+      <div className="p-3 bg-emerald-50 text-center text-sm text-emerald-600 font-medium border-t border-emerald-100">
+        Redirecting to dashboard in {countdown} second{countdown !== 1 ? 's' : ''}...
+      </div>
+    </div>
+  );
+};
 
 interface LoginFormProps {
   callbackUrl?: string | null;
@@ -91,8 +137,16 @@ const LoginForm = ({ callbackUrl }: LoginFormProps) => {
 
       if (!response?.error) {
         form.reset();
-        setSuccess("Logged in successfully!");
-        router.push(callbackUrl || "/dashboard");
+        setSuccess(JSON.stringify({ 
+          title: "Welcome back! 🎉", 
+          message: "Preparing your dashboard experience...", 
+          countdownFrom: 3 
+        }));
+        
+        // Add a small delay for the success message to be visible
+        setTimeout(() => {
+          router.push(callbackUrl || "/dashboard");
+        }, 3000);
       }
     } catch (error) {
       console.error(error);
@@ -243,12 +297,7 @@ const LoginForm = ({ callbackUrl }: LoginFormProps) => {
                           <p className="text-sm font-medium">{urLError}</p>
                         </div>
                       )}
-                      {success && (
-                        <div className="animate-pulse rounded-lg p-4 flex items-center space-x-3 bg-emerald-50 border border-emerald-200 text-emerald-700">
-                          <div className="text-2xl">✅</div>
-                          <p className="text-sm font-medium">{success}</p>
-                        </div>
-                      )}
+                      {success && <SuccessMessage successData={success} />}
                       <div className="flex items-center justify-between">
                         <Button 
                           size="sm" 
