@@ -298,7 +298,7 @@ const Features = () => {
               </div>
             ))}
           </div>
-          <Link href="/dashboard" className="inline-block mt-8 px-6 py-2 bg-[#40e0d0]/20 text-white rounded hover:bg-[#40e0d0]/30 transition-colors">
+          <Link href="/auth/login" className="inline-block mt-8 px-6 py-2 bg-[#40e0d0]/20 text-white rounded hover:bg-[#40e0d0]/30 transition-colors">
             Join Now →
           </Link>
         </div>
