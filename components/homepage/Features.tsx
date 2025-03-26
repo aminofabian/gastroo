@@ -122,8 +122,8 @@ const Features = () => {
     }
   };
 
-  const handleGuestRegistration = async (formData: any) => {
-    if (!selectedEventId) return;
+  const handleGuestRegistration = async (formData: { firstName: string; lastName: string; email: string; phone: string; }) => {
+    if (!selectedEventId) return { registrationId: '' };
 
     try {
       setIsLoading(selectedEventId);
@@ -143,6 +143,8 @@ const Features = () => {
         throw new Error(error);
       }
 
+      const data = await response.json();
+
       toast({
         title: "Success",
         description: "Successfully registered for the event. Please check your email for payment instructions.",
@@ -152,12 +154,15 @@ const Features = () => {
       const updatedResponse = await fetch('/api/events');
       const updatedData = await updatedResponse.json();
       setEvents(updatedData);
+      
+      return { registrationId: data.id || '' };
     } catch (error) {
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to register for event",
         variant: "destructive",
       });
+      return { registrationId: '' };
     } finally {
       setIsLoading(null);
     }
@@ -293,7 +298,7 @@ const Features = () => {
               </div>
             ))}
           </div>
-          <Link href="/join" className="inline-block mt-8 px-6 py-2 bg-[#40e0d0]/20 text-white rounded hover:bg-[#40e0d0]/30 transition-colors">
+          <Link href="/dashboard" className="inline-block mt-8 px-6 py-2 bg-[#40e0d0]/20 text-white rounded hover:bg-[#40e0d0]/30 transition-colors">
             Join Now →
           </Link>
         </div>
@@ -396,8 +401,7 @@ const Features = () => {
           setSelectedEventId(null);
         }}
         onSubmit={handleGuestRegistration}
-        isLoading={false}
-        eventTitle={events.find(e => e.id === selectedEventId)?.title || ''}
+        event={events.find(e => e.id === selectedEventId) || null}
       />
     </>
   );
