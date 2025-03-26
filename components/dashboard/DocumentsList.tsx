@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { FaBook, FaFilePdf, FaVideo, FaNewspaper, FaSearch, FaDownload, FaFileAlt, FaFileMedical, FaFileContract, FaFileSignature } from 'react-icons/fa';
+import { FaBook, FaFilePdf, FaVideo, FaNewspaper, FaSearch, FaDownload, FaFileAlt, FaFileMedical, FaFileContract, FaFileSignature, FaExclamationTriangle } from 'react-icons/fa';
+import { toast } from 'sonner';
 
 type Document = {
   id: string;
@@ -44,17 +45,145 @@ export default function DocumentsList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDocuments = async () => {
       setIsLoading(true);
+      setError(null);
+      
       try {
-        // Use the resources API but filtering for the 'Membership' category
-        const response = await fetch('/api/resources?category=Membership');
-        const data = await response.json() as Document[];
-        setDocuments(data);
+        // 1. First, fetch resources with 'Membership' category
+        const resourcesResponse = await fetch('/api/resources?category=Membership');
+        if (!resourcesResponse.ok) {
+          throw new Error(`Failed to fetch resources: ${resourcesResponse.status} ${resourcesResponse.statusText}`);
+        }
+        
+        const resourcesData = await resourcesResponse.json() as Document[];
+        
+        // Create an array to hold all documents
+        let allDocuments: Document[] = [...resourcesData];
+        
+        try {
+          // 2. Try to fetch user profile to get membership application documents
+          const userResponse = await fetch('/api/users/me');
+          
+          if (userResponse.ok) {
+            const userData = await userResponse.json();
+            
+            // 3. Add documents from user profile if available
+            if (userData) {
+              // Add CV/Resume document if available
+              if (userData.cvUrl) {
+                allDocuments.push({
+                  id: 'cv-' + userData.id,
+                  title: 'CV/Resume',
+                  description: 'CV/Resume Document',
+                  type: 'PDF',
+                  category: 'Membership',
+                  fileUrl: userData.cvUrl,
+                  createdAt: new Date().toISOString()
+                });
+              }
+              
+              // Add license document if available
+              if (userData.licenseUrl) {
+                allDocuments.push({
+                  id: 'license-' + userData.id,
+                  title: 'Medical License',
+                  description: 'Medical License Document',
+                  type: 'PDF',
+                  category: 'Membership',
+                  fileUrl: userData.licenseUrl,
+                  createdAt: new Date().toISOString()
+                });
+              }
+              
+              // Add other documents if available
+              if (userData.otherDocumentsUrls && userData.otherDocumentsUrls.length > 0) {
+                userData.otherDocumentsUrls.forEach((url: string, index: number) => {
+                  allDocuments.push({
+                    id: `other-${userData.id}-${index}`,
+                    title: `Supporting Document ${index + 1}`,
+                    description: 'Additional Supporting Document',
+                    type: 'PDF',
+                    category: 'Membership',
+                    fileUrl: url,
+                    createdAt: new Date().toISOString()
+                  });
+                });
+              }
+              
+              // 4. Check if user has a membership application with documents
+              if (userData.membershipApplication && userData.membershipApplication.length > 0) {
+                const application = userData.membershipApplication[0];
+                
+                // Add CV/Resume document if available from application
+                if (application.cvUrl) {
+                  allDocuments.push({
+                    id: 'app-cv-' + application.id,
+                    title: 'CV/Resume from Application',
+                    description: 'CV/Resume Document',
+                    type: 'PDF',
+                    category: 'Membership',
+                    fileUrl: application.cvUrl,
+                    createdAt: application.createdAt || new Date().toISOString()
+                  });
+                }
+                
+                // Add license document if available from application
+                if (application.licenseUrl) {
+                  allDocuments.push({
+                    id: 'app-license-' + application.id,
+                    title: 'Medical License from Application',
+                    description: 'Medical License Document',
+                    type: 'PDF',
+                    category: 'Membership',
+                    fileUrl: application.licenseUrl,
+                    createdAt: application.createdAt || new Date().toISOString()
+                  });
+                }
+                
+                // Add other documents if available from application
+                if (application.otherDocumentsUrls && application.otherDocumentsUrls.length > 0) {
+                  application.otherDocumentsUrls.forEach((url: string, index: number) => {
+                    allDocuments.push({
+                      id: `app-other-${application.id}-${index}`,
+                      title: `Supporting Document ${index + 1}`,
+                      description: 'Additional Supporting Document',
+                      type: 'PDF',
+                      category: 'Membership',
+                      fileUrl: url,
+                      createdAt: application.createdAt || new Date().toISOString()
+                    });
+                  });
+                }
+              }
+            }
+          } else {
+            console.warn('Could not fetch user profile data:', userResponse.status, userResponse.statusText);
+            // Don't set error - just continue with the resources we have
+          }
+        } catch (userError) {
+          console.error('Error fetching user data:', userError);
+          // Don't set error - just continue with the resources we have
+        }
+        
+        // Remove duplicates by fileUrl
+        const uniqueUrls = new Set();
+        allDocuments = allDocuments.filter(doc => {
+          if (uniqueUrls.has(doc.fileUrl)) {
+            return false;
+          }
+          uniqueUrls.add(doc.fileUrl);
+          return true;
+        });
+
+        setDocuments(allDocuments);
       } catch (error) {
         console.error('Error fetching documents:', error);
+        setError(error instanceof Error ? error.message : 'An error occurred while fetching documents');
+        toast.error('Failed to load documents. Please try again.');
       } finally {
         setIsLoading(false);
       }
@@ -82,6 +211,29 @@ export default function DocumentsList() {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border-l-4 border-red-400 p-4 mt-6">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <FaExclamationTriangle className="h-5 w-5 text-red-400" />
+          </div>
+          <div className="ml-3">
+            <p className="text-sm text-red-700">
+              Error loading documents: {error}
+            </p>
+            <button
+              className="mt-2 text-sm text-red-700 underline"
+              onClick={() => window.location.reload()}
+            >
+              Refresh page
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
