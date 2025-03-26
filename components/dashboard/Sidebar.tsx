@@ -46,7 +46,6 @@ const menuGroups = [
       { icon: FaCertificate, label: "Certificates", href: "/dashboard/certificates" },
       { icon: MdPayments, label: "Payments", href: "/dashboard/payments" },
       { icon: FaFileAlt, label: "Documents", href: "/dashboard/documents" },
-      { icon: FaHospital, label: "Facilities", href: "/dashboard/facilities" },
     ]
   }
 ];
