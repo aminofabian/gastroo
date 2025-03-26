@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from "@/auth";
+import { getUserStatistics } from '@/app/actions/statistics';
 
 export async function GET() {
   try {
@@ -9,29 +10,36 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // TODO: Replace with actual database queries
+    // Fetch actual statistics from the database
+    const userStats = await getUserStatistics();
+    
+    if (!userStats) {
+      return NextResponse.json({ error: 'Failed to fetch user statistics' }, { status: 500 });
+    }
+
+    // Transform the data to match the expected format for the sidebar
     const stats = [
       { 
         label: "CPD Points", 
-        value: "150/200", 
+        value: `${userStats.cpdPoints.value}/${userStats.cpdPoints.target}`, 
         icon: "🎯",
         description: "Annual Target"
       },
       { 
         label: "Member Status", 
-        value: "Specialist", 
+        value: session.user?.role || "Member", 
         icon: "🏅",
         description: "MMed (Medicine)"
       },
       { 
         label: "Research", 
-        value: "12", 
+        value: userStats.documents.value.toString(), 
         icon: "🔬",
         description: "Publications"
       },
       { 
         label: "Procedures", 
-        value: "523", 
+        value: userStats.eventsAttended.value.toString(), 
         icon: "⚕️",
         description: "This Year"
       },
@@ -39,6 +47,7 @@ export async function GET() {
 
     return NextResponse.json(stats);
   } catch (error) {
+    console.error('Error fetching statistics:', error);
     return NextResponse.json(
       { error: 'Failed to fetch stats' },
       { status: 500 }
