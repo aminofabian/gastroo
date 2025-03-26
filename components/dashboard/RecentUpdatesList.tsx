@@ -15,9 +15,9 @@ export default async function RecentUpdatesList() {
             <p className="text-sm text-gray-500">Latest medical updates and announcements</p>
           </div>
         </div>
-        <Link href="/dashboard/updates" className="text-sm text-[#083c74] hover:text-[#004488] font-medium">
+        <div className="text-sm text-[#083c74] hover:text-[#004488] font-medium">
           View All
-        </Link>
+        </div>
       </div>
       <div className="space-y-2.5">
         {recentUpdates.map((update, index) => (

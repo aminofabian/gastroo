@@ -22,11 +22,11 @@ export default function UpdateItem({ update, index }: { update: RecentUpdate; in
            <FaGraduationCap className="text-sm" />}
         </div>
         <div className="space-y-0.5">
-          <Link href={update.link}>
+          <div>
             <h3 className="text-[#083c74] font-medium text-sm group-hover:text-[#004488] transition-colors line-clamp-1">
               {update.title}
             </h3>
-          </Link>
+          </div>
           <p className="text-gray-500 text-xs flex items-center gap-2">
             <span className="w-1 h-1 bg-[#083c74]/30"></span>
             {format(new Date(update.date), 'MMMM d, yyyy')}
