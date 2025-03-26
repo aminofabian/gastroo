@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from "@/auth";
 import { prisma } from '@/lib/prisma';
 import { Prisma, ResourceType } from '@prisma/client';
@@ -12,16 +12,42 @@ type CreateResourceBody = {
 };
 
 // Get all resources
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const resources = await prisma.resource.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Get query parameters
+    const searchParams = request.nextUrl.searchParams;
+    const category = searchParams.get('category');
+    
+    // Build query object with filters
+    const query: any = {
+      where: {
+        userId: session.user.id,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    };
+    
+    // Add category filter if provided
+    if (category) {
+      query.where.category = category;
+    }
+    
+    // Fetch resources for the current user
+    const resources = await prisma.resource.findMany(query);
 
     return NextResponse.json(resources);
   } catch (error) {
-    console.error('Error fetching resources:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    console.error("Error fetching resources:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch resources" },
+      { status: 500 }
+    );
   }
 }
 

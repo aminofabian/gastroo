@@ -420,10 +420,21 @@ export default function MembershipForm() {
       
       console.log(`Starting upload for ${type}:`, { fileName: file.name, fileType: file.type, fileSize: file.size });
       
+      // Create a descriptive title based on document type
+      let title = file.name;
+      if (type === 'doc1') {
+        title = `CV/Resume - ${form.getValues('firstName')} ${form.getValues('lastName')}`;
+      } else if (type === 'doc2') {
+        title = `Medical License - ${form.getValues('firstName')} ${form.getValues('lastName')}`;
+      } else if (type === 'doc3') {
+        title = `Supporting Document - ${form.getValues('firstName')} ${form.getValues('lastName')}`;
+      }
+      
       // Create a FormData instance
       const formData = new FormData();
       formData.append('file', file);
       formData.append('docType', type);
+      formData.append('title', title);
       
       // Upload file using the new document upload API endpoint
       const response = await fetch('/api/documents', {
