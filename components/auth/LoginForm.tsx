@@ -66,7 +66,27 @@ const LoginForm = ({ callbackUrl }: LoginFormProps) => {
 
       if (response?.error) {
         form.reset();
-        setError(response.error);
+        // Map the error code to a user-friendly message with additional styling info
+        const errorMessages = {
+          CredentialsSignin: { 
+            message: "The email or password you entered doesn't match our records. Let's try again!", 
+            icon: "🔐", 
+            variant: "auth" 
+          },
+          OAuthAccountNotLinked: { 
+            message: "This email is already associated with a different sign-in method", 
+            icon: "🔄", 
+            variant: "warning" 
+          },
+          default: { 
+            message: "Oops! Something unexpected happened", 
+            icon: "⚠️", 
+            variant: "error" 
+          },
+        };
+        
+        const errorInfo = errorMessages[response.error as keyof typeof errorMessages] || errorMessages.default;
+        setError(JSON.stringify(errorInfo));
       }
 
       if (!response?.error) {
@@ -76,7 +96,11 @@ const LoginForm = ({ callbackUrl }: LoginFormProps) => {
       }
     } catch (error) {
       console.error(error);
-      setError("Something went wrong");
+      setError(JSON.stringify({ 
+        message: "Our servers are feeling a bit shy right now. Please try again soon!", 
+        icon: "🤖", 
+        variant: "error" 
+      }));
     } finally {
       setIsLoading(false);
     }
@@ -197,8 +221,34 @@ const LoginForm = ({ callbackUrl }: LoginFormProps) => {
                           )}
                         />
                       </div>
-                      <FormError message={error || urLError} />
-                      <FormSuccess message={success} />
+                      {error && (() => {
+                        const errorInfo = JSON.parse(error);
+                        const variantStyles = {
+                          auth: "bg-rose-50 border-rose-200 text-rose-700",
+                          warning: "bg-amber-50 border-amber-200 text-amber-700",
+                          error: "bg-red-50 border-red-200 text-red-700"
+                        };
+                        const style = variantStyles[errorInfo.variant as keyof typeof variantStyles];
+                        
+                        return (
+                          <div className={`animate-pulse rounded-lg p-4 flex items-center space-x-3 ${style} border`}>
+                            <div className="text-2xl">{errorInfo.icon}</div>
+                            <p className="text-sm font-medium">{errorInfo.message}</p>
+                          </div>
+                        );
+                      })()}
+                      {urLError && (
+                        <div className="animate-pulse rounded-lg p-4 flex items-center space-x-3 bg-amber-50 border border-amber-200 text-amber-700">
+                          <div className="text-2xl">🔄</div>
+                          <p className="text-sm font-medium">{urLError}</p>
+                        </div>
+                      )}
+                      {success && (
+                        <div className="animate-pulse rounded-lg p-4 flex items-center space-x-3 bg-emerald-50 border border-emerald-200 text-emerald-700">
+                          <div className="text-2xl">✅</div>
+                          <p className="text-sm font-medium">{success}</p>
+                        </div>
+                      )}
                       <div className="flex items-center justify-between">
                         <Button 
                           size="sm" 

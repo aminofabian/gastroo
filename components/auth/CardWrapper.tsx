@@ -44,7 +44,6 @@ const CardWrapper = ({
               </span>
             </div>
           </div>
-          <Social />
         </CardFooter>
       )}
       <CardFooter>
