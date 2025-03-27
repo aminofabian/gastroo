@@ -46,6 +46,27 @@ const SPRING_OPTIONS = {
 
 const TRANSITION_EASE = [0.32, 0.72, 0, 1];
 
+// Helper function to format links - moved outside component scope
+const formatLink = (link: string) => {
+  if (!link) return '/';
+
+  // Remove any domain prefix (localhost:3000 or actual domain)
+  const cleanLink = link.replace(/^https?:\/\/[^/]+\//, '');
+  
+  // If it's already a fully qualified URL (after cleaning), return as is
+  if (cleanLink.match(/^https?:\/\//)) {
+    return cleanLink;
+  }
+  
+  // If it looks like a domain name (contains dots and no slashes), add https://
+  if (cleanLink.match(/^[^/]+\.[^/]+/)) {
+    return `https://${cleanLink}`;
+  }
+  
+  // Otherwise treat as internal link
+  return cleanLink.startsWith('/') ? cleanLink : `/${cleanLink}`;
+};
+
 const Hero = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -360,6 +381,32 @@ const SwipeCarousel = ({ banners }: { banners: Banner[] }) => {
 
   return (
     <div className="relative overflow-hidden bg-black/20 rounded-lg">
+      {/* Banner links overlay - positioned above the draggable carousel */}
+      <div className="absolute inset-0 z-20 flex pointer-events-none">
+        {banners.map((banner, index) => (
+          <div 
+            key={`link-${banner.id}`}
+            className="w-full shrink-0 flex-none" 
+            style={{ 
+              opacity: imgIndex === index ? 1 : 0,
+              transition: 'opacity 0.3s ease'
+            }}
+          >
+            <div className="absolute bottom-0 left-0 right-0 p-6 text-white pointer-events-auto">
+              <h3 className="text-2xl font-bold mb-2">{banner.title}</h3>
+              <a
+                href={formatLink(banner.link)}
+                className="inline-block bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors"
+                target={formatLink(banner.link).includes('://') ? '_blank' : undefined}
+                rel={formatLink(banner.link).includes('://') ? 'noopener noreferrer' : undefined}
+              >
+                {banner.cta}
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <motion.div
         drag="x"
         dragConstraints={{
@@ -375,7 +422,7 @@ const SwipeCarousel = ({ banners }: { banners: Banner[] }) => {
         transition={SPRING_OPTIONS}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
-        className="flex cursor-grab items-center active:cursor-grabbing"
+        className="flex cursor-grab items-center active:cursor-grabbing relative z-10"
       >
         <Images banners={banners} imgIndex={imgIndex} />
       </motion.div>
@@ -386,26 +433,6 @@ const SwipeCarousel = ({ banners }: { banners: Banner[] }) => {
 };
 
 const Images = ({ banners, imgIndex }: { banners: Banner[]; imgIndex: number }) => {
-  const formatLink = (link: string) => {
-    if (!link) return '/';
-
-    // Remove any domain prefix (localhost:3000 or actual domain)
-    const cleanLink = link.replace(/^https?:\/\/[^/]+\//, '');
-    
-    // If it's already a fully qualified URL (after cleaning), return as is
-    if (cleanLink.match(/^https?:\/\//)) {
-      return cleanLink;
-    }
-    
-    // If it looks like a domain name (contains dots and no slashes), add https://
-    if (cleanLink.match(/^[^/]+\.[^/]+/)) {
-      return `https://${cleanLink}`;
-    }
-    
-    // Otherwise treat as internal link
-    return cleanLink.startsWith('/') ? cleanLink : `/${cleanLink}`;
-  };
-
   return (
     <>
       {banners.map((banner, index) => (
@@ -423,17 +450,7 @@ const Images = ({ banners, imgIndex }: { banners: Banner[]; imgIndex: number }) 
           className="aspect-video w-full shrink-0 rounded-lg bg-neutral-800 object-cover relative"
         >
           <div className="absolute inset-0 bg-black/25 rounded-lg" />
-          <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-            <h3 className="text-2xl font-bold mb-2">{banner.title}</h3>
-            <a
-              href={formatLink(banner.link)}
-              className="inline-block bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors"
-              target={formatLink(banner.link).includes('://') ? '_blank' : undefined}
-              rel={formatLink(banner.link).includes('://') ? 'noopener noreferrer' : undefined}
-            >
-              {banner.cta}
-            </a>
-          </div>
+          {/* Banner content moved to overlay above */}
         </motion.div>
       ))}
     </>
