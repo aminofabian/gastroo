@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { motion, useMotionValue, AnimatePresence } from "framer-motion";
 import { Banner } from "@/types";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 // Enhanced global styles with unique effects
 const styles = {
@@ -353,6 +354,7 @@ const SwipeCarousel: React.FC<{ banners: Banner[] }> = ({ banners }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [autoplayEnabled, setAutoplayEnabled] = useState(true);
   const dragStartTime = React.useRef<number | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (!autoplayEnabled) return;
@@ -463,6 +465,34 @@ const SwipeCarousel: React.FC<{ banners: Banner[] }> = ({ banners }) => {
         <Images banners={banners} imgIndex={imgIndex} />
       </motion.div>
       
+      {/* Full banner click area */}
+      {banners[imgIndex] && (
+        <div 
+          className="absolute inset-0 z-40" 
+          onClick={(e) => {
+            // Only trigger if not dragging
+            if (!isDragging) {
+              e.preventDefault();
+              e.stopPropagation();
+              
+              const url = formatLink(banners[imgIndex].link);
+              console.log('Full banner clicked, navigating to:', url);
+              
+              if (url.startsWith('/')) {
+                try {
+                  router.push(url);
+                } catch (error) {
+                  window.location.href = url;
+                }
+              } else {
+                window.open(url, '_blank', 'noopener,noreferrer');
+              }
+            }
+          }}
+          style={{ opacity: 0 }}
+        />
+      )}
+      
       {/* Banner titles and content overlay */}
       <div className="absolute inset-0 z-20 pointer-events-none">
         {banners.map((banner, index) => (
@@ -479,22 +509,35 @@ const SwipeCarousel: React.FC<{ banners: Banner[] }> = ({ banners }) => {
         ))}
       </div>
       
-      {/* Standalone CTA button - completely separate from the draggable area */}
+      {/* Standalone CTA button with absolute positioning to be above everything */}
       {banners[imgIndex] && (
-        <div className="absolute bottom-6 left-6 z-40 pointer-events-auto">
-          <button
-            onClick={handleBannerClick}
-            className="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-lg border border-white/30 hover:border-white/50 text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all active:scale-95"
-          >
-            {banners[imgIndex].cta || "Click here"}
-          </button>
-          
-          {/* Hidden direct link for accessibility and as a fallback */}
+        <div className="absolute bottom-6 left-6 z-50 pointer-events-auto" style={{ isolation: 'isolate' }}>
           <a 
-            href={formatLink(banners[imgIndex].link)} 
-            className="sr-only"
-            target={formatLink(banners[imgIndex].link).startsWith('/') ? undefined : '_blank'}
-            rel={formatLink(banners[imgIndex].link).startsWith('/') ? undefined : 'noopener noreferrer'}
+            href={formatLink(banners[imgIndex].link)}
+            className="inline-block bg-white/20 hover:bg-white/30 px-8 py-4 rounded-lg border border-white/30 hover:border-white/50 text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all active:scale-95"
+            target={formatLink(banners[imgIndex].link).startsWith('/') ? "_self" : "_blank"}
+            rel={formatLink(banners[imgIndex].link).startsWith('/') ? "" : "noopener noreferrer"}
+            data-link-url={formatLink(banners[imgIndex].link)}
+            data-link-type={formatLink(banners[imgIndex].link).startsWith('/') ? "internal" : "external"}
+            data-banner-id={banners[imgIndex].id}
+            onClick={(e) => {
+              // Add click tracking for debugging in production
+              if (typeof window !== 'undefined') {
+                console.log('Banner link clicked:', formatLink(banners[imgIndex].link));
+                
+                // For internal links, handle navigation manually if needed
+                if (formatLink(banners[imgIndex].link).startsWith('/')) {
+                  e.preventDefault();
+                  try {
+                    // Try Next.js router first
+                    router.push(formatLink(banners[imgIndex].link));
+                  } catch (error) {
+                    // Fall back to window.location if router fails
+                    window.location.href = formatLink(banners[imgIndex].link);
+                  }
+                }
+              }
+            }}
           >
             {banners[imgIndex].cta || "Click here"}
           </a>
