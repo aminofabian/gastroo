@@ -140,7 +140,7 @@ const Hero = () => {
       
       {/* Main content */}
       <div className="relative w-full min-h-screen mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-[1600px] mx-auto pt-20 sm:pt-24 flex flex-col h-full">
+        <div className="max-w-[1600px] mx-auto pt-12 sm:pt-16 flex flex-col h-full">
           {/* Grid background */}
           <div className="absolute inset-0 bg-grid-white/[0.02] bg-[length:30px_30px]" />
           
@@ -286,7 +286,7 @@ const Hero = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8 }}
                 whileHover={{ scale: 1.05 }}
-                className="absolute -bottom-6 md:bottom-auto md:top-full md:mt-8 right-0 bg-white/10 backdrop-blur-sm p-4 rounded-sm z-30"
+                className="absolute md:top-full md:mt-8 md:-right-6 right-0 bottom-auto bg-white/10 backdrop-blur-sm p-4 rounded-sm z-30"
               >
                 <motion.div 
                   className="flex items-center gap-4"
@@ -326,7 +326,7 @@ const Hero = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}
-            className="absolute bottom-8 right-8 text-white/30"
+            className="absolute bottom-4 right-8 text-white/30"
           >
             <div className="flex flex-col items-center gap-2">
               <span className="text-sm">Scroll to</span>
@@ -346,7 +346,7 @@ const Hero = () => {
   );
 };
 
-const SwipeCarousel = ({ banners }: { banners: Banner[] }) => {
+const SwipeCarousel: React.FC<{ banners: Banner[] }> = ({ banners }) => {
   const [imgIndex, setImgIndex] = useState(0);
   const dragX = useMotionValue(0);
   const [dragStartX, setDragStartX] = useState<number | null>(null);
@@ -402,54 +402,47 @@ const SwipeCarousel = ({ banners }: { banners: Banner[] }) => {
     setAutoplayEnabled(true);
   };
 
+  // Function to handle direct navigation when banner CTA is clicked
+  const handleBannerClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const currentBanner = banners[imgIndex];
+    if (!currentBanner) return;
+    
+    const url = formatLink(currentBanner.link);
+    
+    try {
+      if (url.startsWith('/')) {
+        // Try both methods for internal links
+        if (typeof window !== 'undefined') {
+          // For client-side navigation
+          window.location.href = url;
+        }
+      } else {
+        // External link - open in new tab with multiple fallbacks
+        const newWindow = window.open(url, '_blank');
+        
+        // If popup blocked, try alternative
+        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+          // Create and click a temporary link
+          const link = document.createElement('a');
+          link.href = url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.click();
+        }
+      }
+    } catch (error) {
+      console.error("Navigation error:", error);
+      // Last resort fallback
+      window.location.href = url;
+    }
+  };
+
   return (
     <div className="relative overflow-hidden bg-black/20 rounded-lg">
-      {/* Banner links overlay - positioned above the draggable carousel */}
-      <div className="absolute inset-0 z-20 flex pointer-events-none">
-        {banners.map((banner, index) => (
-          <div 
-            key={`link-${banner.id}`}
-            className="w-full shrink-0 flex-none" 
-            style={{ 
-              opacity: imgIndex === index ? 1 : 0,
-              transition: 'opacity 0.3s ease'
-            }}
-          >
-            <div 
-              className="absolute bottom-0 left-0 right-0 p-6 mb-4 text-white pointer-events-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h3 className="text-2xl font-bold mb-4">{banner.title}</h3>
-              
-              {/* Use Next.js Link for internal links, regular anchor for external */}
-              {formatLink(banner.link).startsWith('/') ? (
-                <Link 
-                  href={formatLink(banner.link)}
-                  className="inline-block bg-white/20 hover:bg-white/30 px-6 py-3 rounded-lg transition-colors border border-white/30 hover:border-white/50 text-white font-medium shadow-lg"
-                  prefetch={false}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {banner.cta || "Click here"}
-                </Link>
-              ) : (
-                <a
-                  href={formatLink(banner.link)}
-                  className="inline-block bg-white/20 hover:bg-white/30 px-6 py-3 rounded-lg transition-colors border border-white/30 hover:border-white/50 text-white font-medium shadow-lg"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => {
-                    // Ensure click propagation is stopped
-                    e.stopPropagation();
-                  }}
-                >
-                  {banner.cta || "Click here"}
-                </a>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
+      {/* Draggable carousel */}
       <motion.div
         drag="x"
         dragConstraints={{
@@ -470,13 +463,51 @@ const SwipeCarousel = ({ banners }: { banners: Banner[] }) => {
         <Images banners={banners} imgIndex={imgIndex} />
       </motion.div>
       
+      {/* Banner titles and content overlay */}
+      <div className="absolute inset-0 z-20 pointer-events-none">
+        {banners.map((banner, index) => (
+          <div 
+            key={`content-${banner.id}`}
+            className="absolute inset-0 flex flex-col justify-end p-6 mb-16" 
+            style={{ 
+              opacity: imgIndex === index ? 1 : 0,
+              transition: 'opacity 0.3s ease'
+            }}
+          >
+            <h3 className="text-2xl font-bold mb-4 text-white">{banner.title}</h3>
+          </div>
+        ))}
+      </div>
+      
+      {/* Standalone CTA button - completely separate from the draggable area */}
+      {banners[imgIndex] && (
+        <div className="absolute bottom-16 left-6 z-40 pointer-events-auto">
+          <button
+            onClick={handleBannerClick}
+            className="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-lg transition-colors border border-white/30 hover:border-white/50 text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all active:scale-95"
+          >
+            {banners[imgIndex].cta || "Click here"}
+          </button>
+          
+          {/* Hidden direct link for accessibility and as a fallback */}
+          <a 
+            href={formatLink(banners[imgIndex].link)} 
+            className="sr-only"
+            target={formatLink(banners[imgIndex].link).startsWith('/') ? undefined : '_blank'}
+            rel={formatLink(banners[imgIndex].link).startsWith('/') ? undefined : 'noopener noreferrer'}
+          >
+            {banners[imgIndex].cta || "Click here"}
+          </a>
+        </div>
+      )}
+      
       {/* Increased bottom margin for dots to ensure they don't overlap with content */}
       <Dots banners={banners} imgIndex={imgIndex} setImgIndex={setImgIndex} />
     </div>
   );
 };
 
-const Images = ({ banners, imgIndex }: { banners: Banner[]; imgIndex: number }) => {
+const Images: React.FC<{ banners: Banner[]; imgIndex: number }> = ({ banners, imgIndex }) => {
   return (
     <>
       {banners.map((banner, index) => (
@@ -501,9 +532,13 @@ const Images = ({ banners, imgIndex }: { banners: Banner[]; imgIndex: number }) 
   );
 };
 
-const Dots = ({ banners, imgIndex, setImgIndex }: { banners: Banner[]; imgIndex: number; setImgIndex: (index: number) => void }) => {
+const Dots: React.FC<{
+  banners: Banner[];
+  imgIndex: number;
+  setImgIndex: (index: number) => void;
+}> = ({ banners, imgIndex, setImgIndex }) => {
   return (
-    <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-2 z-25">
+    <div className="absolute bottom-16 right-6 flex gap-2 z-30">
       {banners.map((_, index) => (
         <button
           key={index}
