@@ -75,21 +75,44 @@ export default function HeroBannersPage() {
       setUploadingIndex(index);
       const formData = new FormData();
       formData.append("file", file);
-
-      // Use the banner API endpoint directly
-      const response = await fetch("/api/banners", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error("Upload failed");
-
-      const { banner } = await response.json();
       
-      // Update banners array with the new banner
-      const updatedBanners = [...banners];
-      updatedBanners[index] = banner;
-      setBanners(updatedBanners);
+      // For existing banners, we need to update the image
+      if (banners[index]?.id) {
+        const banner = banners[index];
+        formData.append("title", banner.title || "");
+        formData.append("link", banner.link || "");
+        formData.append("cta", banner.cta || "");
+        
+        // Use the update endpoint if the banner already exists
+        const response = await fetch(`/api/banners/${banner.id}`, {
+          method: "PUT",
+          body: formData,
+        });
+
+        if (!response.ok) throw new Error("Upload failed");
+
+        const updatedBanner = await response.json();
+        
+        // Update banners array with the updated banner
+        const updatedBanners = [...banners];
+        updatedBanners[index] = updatedBanner;
+        setBanners(updatedBanners);
+      } else {
+        // Use the create endpoint for new banners
+        const response = await fetch("/api/banners", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) throw new Error("Upload failed");
+
+        const { banner } = await response.json();
+        
+        // Update banners array with the new banner
+        const updatedBanners = [...banners];
+        updatedBanners[index] = banner;
+        setBanners(updatedBanners);
+      }
       
       toast.success("Banner updated successfully");
       router.refresh();

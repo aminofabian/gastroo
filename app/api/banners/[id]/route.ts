@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
+import { uploadToS3 } from "@/lib/s3";
 
 export async function PUT(
   req: Request,
@@ -14,20 +15,48 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const data = await req.json();
-    const { title, image, link, cta, order, active } = data;
+    // Check content type to determine how to handle the request
+    const contentType = req.headers.get("content-type") || "";
+
+    let updateData: any = {};
+
+    if (contentType.includes("multipart/form-data")) {
+      // Handle FormData for file uploads
+      const formData = await req.formData();
+      const file = formData.get("file") as File | null;
+      const title = formData.get("title") as string;
+      const link = formData.get("link") as string;
+      const cta = formData.get("cta") as string;
+      
+      if (title) updateData.title = title;
+      if (link) updateData.link = link;
+      if (cta) updateData.cta = cta;
+      
+      if (file) {
+        console.log("Uploading new file for banner...");
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const fileName = `banners/${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+        const imageUrl = await uploadToS3(buffer, fileName, file.type);
+        updateData.image = imageUrl;
+        console.log("File uploaded successfully:", imageUrl);
+      }
+    } else {
+      // Handle JSON data for regular updates
+      const data = await req.json();
+      const { title, image, link, cta, order, active } = data;
+
+      if (title) updateData.title = title;
+      if (image) updateData.image = image;
+      if (link) updateData.link = link;
+      if (cta) updateData.cta = cta;
+      if (typeof order === 'number') updateData.order = order;
+      if (typeof active === 'boolean') updateData.active = active;
+    }
 
     console.log("Updating banner with ID:", params.id);
     const banner = await prisma.banner.update({
       where: { id: params.id },
-      data: {
-        ...(title && { title }),
-        ...(image && { image }),
-        ...(link && { link }),
-        ...(cta && { cta }),
-        ...(typeof order === 'number' && { order }),
-        ...(typeof active === 'boolean' && { active }),
-      },
+      data: updateData,
     });
     
     console.log("Banner updated successfully");

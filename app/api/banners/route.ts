@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     if (file) {
       console.log("Uploading file to S3...");
       const buffer = Buffer.from(await file.arrayBuffer());
-      const fileName = `banners/${Date.now()}-${file.name}`;
+      const fileName = `banners/${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
       image = await uploadToS3(buffer, fileName, file.type);
       console.log("File uploaded successfully:", image);
     }

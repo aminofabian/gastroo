@@ -9,7 +9,7 @@ const s3Client = new S3Client({
 });
 
 export async function uploadToS3(file: Buffer, fileName: string, contentType: string): Promise<string> {
-  const key = `events/materials/${Date.now()}-${fileName}`;
+  const key = fileName;
 
   await s3Client.send(
     new PutObjectCommand({
