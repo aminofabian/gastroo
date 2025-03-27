@@ -75,23 +75,7 @@ interface EventData {
   }>;
 }
 
-type FormValues = {
-  title: string;
-  description: string;
-  type: EventType;
-  startDate: string;
-  endDate: string;
-  venue: string;
-  objectives: string[];
-  cpdPoints: number;
-  speakers: string[];
-  moderators: string[];
-  capacity?: number | null;
-  registrationDeadline?: string | null;
-  materials?: File[];
-  memberPrice?: number | null;
-  nonMemberPrice?: number | null;
-};
+type FormValues = z.infer<typeof formSchema>;
 
 const ACCEPTED_FILE_TYPES = {
   'application/pdf': '.pdf',
@@ -114,18 +98,18 @@ const formatBytes = (bytes: number, decimals = 2) => {
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  description: z.string().min(1, "Description is required"),
-  type: z.nativeEnum(EventType),
+  description: z.string().optional().default(""),
+  type: z.nativeEnum(EventType).optional().default("CONFERENCE" as EventType),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
-  venue: z.string().min(1, "Venue is required"),
-  objectives: z.array(z.string()).min(1, "At least one objective is required"),
-  cpdPoints: z.number().min(0, "CPD points must be non-negative"),
-  speakers: z.array(z.string()),
-  moderators: z.array(z.string()),
+  venue: z.string().optional().default(""),
+  objectives: z.array(z.string()).optional().default([]),
+  cpdPoints: z.number().nonnegative().optional().default(0),
+  speakers: z.array(z.string()).optional().default([]),
+  moderators: z.array(z.string()).optional().default([]),
   capacity: z.number().nullable().optional(),
   registrationDeadline: z.string().nullable().optional(),
-  materials: z.array(z.custom<File>()).optional(),
+  materials: z.array(z.custom<File>()).optional().default([]),
   memberPrice: z.number().nullable().optional(),
   nonMemberPrice: z.number().nullable().optional(),
 });
@@ -140,6 +124,8 @@ export default function EventManagement() {
   const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
   const [showRegistrationsModal, setShowRegistrationsModal] = useState(false);
   const [selectedEventForRegistrations, setSelectedEventForRegistrations] = useState<EventData | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [fileErrors, setFileErrors] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
@@ -276,9 +262,43 @@ export default function EventManagement() {
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setFileErrors(null);
+    
+    // Validate each file
+    const invalidFiles = files.filter(file => {
+      // Check if file type is in accepted formats
+      const isValidType = Object.keys(ACCEPTED_FILE_TYPES).includes(file.type);
+      
+      // Check if file size is under 10MB
+      const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB limit
+      
+      return !isValidType || !isValidSize;
+    });
+    
+    if (invalidFiles.length > 0) {
+      setFileErrors('Some files are not valid. Please ensure all files are of accepted types and under 10MB.');
+      return;
+    }
+    
+    setSelectedFiles(files);
+    form.setValue('materials', files);
+  };
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
+      if (fileErrors) {
+        toast({
+          title: "Error",
+          description: fileErrors,
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const url = selectedEvent
         ? `/api/admin/events/${selectedEvent.id}`
         : "/api/admin/events";
@@ -291,25 +311,32 @@ export default function EventManagement() {
 
       const formData = new FormData();
       formData.append("title", values.title);
-      formData.append("description", values.description);
-      formData.append("type", values.type);
+      formData.append("description", values.description || "");
+      formData.append("type", values.type || "CONFERENCE");
       formData.append("startDate", values.startDate);
       formData.append("endDate", values.endDate);
-      formData.append("venue", values.venue);
-      formData.append("objectives", JSON.stringify(values.objectives));
-      formData.append("cpdPoints", values.cpdPoints.toString());
-      formData.append("speakers", JSON.stringify(values.speakers));
-      formData.append("moderators", JSON.stringify(values.moderators));
-      if (values.capacity) formData.append("capacity", values.capacity.toString());
-      if (values.registrationDeadline) formData.append("registrationDeadline", values.registrationDeadline);
+      formData.append("venue", values.venue || "");
+      formData.append("objectives", JSON.stringify(values.objectives || []));
+      formData.append("cpdPoints", (values.cpdPoints || 0).toString());
+      formData.append("speakers", JSON.stringify(values.speakers || []));
+      formData.append("moderators", JSON.stringify(values.moderators || []));
+      if (values.capacity !== undefined && values.capacity !== null) 
+        formData.append("capacity", values.capacity.toString());
+      if (values.registrationDeadline) 
+        formData.append("registrationDeadline", values.registrationDeadline);
       
       formData.append("memberPrice", values.memberPrice === null || values.memberPrice === undefined ? 'null' : values.memberPrice.toString());
       formData.append("nonMemberPrice", values.nonMemberPrice === null || values.nonMemberPrice === undefined ? 'null' : values.nonMemberPrice.toString());
 
-      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-      if (fileInput && fileInput.files) {
-        for (const file of Array.from(fileInput.files)) {
+      // Handle file uploads
+      if (selectedFiles && selectedFiles.length > 0) {
+        for (const file of selectedFiles) {
           formData.append("materials", file);
+          console.log('Adding file to form data:', {
+            name: file.name,
+            type: file.type,
+            size: file.size
+          });
         }
       }
 
@@ -318,7 +345,29 @@ export default function EventManagement() {
         body: formData,
       });
 
-      if (!response.ok) throw new Error(`Failed to ${selectedEvent ? 'update' : 'create'} event`);
+      // Handle response similar to banner upload
+      const contentType = response.headers.get("content-type");
+      
+      // Clone the response before reading it
+      const responseClone = response.clone();
+      
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error('Response parsing error:', {
+          status: responseClone.status,
+          contentType,
+        });
+        // Read the text from the cloned response
+        const text = await responseClone.text();
+        console.error('Response text:', text);
+        throw new Error('Failed to parse server response');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || data.details || `Failed to ${selectedEvent ? 'update' : 'create'} event`);
+      }
 
       toast({
         title: "Success",
@@ -326,13 +375,14 @@ export default function EventManagement() {
       });
       setOpen(false);
       setSelectedEvent(null);
+      setSelectedFiles([]);
       form.reset();
       fetchEvents();
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error ${selectedEvent ? 'updating' : 'creating'} event:`, error);
       toast({
         title: "Error",
-        description: `Failed to ${selectedEvent ? 'update' : 'create'} event`,
+        description: error.message || `Failed to ${selectedEvent ? 'update' : 'create'} event`,
         variant: "destructive",
       });
     } finally {
@@ -674,7 +724,7 @@ export default function EventManagement() {
                       <FormControl>
                         <Textarea 
                           className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-text" 
-                          value={field.value.join('\n')} 
+                          value={field.value?.join('\n') || ''} 
                           onChange={(e) => field.onChange(e.target.value.split('\n').filter(line => line.trim() !== ''))}
                         />
                       </FormControl>
@@ -693,7 +743,7 @@ export default function EventManagement() {
                         <FormControl>
                           <Textarea 
                             className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-text" 
-                            value={field.value.join('\n')} 
+                            value={field.value?.join('\n') || ''} 
                             onChange={(e) => field.onChange(e.target.value.split('\n').filter(line => line.trim() !== ''))}
                           />
                         </FormControl>
@@ -710,7 +760,7 @@ export default function EventManagement() {
                         <FormControl>
                           <Textarea 
                             className="min-h-[80px] resize-none border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-text" 
-                            value={field.value.join('\n')} 
+                            value={field.value?.join('\n') || ''} 
                             onChange={(e) => field.onChange(e.target.value.split('\n').filter(line => line.trim() !== ''))}
                           />
                         </FormControl>
@@ -727,16 +777,27 @@ export default function EventManagement() {
                     <FormItem>
                       <FormLabel className="text-sm font-semibold text-[#c22f63]">Materials</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="file" 
-                          className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer" 
-                          accept={Object.keys(ACCEPTED_FILE_TYPES).join(",")}
-                          onChange={(e) => {
-                            const files = Array.from(e.target.files || []);
-                            field.onChange(files);
-                          }}
-                          multiple
-                        />
+                        <div className="space-y-3">
+                          <Input 
+                            type="file" 
+                            className="h-10 border-[#c22f63]/20 focus:border-[#c22f63] focus:ring-[#c22f63] shadow-sm cursor-pointer" 
+                            accept={Object.keys(ACCEPTED_FILE_TYPES).join(",")}
+                            onChange={handleFileSelect}
+                            multiple
+                          />
+                          {fileErrors && (
+                            <div className="text-red-500 text-sm">
+                              {fileErrors}
+                            </div>
+                          )}
+                          {selectedFiles.length > 0 && (
+                            <div className="text-sm text-gray-500">
+                              {selectedFiles.length} file(s) selected ({selectedFiles.reduce((total, file) => total + file.size, 0) / 1024 / 1024 < 1 
+                                ? `${(selectedFiles.reduce((total, file) => total + file.size, 0) / 1024).toFixed(1)} KB` 
+                                : `${(selectedFiles.reduce((total, file) => total + file.size, 0) / 1024 / 1024).toFixed(1)} MB`})
+                            </div>
+                          )}
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
