@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { motion, useMotionValue, AnimatePresence } from "framer-motion";
 import { Banner } from "@/types";
+import Link from "next/link";
 
 // Enhanced global styles with unique effects
 const styles = {
@@ -50,21 +51,28 @@ const TRANSITION_EASE = [0.32, 0.72, 0, 1];
 const formatLink = (link: string) => {
   if (!link) return '/';
 
-  // Remove any domain prefix (localhost:3000 or actual domain)
-  const cleanLink = link.replace(/^https?:\/\/[^/]+\//, '');
-  
-  // If it's already a fully qualified URL (after cleaning), return as is
-  if (cleanLink.match(/^https?:\/\//)) {
-    return cleanLink;
+  // Handle empty or null values
+  if (!link.trim()) return '/';
+
+  try {
+    // Try to create a URL object to test if it's a valid URL
+    new URL(link);
+    // If it doesn't throw, it's a valid URL, return as is
+    return link;
+  } catch (e) {
+    // Not a valid URL, so treat as a path
+    
+    // Remove any leading domain parts if present
+    const cleanLink = link.replace(/^https?:\/\/[^/]+\//, '');
+    
+    // If it looks like a domain name (contains dots and no slashes), add https://
+    if (cleanLink.match(/^[^/]+\.[^/]+/)) {
+      return `https://${cleanLink}`;
+    }
+    
+    // Otherwise treat as internal link - ensure it starts with '/'
+    return cleanLink.startsWith('/') ? cleanLink : `/${cleanLink}`;
   }
-  
-  // If it looks like a domain name (contains dots and no slashes), add https://
-  if (cleanLink.match(/^[^/]+\.[^/]+/)) {
-    return `https://${cleanLink}`;
-  }
-  
-  // Otherwise treat as internal link
-  return cleanLink.startsWith('/') ? cleanLink : `/${cleanLink}`;
 };
 
 const Hero = () => {
@@ -342,7 +350,9 @@ const SwipeCarousel = ({ banners }: { banners: Banner[] }) => {
   const [imgIndex, setImgIndex] = useState(0);
   const dragX = useMotionValue(0);
   const [dragStartX, setDragStartX] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [autoplayEnabled, setAutoplayEnabled] = useState(true);
+  const dragStartTime = React.useRef<number | null>(null);
 
   useEffect(() => {
     if (!autoplayEnabled) return;
@@ -357,12 +367,24 @@ const SwipeCarousel = ({ banners }: { banners: Banner[] }) => {
 
   const onDragStart = () => {
     setDragStartX(dragX.get());
+    setIsDragging(true);
+    dragStartTime.current = Date.now();
     setAutoplayEnabled(false);
   };
 
   const onDragEnd = () => {
     const dragEndX = dragX.get();
-    if (dragStartX === null) return;
+    const dragEndTime = Date.now();
+    const dragDuration = dragStartTime.current ? dragEndTime - dragStartTime.current : 0;
+    
+    // Only consider it a drag if it lasted more than 100ms
+    const isRealDrag = dragDuration > 100;
+    
+    if (dragStartX === null || !isRealDrag) {
+      setIsDragging(false);
+      setAutoplayEnabled(true);
+      return;
+    }
 
     const dragDelta = dragEndX - dragStartX;
 
@@ -376,6 +398,7 @@ const SwipeCarousel = ({ banners }: { banners: Banner[] }) => {
       }
     }
 
+    setIsDragging(false);
     setAutoplayEnabled(true);
   };
 
@@ -392,16 +415,36 @@ const SwipeCarousel = ({ banners }: { banners: Banner[] }) => {
               transition: 'opacity 0.3s ease'
             }}
           >
-            <div className="absolute bottom-0 left-0 right-0 p-6 mb-4 text-white pointer-events-auto">
+            <div 
+              className="absolute bottom-0 left-0 right-0 p-6 mb-4 text-white pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <h3 className="text-2xl font-bold mb-4">{banner.title}</h3>
-              <a
-                href={formatLink(banner.link)}
-                className="inline-block bg-white/20 hover:bg-white/30 px-6 py-3 rounded-lg transition-colors border border-white/30 hover:border-white/50 text-white font-medium shadow-lg"
-                target={formatLink(banner.link).includes('://') ? '_blank' : undefined}
-                rel={formatLink(banner.link).includes('://') ? 'noopener noreferrer' : undefined}
-              >
-                {banner.cta || "Click here"}
-              </a>
+              
+              {/* Use Next.js Link for internal links, regular anchor for external */}
+              {formatLink(banner.link).startsWith('/') ? (
+                <Link 
+                  href={formatLink(banner.link)}
+                  className="inline-block bg-white/20 hover:bg-white/30 px-6 py-3 rounded-lg transition-colors border border-white/30 hover:border-white/50 text-white font-medium shadow-lg"
+                  prefetch={false}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {banner.cta || "Click here"}
+                </Link>
+              ) : (
+                <a
+                  href={formatLink(banner.link)}
+                  className="inline-block bg-white/20 hover:bg-white/30 px-6 py-3 rounded-lg transition-colors border border-white/30 hover:border-white/50 text-white font-medium shadow-lg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    // Ensure click propagation is stopped
+                    e.stopPropagation();
+                  }}
+                >
+                  {banner.cta || "Click here"}
+                </a>
+              )}
             </div>
           </div>
         ))}
