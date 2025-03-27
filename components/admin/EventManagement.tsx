@@ -96,6 +96,9 @@ const formatBytes = (bytes: number, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB instead of 10MB
+const MAX_COMBINED_SIZE = 10 * 1024 * 1024; // 10MB total limit for all files combined
+
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional().default(""),
@@ -266,19 +269,28 @@ export default function EventManagement() {
     const files = Array.from(e.target.files || []);
     setFileErrors(null);
     
+    // Calculate total size of all files
+    const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+    
+    // Validate total size
+    if (totalSize > MAX_COMBINED_SIZE) {
+      setFileErrors(`Total file size (${formatBytes(totalSize)}) exceeds the maximum allowed (${formatBytes(MAX_COMBINED_SIZE)}). Please reduce file sizes.`);
+      return;
+    }
+    
     // Validate each file
     const invalidFiles = files.filter(file => {
       // Check if file type is in accepted formats
       const isValidType = Object.keys(ACCEPTED_FILE_TYPES).includes(file.type);
       
-      // Check if file size is under 10MB
-      const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB limit
+      // Check if individual file size is under limit
+      const isValidSize = file.size <= MAX_FILE_SIZE;
       
       return !isValidType || !isValidSize;
     });
     
     if (invalidFiles.length > 0) {
-      setFileErrors('Some files are not valid. Please ensure all files are of accepted types and under 10MB.');
+      setFileErrors(`Some files are not valid. Please ensure all files are of accepted types and under ${formatBytes(MAX_FILE_SIZE)}.`);
       return;
     }
     
@@ -785,6 +797,11 @@ export default function EventManagement() {
                             onChange={handleFileSelect}
                             multiple
                           />
+                          <div className="text-xs text-gray-500">
+                            Accepted file types: {Object.values(ACCEPTED_FILE_TYPES).join(', ')} | 
+                            Max size per file: {formatBytes(MAX_FILE_SIZE)} | 
+                            Max total size: {formatBytes(MAX_COMBINED_SIZE)}
+                          </div>
                           {fileErrors && (
                             <div className="text-red-500 text-sm">
                               {fileErrors}

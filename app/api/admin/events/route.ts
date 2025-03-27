@@ -16,7 +16,8 @@ const ACCEPTED_FILE_TYPES = [
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 ];
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // Reduced to 5MB per file
+const MAX_COMBINED_SIZE = 10 * 1024 * 1024; // 10MB total for all files
 
 export async function GET() {
   try {
@@ -75,7 +76,17 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const formData = await req.formData();
+    // Use a try/catch block specifically for form parsing
+    let formData;
+    try {
+      formData = await req.formData();
+    } catch (error) {
+      console.error("[EVENTS_POST] Form data parsing error:", error);
+      return NextResponse.json({ 
+        error: "Failed to parse form data. The payload might be too large.", 
+        details: "Maximum allowed file size is 5MB per file, and 10MB total"
+      }, { status: 413 });
+    }
     
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
@@ -98,8 +109,8 @@ export async function POST(req: Request) {
     const memberPrice = memberPriceStr === 'null' || memberPriceStr === '' ? null : parseFloat(memberPriceStr);
     const nonMemberPrice = nonMemberPriceStr === 'null' || nonMemberPriceStr === '' ? null : parseFloat(nonMemberPriceStr);
 
-    if (!title || !description || !type || !startDate || !endDate || !venue || !objectives) {
-      return new NextResponse("Missing required fields", { status: 400 });
+    if (!title || !startDate || !endDate) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     // Generate base slug
@@ -120,42 +131,65 @@ export async function POST(req: Request) {
 
     // Validate prices
     if (memberPrice !== null && (isNaN(memberPrice) || memberPrice < 0)) {
-      return new NextResponse("Invalid member price", { status: 400 });
+      return NextResponse.json({ error: "Invalid member price" }, { status: 400 });
     }
     if (nonMemberPrice !== null && (isNaN(nonMemberPrice) || nonMemberPrice < 0)) {
-      return new NextResponse("Invalid non-member price", { status: 400 });
+      return NextResponse.json({ error: "Invalid non-member price" }, { status: 400 });
     }
 
     // Handle file uploads with validation
     const materials: Record<string, string> = {};
     const files = formData.getAll("materials") as File[];
     
+    // Calculate total size of all files
+    const totalFileSize = files.reduce((sum, file) => sum + file.size, 0);
+    if (totalFileSize > MAX_COMBINED_SIZE) {
+      return NextResponse.json({ 
+        error: "Total file size exceeds the maximum allowed",
+        details: `Maximum combined size is ${MAX_COMBINED_SIZE / 1024 / 1024}MB, uploaded: ${(totalFileSize / 1024 / 1024).toFixed(2)}MB`
+      }, { status: 413 });
+    }
+    
     for (const file of files) {
       // Validate file type
       if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
-        return new NextResponse(`Invalid file type: ${file.type}`, { status: 400 });
+        return NextResponse.json({
+          error: "Invalid file type",
+          details: `File '${file.name}' has unsupported type: ${file.type}`
+        }, { status: 400 });
       }
 
       // Validate file size
       if (file.size > MAX_FILE_SIZE) {
-        return new NextResponse(`File too large: ${file.name}`, { status: 400 });
+        return NextResponse.json({
+          error: "File too large",
+          details: `File '${file.name}' is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Maximum allowed is ${MAX_FILE_SIZE / 1024 / 1024}MB per file.`
+        }, { status: 413 });
       }
 
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const fileUrl = await uploadToS3(buffer, file.name, file.type);
-      materials[file.name] = fileUrl;
+      try {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const fileUrl = await uploadToS3(buffer, file.name, file.type);
+        materials[file.name] = fileUrl;
+      } catch (uploadError) {
+        console.error("[EVENTS_POST] S3 upload error:", uploadError);
+        return NextResponse.json({
+          error: "Failed to upload file",
+          details: `Error uploading '${file.name}' to storage.`
+        }, { status: 500 });
+      }
     }
 
     const event = await db.event.create({
       data: {
         title,
-        description,
+        description: description || "",
         type,
         startDate: new Date(startDate),
         endDate: new Date(endDate),
-        venue,
+        venue: venue || "",
         slug,
-        objectives,
+        objectives: objectives || [],
         cpdPoints: cpdPoints || 0,
         speakers: speakers || [],
         moderators: moderators || [],
@@ -167,9 +201,12 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json(event);
+    return NextResponse.json({ success: true, event });
   } catch (error) {
     console.error("[EVENTS_POST]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    return NextResponse.json({ 
+      error: "Internal Server Error", 
+      details: error instanceof Error ? error.message : "Unknown error"
+    }, { status: 500 });
   }
 } 
