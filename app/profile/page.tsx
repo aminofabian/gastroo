@@ -239,12 +239,16 @@ export default function EditProfilePage() {
       if (imageFile) {
         const formData = new FormData();
         formData.append("file", imageFile);
-        const uploadResponse = await fetch("/api/upload", {
+
+        // Use the same approach as banner uploads
+        const uploadResponse = await fetch("/api/upload/direct", {
           method: "POST",
           body: formData,
         });
+        
         if (!uploadResponse.ok) throw new Error("Failed to upload image");
-        const { url } = await uploadResponse.json();
+        const { url, success } = await uploadResponse.json();
+        if (!success) throw new Error("Failed to upload image");
         values.image = url;
       }
 
