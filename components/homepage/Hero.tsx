@@ -278,7 +278,7 @@ const Hero = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8 }}
                 whileHover={{ scale: 1.05 }}
-                className="absolute -bottom-6 right-0 bg-white/10 backdrop-blur-sm p-4 rounded-sm"
+                className="absolute -bottom-6 md:bottom-auto md:top-full md:mt-8 right-0 bg-white/10 backdrop-blur-sm p-4 rounded-sm z-30"
               >
                 <motion.div 
                   className="flex items-center gap-4"
@@ -392,15 +392,15 @@ const SwipeCarousel = ({ banners }: { banners: Banner[] }) => {
               transition: 'opacity 0.3s ease'
             }}
           >
-            <div className="absolute bottom-0 left-0 right-0 p-6 text-white pointer-events-auto">
-              <h3 className="text-2xl font-bold mb-2">{banner.title}</h3>
+            <div className="absolute bottom-0 left-0 right-0 p-6 mb-4 text-white pointer-events-auto">
+              <h3 className="text-2xl font-bold mb-4">{banner.title}</h3>
               <a
                 href={formatLink(banner.link)}
-                className="inline-block bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors"
+                className="inline-block bg-white/20 hover:bg-white/30 px-6 py-3 rounded-lg transition-colors border border-white/30 hover:border-white/50 text-white font-medium shadow-lg"
                 target={formatLink(banner.link).includes('://') ? '_blank' : undefined}
                 rel={formatLink(banner.link).includes('://') ? 'noopener noreferrer' : undefined}
               >
-                {banner.cta}
+                {banner.cta || "Click here"}
               </a>
             </div>
           </div>
@@ -426,7 +426,8 @@ const SwipeCarousel = ({ banners }: { banners: Banner[] }) => {
       >
         <Images banners={banners} imgIndex={imgIndex} />
       </motion.div>
-
+      
+      {/* Increased bottom margin for dots to ensure they don't overlap with content */}
       <Dots banners={banners} imgIndex={imgIndex} setImgIndex={setImgIndex} />
     </div>
   );
@@ -459,7 +460,7 @@ const Images = ({ banners, imgIndex }: { banners: Banner[]; imgIndex: number }) 
 
 const Dots = ({ banners, imgIndex, setImgIndex }: { banners: Banner[]; imgIndex: number; setImgIndex: (index: number) => void }) => {
   return (
-    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+    <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-2 z-25">
       {banners.map((_, index) => (
         <button
           key={index}
