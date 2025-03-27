@@ -270,7 +270,7 @@ const Hero = () => {
           </div>
 
           {/* Stats and image section */}
-          <div className="relative mt-12 lg:mt-0 lg:absolute lg:right-8 lg:top-1/2 lg:-translate-y-1/2 lg:w-[45%]">
+          <div className="relative mt-8 lg:mt-0 lg:absolute lg:right-8 lg:top-[40%] lg:-translate-y-1/2 lg:w-[45%]">
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -286,7 +286,7 @@ const Hero = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8 }}
                 whileHover={{ scale: 1.05 }}
-                className="absolute md:top-full md:mt-8 md:-right-6 right-0 bottom-auto bg-white/10 backdrop-blur-sm p-4 rounded-sm z-30"
+                className="absolute md:top-full md:mt-12 md:-right-6 right-0 bottom-auto bg-white/10 backdrop-blur-sm p-4 rounded-sm z-30"
               >
                 <motion.div 
                   className="flex items-center gap-4"
@@ -468,23 +468,23 @@ const SwipeCarousel: React.FC<{ banners: Banner[] }> = ({ banners }) => {
         {banners.map((banner, index) => (
           <div 
             key={`content-${banner.id}`}
-            className="absolute inset-0 flex flex-col justify-end p-6 mb-16" 
+            className="absolute inset-0 flex flex-col justify-end p-6" 
             style={{ 
               opacity: imgIndex === index ? 1 : 0,
               transition: 'opacity 0.3s ease'
             }}
           >
-            <h3 className="text-2xl font-bold mb-4 text-white">{banner.title}</h3>
+            <h3 className="text-2xl font-bold mb-16 text-white drop-shadow-lg">{banner.title}</h3>
           </div>
         ))}
       </div>
       
       {/* Standalone CTA button - completely separate from the draggable area */}
       {banners[imgIndex] && (
-        <div className="absolute bottom-16 left-6 z-40 pointer-events-auto">
+        <div className="absolute bottom-6 left-6 z-40 pointer-events-auto">
           <button
             onClick={handleBannerClick}
-            className="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-lg transition-colors border border-white/30 hover:border-white/50 text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all active:scale-95"
+            className="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-lg border border-white/30 hover:border-white/50 text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all active:scale-95"
           >
             {banners[imgIndex].cta || "Click here"}
           </button>
@@ -522,7 +522,7 @@ const Images: React.FC<{ banners: Banner[]; imgIndex: number }> = ({ banners, im
             scale: imgIndex === index ? 1 : 0.85,
           }}
           transition={SPRING_OPTIONS}
-          className="aspect-video w-full shrink-0 rounded-lg bg-neutral-800 object-cover relative"
+          className="aspect-[16/9] w-full shrink-0 rounded-lg bg-neutral-800 object-cover relative"
         >
           <div className="absolute inset-0 bg-black/25 rounded-lg" />
           {/* Banner content moved to overlay above */}
@@ -538,7 +538,7 @@ const Dots: React.FC<{
   setImgIndex: (index: number) => void;
 }> = ({ banners, imgIndex, setImgIndex }) => {
   return (
-    <div className="absolute bottom-16 right-6 flex gap-2 z-30">
+    <div className="absolute bottom-6 right-6 flex gap-2 z-30">
       {banners.map((_, index) => (
         <button
           key={index}
