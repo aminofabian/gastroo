@@ -95,7 +95,7 @@ export default async function BlogPost({ params }: PostProps) {
             </div>
 
             <div 
-              className="prose prose-lg max-w-none prose-headings:font-merriweather prose-p:text-gray-600 prose-a:text-[#0f5a5e] prose-a:no-underline hover:prose-a:text-[#c22f61]"
+              className="prose prose-lg max-w-none prose-headings:font-merriweather prose-p:text-gray-600 prose-a:text-[#0f5a5e] prose-a:no-underline hover:prose-a:text-[#003366]"
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
           </div>

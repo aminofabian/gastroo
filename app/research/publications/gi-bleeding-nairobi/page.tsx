@@ -13,7 +13,7 @@ export default function GiBleedingPublicationPage() {
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-[#c22f61] text-white py-16">
+      <div className="bg-[#003366] text-white py-16">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center mb-6">
             <Link href="/research/publications" className="flex items-center text-white/80 hover:text-white transition-colors">
@@ -47,16 +47,16 @@ export default function GiBleedingPublicationPage() {
           {/* Publication Info Bar */}
           <div className="bg-gray-50 p-6 border-b flex flex-wrap justify-between gap-4">
             <div className="flex items-center">
-              <span className="px-3 py-1 bg-[#c22f61]/10 text-[#c22f61] rounded-full text-sm font-medium">
+              <span className="px-3 py-1 bg-[#003366]/10 text-[#003366] rounded-full text-sm font-medium">
                 Endoscopy
               </span>
             </div>
             <div className="flex gap-3">
-              <button className="flex items-center text-gray-600 hover:text-[#c22f61] transition-colors">
+              <button className="flex items-center text-gray-600 hover:text-[#003366] transition-colors">
                 <Download size={18} className="mr-1" />
                 <span className="text-sm">PDF</span>
               </button>
-              <button className="flex items-center text-gray-600 hover:text-[#c22f61] transition-colors">
+              <button className="flex items-center text-gray-600 hover:text-[#003366] transition-colors">
                 <Share2 size={18} className="mr-1" />
                 <span className="text-sm">Share</span>
               </button>
@@ -249,7 +249,7 @@ export default function GiBleedingPublicationPage() {
               <div className="grid md:grid-cols-2 gap-6">
                 <Link href="/research/publications/hpylori-infection-kenya" className="block group">
                   <div className="bg-gray-50 p-6 rounded-lg h-full hover:shadow-md transition-shadow">
-                    <h3 className="font-medium text-gray-800 mb-2 group-hover:text-[#c22f61] transition-colors">
+                    <h3 className="font-medium text-gray-800 mb-2 group-hover:text-[#003366] transition-colors">
                       Prevalence and Risk Factors of Helicobacter pylori Infection in Kenya: A Cross-Sectional Study
                     </h3>
                     <p className="text-gray-500 text-sm mb-2">Kimani J, et al. (2023)</p>
@@ -261,7 +261,7 @@ export default function GiBleedingPublicationPage() {
                 
                 <Link href="/research/publications/ulcers-nsaids-kenya" className="block group">
                   <div className="bg-gray-50 p-6 rounded-lg h-full hover:shadow-md transition-shadow">
-                    <h3 className="font-medium text-gray-800 mb-2 group-hover:text-[#c22f61] transition-colors">
+                    <h3 className="font-medium text-gray-800 mb-2 group-hover:text-[#003366] transition-colors">
                       Peptic Ulcer Disease and NSAID Use in Kenya: A Hospital-Based Case-Control Study
                     </h3>
                     <p className="text-gray-500 text-sm mb-2">Okoth K, et al. (2019)</p>

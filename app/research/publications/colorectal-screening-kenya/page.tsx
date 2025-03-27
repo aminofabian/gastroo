@@ -13,7 +13,7 @@ export default function ColorectalScreeningPublicationPage() {
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-[#c22f61] text-white py-16">
+      <div className="bg-[#003366] text-white py-16">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center mb-6">
             <Link href="/research/publications" className="flex items-center text-white/80 hover:text-white transition-colors">
@@ -47,16 +47,16 @@ export default function ColorectalScreeningPublicationPage() {
           {/* Publication Info Bar */}
           <div className="bg-gray-50 p-6 border-b flex flex-wrap justify-between gap-4">
             <div className="flex items-center">
-              <span className="px-3 py-1 bg-[#c22f61]/10 text-[#c22f61] rounded-full text-sm font-medium">
+              <span className="px-3 py-1 bg-[#003366]/10 text-[#003366] rounded-full text-sm font-medium">
                 Oncology
               </span>
             </div>
             <div className="flex gap-3">
-              <button className="flex items-center text-gray-600 hover:text-[#c22f61] transition-colors">
+              <button className="flex items-center text-gray-600 hover:text-[#003366] transition-colors">
                 <Download size={18} className="mr-1" />
                 <span className="text-sm">PDF</span>
               </button>
-              <button className="flex items-center text-gray-600 hover:text-[#c22f61] transition-colors">
+              <button className="flex items-center text-gray-600 hover:text-[#003366] transition-colors">
                 <Share2 size={18} className="mr-1" />
                 <span className="text-sm">Share</span>
               </button>
@@ -138,42 +138,42 @@ export default function ColorectalScreeningPublicationPage() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-gray-700">Limited resources/equipment</span>
-                        <span className="font-medium text-[#c22f61]">76%</span>
+                        <span className="font-medium text-[#003366]">76%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
-                        <div className="bg-[#c22f61] h-2.5 rounded-full" style={{ width: '76%' }}></div>
+                        <div className="bg-[#003366] h-2.5 rounded-full" style={{ width: '76%' }}></div>
                       </div>
                       
                       <div className="flex items-center justify-between">
                         <span className="text-gray-700">High cost of screening</span>
-                        <span className="font-medium text-[#c22f61]">82%</span>
+                        <span className="font-medium text-[#003366]">82%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
-                        <div className="bg-[#c22f61] h-2.5 rounded-full" style={{ width: '82%' }}></div>
+                        <div className="bg-[#003366] h-2.5 rounded-full" style={{ width: '82%' }}></div>
                       </div>
                       
                       <div className="flex items-center justify-between">
                         <span className="text-gray-700">Insufficient trained personnel</span>
-                        <span className="font-medium text-[#c22f61]">72%</span>
+                        <span className="font-medium text-[#003366]">72%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
-                        <div className="bg-[#c22f61] h-2.5 rounded-full" style={{ width: '72%' }}></div>
+                        <div className="bg-[#003366] h-2.5 rounded-full" style={{ width: '72%' }}></div>
                       </div>
                       
                       <div className="flex items-center justify-between">
                         <span className="text-gray-700">Poor awareness/knowledge</span>
-                        <span className="font-medium text-[#c22f61]">68%</span>
+                        <span className="font-medium text-[#003366]">68%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
-                        <div className="bg-[#c22f61] h-2.5 rounded-full" style={{ width: '68%' }}></div>
+                        <div className="bg-[#003366] h-2.5 rounded-full" style={{ width: '68%' }}></div>
                       </div>
                       
                       <div className="flex items-center justify-between">
                         <span className="text-gray-700">Cultural barriers/stigma</span>
-                        <span className="font-medium text-[#c22f61]">54%</span>
+                        <span className="font-medium text-[#003366]">54%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
-                        <div className="bg-[#c22f61] h-2.5 rounded-full" style={{ width: '54%' }}></div>
+                        <div className="bg-[#003366] h-2.5 rounded-full" style={{ width: '54%' }}></div>
                       </div>
                     </div>
                   </div>
@@ -225,35 +225,35 @@ export default function ColorectalScreeningPublicationPage() {
             <div className="border-t pt-8 mt-8">
               <h2 className="text-2xl font-serif font-bold text-gray-800 mb-6">Recommendations for Improving CRC Screening</h2>
               <div className="space-y-6">
-                <div className="bg-[#c22f61]/5 p-6 rounded-lg">
+                <div className="bg-[#003366]/5 p-6 rounded-lg">
                   <h3 className="font-medium text-gray-800 mb-3">1. Phased Implementation Approach</h3>
                   <p className="text-gray-600">
                     Begin with targeted screening of high-risk populations (family history, symptomatic patients) using FOBT as the primary screening tool, with gradual expansion to population-based screening as resources increase.
                   </p>
                 </div>
                 
-                <div className="bg-[#c22f61]/5 p-6 rounded-lg">
+                <div className="bg-[#003366]/5 p-6 rounded-lg">
                   <h3 className="font-medium text-gray-800 mb-3">2. National Guidelines and Protocol Development</h3>
                   <p className="text-gray-600">
                     Develop clear, resource-stratified national guidelines for CRC screening that can be adapted to different healthcare settings across Kenya, with standardized protocols for screening, follow-up, and referral.
                   </p>
                 </div>
                 
-                <div className="bg-[#c22f61]/5 p-6 rounded-lg">
+                <div className="bg-[#003366]/5 p-6 rounded-lg">
                   <h3 className="font-medium text-gray-800 mb-3">3. Healthcare Provider Training</h3>
                   <p className="text-gray-600">
                     Invest in training more gastroenterologists and nurse endoscopists, and educate primary care providers on CRC risk assessment and screening recommendations to increase screening referrals.
                   </p>
                 </div>
                 
-                <div className="bg-[#c22f61]/5 p-6 rounded-lg">
+                <div className="bg-[#003366]/5 p-6 rounded-lg">
                   <h3 className="font-medium text-gray-800 mb-3">4. Public Education and Awareness</h3>
                   <p className="text-gray-600">
                     Develop culturally appropriate educational campaigns that address stigma and misconceptions around CRC and screening procedures, using multiple communication channels including community health workers.
                   </p>
                 </div>
                 
-                <div className="bg-[#c22f61]/5 p-6 rounded-lg">
+                <div className="bg-[#003366]/5 p-6 rounded-lg">
                   <h3 className="font-medium text-gray-800 mb-3">5. Innovative Financing Mechanisms</h3>
                   <p className="text-gray-600">
                     Advocate for inclusion of CRC screening in national health insurance coverage, develop public-private partnerships, and explore sliding fee scales or voucher systems to reduce cost barriers.
@@ -288,7 +288,7 @@ export default function ColorectalScreeningPublicationPage() {
               <div className="grid md:grid-cols-2 gap-6">
                 <Link href="/research/publications/gi-bleeding-nairobi" className="block group">
                   <div className="bg-gray-50 p-6 rounded-lg h-full hover:shadow-md transition-shadow">
-                    <h3 className="font-medium text-gray-800 mb-2 group-hover:text-[#c22f61] transition-colors">
+                    <h3 className="font-medium text-gray-800 mb-2 group-hover:text-[#003366] transition-colors">
                       Endoscopic Management of Gastrointestinal Bleeding: A Retrospective Analysis of Cases in Nairobi
                     </h3>
                     <p className="text-gray-500 text-sm mb-2">Omondi L, et al. (2022)</p>
@@ -300,7 +300,7 @@ export default function ColorectalScreeningPublicationPage() {
                 
                 <Link href="/research/publications/ibd-nairobi-cohort" className="block group">
                   <div className="bg-gray-50 p-6 rounded-lg h-full hover:shadow-md transition-shadow">
-                    <h3 className="font-medium text-gray-800 mb-2 group-hover:text-[#c22f61] transition-colors">
+                    <h3 className="font-medium text-gray-800 mb-2 group-hover:text-[#003366] transition-colors">
                       Clinical Presentation and Management of Inflammatory Bowel Disease: Experience from a Nairobi Cohort
                     </h3>
                     <p className="text-gray-500 text-sm mb-2">Gitau W, et al. (2021)</p>

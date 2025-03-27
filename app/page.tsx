@@ -53,7 +53,7 @@ export default function Home() {
 
             {/* Features Section with top wave separator */}
             <section className="relative bg-white pt-20 pb-20">
-              <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-[#af2a57] to-transparent pointer-events-none" />
+              <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-[#002347] to-transparent pointer-events-none" />
               <div className="relative">
                 <Features />
               </div>
@@ -71,7 +71,7 @@ export default function Home() {
           {/* Publications Section with subtle separator */}
           {/* <section className="relative bg-white pt-5">
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-            <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-b from-transparent to-[#c22f61]" />
+            <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-b from-transparent to-[#003366]" />
             <div className="relative">
               <Publications />
             </div>
@@ -90,7 +90,7 @@ export default function Home() {
           </section>
 
           {/* Footer */}
-          <section className="relative bg-[#c22f61]">
+          <section className="relative bg-[#003366]">
             <Footer />
           </section>
         </Suspense>

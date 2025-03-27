@@ -77,7 +77,7 @@ The website is fully responsive and optimized for:
 ## 🎨 Design System
 
 - **Colors**:
-  - Primary: `#c22f61` (Navy emerald)
+  - Primary: `#003366` (Navy emerald)
   - Secondary: `#0f5a5e` (Turquoise)
   - Accents: Various opacity levels of primary/secondary colors
 

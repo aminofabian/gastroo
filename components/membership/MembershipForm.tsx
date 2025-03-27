@@ -493,11 +493,11 @@ export default function MembershipForm() {
               <div
                 className={`group flex flex-col border-l-4 py-2 pl-4 md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4 ${
                   index <= currentStep
-                    ? "border-[#c22f61]"
+                    ? "border-[#003366]"
                     : "border-gray-200"
                 }`}
               >
-                <span className="text-sm font-medium text-[#c22f61]">
+                <span className="text-sm font-medium text-[#003366]">
                   Step {index + 1}
                 </span>
                 <span className="text-sm font-medium">{step.title}</span>
@@ -750,7 +750,7 @@ export default function MembershipForm() {
                         />
                         {uploadingFiles && currentlyUploading === 'cvUrl' && (
                           <div className="flex items-center space-x-2 text-sm text-gray-500">
-                            <Loader2 className="w-4 h-4 animate-spin text-[#c22f61]" />
+                            <Loader2 className="w-4 h-4 animate-spin text-[#003366]" />
                             <span>Uploading document 1...</span>
                           </div>
                         )}
@@ -794,7 +794,7 @@ export default function MembershipForm() {
                         />
                         {uploadingFiles && currentlyUploading === 'licenseUrl' && (
                           <div className="flex items-center space-x-2 text-sm text-gray-500">
-                            <Loader2 className="w-4 h-4 animate-spin text-[#c22f61]" />
+                            <Loader2 className="w-4 h-4 animate-spin text-[#003366]" />
                             <span>Uploading document 2...</span>
                           </div>
                         )}
@@ -838,7 +838,7 @@ export default function MembershipForm() {
                         />
                         {uploadingFiles && currentlyUploading === 'otherDocumentsUrls' && (
                           <div className="flex items-center space-x-2 text-sm text-gray-500">
-                            <Loader2 className="w-4 h-4 animate-spin text-[#c22f61]" />
+                            <Loader2 className="w-4 h-4 animate-spin text-[#003366]" />
                             <span>Uploading document 3...</span>
                           </div>
                         )}
@@ -875,7 +875,7 @@ export default function MembershipForm() {
                         type="button"
                         disabled={isSubmitting}
                         className={`h-24 flex flex-col items-center justify-center space-y-2 relative ${
-                          field.value === "new" ? "bg-[#c22f61] text-white" : "bg-gray-100"
+                          field.value === "new" ? "bg-[#003366] text-white" : "bg-gray-100"
                         }`}
                         onClick={(e) => {
                           field.onChange("new");
@@ -895,7 +895,7 @@ export default function MembershipForm() {
                         type="button"
                         disabled={isSubmitting}
                         className={`h-24 flex flex-col items-center justify-center space-y-2 relative ${
-                          field.value === "renewal" ? "bg-[#c22f61] text-white" : "bg-gray-100"
+                          field.value === "renewal" ? "bg-[#003366] text-white" : "bg-gray-100"
                         }`}
                         onClick={(e) => {
                           field.onChange("renewal");
@@ -946,7 +946,7 @@ export default function MembershipForm() {
                       type="button"
                       onClick={handlePayment}
                       disabled={isSubmitting || paymentStatus.paid}
-                      className="w-full h-12 mt-4 bg-[#c22f61] hover:bg-[#a02550] text-white"
+                      className="w-full h-12 mt-4 bg-[#003366] hover:bg-[#a02550] text-white"
                     >
                       {isSubmitting ? (
                         <div className="flex items-center justify-center">
@@ -1029,7 +1029,7 @@ export default function MembershipForm() {
               <Button 
                 type="submit"
                 disabled={isSubmitting || !paymentStatus.paid}
-                className="h-12 bg-[#c22f61] hover:bg-[#004488] text-white font-display font-bold transition-colors"
+                className="h-12 bg-[#003366] hover:bg-[#004488] text-white font-display font-bold transition-colors"
               >
                 {isSubmitting ? "Submitting..." : "Submit Application"}
               </Button>
@@ -1037,7 +1037,7 @@ export default function MembershipForm() {
               <Button
                 type="button"
                 onClick={next}
-                className="h-12 bg-[#c22f61] hover:bg-[#004488] text-white font-display font-bold transition-colors"
+                className="h-12 bg-[#003366] hover:bg-[#004488] text-white font-display font-bold transition-colors"
               >
                 Next
               </Button>

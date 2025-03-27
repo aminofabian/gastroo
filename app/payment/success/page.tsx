@@ -15,7 +15,7 @@ export default function PaymentSuccessPage() {
         <p className="text-gray-600 mb-8">
           Thank you for your membership payment. Your account has been successfully updated.
         </p>
-        <Button asChild className="w-full bg-[#c22f61] hover:bg-[#004488]">
+        <Button asChild className="w-full bg-[#003366] hover:bg-[#004488]">
           <Link href="/dashboard"> 
             Go to Dashboard
           </Link>

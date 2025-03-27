@@ -64,7 +64,7 @@ export default function AdminDashboard() {
           <p className="text-red-500">Error: {error}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-[#c22f61] text-white hover:bg-[#004488] transition-colors"
+            className="mt-4 px-4 py-2 bg-[#003366] text-white hover:bg-[#004488] transition-colors"
           >
             Try Again
           </button>
@@ -77,7 +77,7 @@ export default function AdminDashboard() {
     return (
       <AdminLayout>
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#c22f61] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#003366] mx-auto"></div>
           <p className="text-gray-500 mt-4">Loading dashboard data...</p>
         </div>
       </AdminLayout>
@@ -128,25 +128,25 @@ export default function AdminDashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <button className="p-4 bg-[#c22f61] text-white hover:bg-[#004488] transition-colors">
+          <button className="p-4 bg-[#003366] text-white hover:bg-[#004488] transition-colors">
             <div className="flex items-center gap-3">
               <FaUsers className="text-xl" />
               <span>Add New Member</span>
             </div>
           </button>
-          <button className="p-4 bg-[#c22f61] text-white hover:bg-[#004488] transition-colors">
+          <button className="p-4 bg-[#003366] text-white hover:bg-[#004488] transition-colors">
             <div className="flex items-center gap-3">
               <FaHandshake className="text-xl" />
               <span>Add Partner</span>
             </div>
           </button>
-          <button className="p-4 bg-[#c22f61] text-white hover:bg-[#004488] transition-colors">
+          <button className="p-4 bg-[#003366] text-white hover:bg-[#004488] transition-colors">
             <div className="flex items-center gap-3">
               <FaNewspaper className="text-xl" />
               <span>Post Update</span>
             </div>
           </button>
-          <button className="p-4 bg-[#c22f61] text-white hover:bg-[#004488] transition-colors">
+          <button className="p-4 bg-[#003366] text-white hover:bg-[#004488] transition-colors">
             <div className="flex items-center gap-3">
               <FaDonate className="text-xl" />
               <span>Record Donation</span>

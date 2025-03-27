@@ -64,13 +64,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="flex items-center justify-between px-6 py-3">
                 {/* Left side */}
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8  bg-[#c22f61]/5 flex items-center justify-center">
-                    <FaUserMd className="text-[#c22f61]" />
+                  <div className="w-8 h-8  bg-[#003366]/5 flex items-center justify-center">
+                    <FaUserMd className="text-[#003366]" />
                   </div>
                   <div className="space-y-0.5">
                     <div className="text-gray-800 font-semibold tracking-wide">{fullName}</div>
                     {formattedDesignation && (
-                      <div className="text-xs font-medium text-[#c22f61]/70">{formattedDesignation}</div>
+                      <div className="text-xs font-medium text-[#003366]/70">{formattedDesignation}</div>
                     )}
                     <div className="text-xs text-gray-500">{user?.role || 'Loading...'}</div>
                   </div>
@@ -94,7 +94,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   >
                     <FaBell className="text-xl" />
                     {notifications.length > 0 && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#c22f61] text-xs flex items-center justify-center text-white">
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#003366] text-xs flex items-center justify-center text-white">
                         {notifications.length}
                       </span>
                     )}

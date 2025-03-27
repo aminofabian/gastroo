@@ -73,7 +73,7 @@ const NewPasswordForm = () => {
                           {...field}
                           placeholder="Enter your new password"
                           type="password"
-                          className="h-12 bg-gray-50/50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#c22f61] focus:ring-[#c22f61]/20"
+                          className="h-12 bg-gray-50/50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#003366] focus:ring-[#003366]/20"
                         />
                       </FormControl>
                       <FormMessage className="text-sm text-red-500 font-light" />
@@ -86,7 +86,7 @@ const NewPasswordForm = () => {
               <Button
                 variant="default"
                 type="submit"
-                className="w-full h-12 bg-[#c22f61] hover:bg-[#004488] text-white font-display font-bold transition-colors"
+                className="w-full h-12 bg-[#003366] hover:bg-[#004488] text-white font-display font-bold transition-colors"
                 disabled={isPending}
               >
                 {isPending ? "Resetting..." : "Reset Password"}

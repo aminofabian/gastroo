@@ -76,7 +76,7 @@ export default async function DashboardPage() {
       <DashboardClient />
       <DashboardLayout>
         {/* Welcome Section */}
-        <div className="relative overflow-hidden mb-8 bg-gradient-to-r from-[#c22f61] to-[#004488]">
+        <div className="relative overflow-hidden mb-8 bg-gradient-to-r from-[#003366] to-[#004488]">
           <div className="absolute inset-0 bg-grid-white/10" />
           <div className="relative p-8">
             <h1 className="text-3xl font-bold text-white mb-2">Welcome Back, {firstName}</h1>

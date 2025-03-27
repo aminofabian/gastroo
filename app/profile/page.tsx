@@ -614,7 +614,7 @@ export default function EditProfilePage() {
               <div className="flex justify-end">
                 <Button
                   type="submit"
-                  className="bg-[#c22f61] hover:bg-[#004488] text-white px-8 min-w-[150px]"
+                  className="bg-[#003366] hover:bg-[#004488] text-white px-8 min-w-[150px]"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (

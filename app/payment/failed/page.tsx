@@ -15,7 +15,7 @@ export default function PaymentFailedPage() {
         <p className="text-gray-600 mb-8">
           We were unable to process your payment. Please try again or contact support if the problem persists.
         </p>
-        <Button asChild className="w-full bg-[#c22f61] hover:bg-[#004488]">
+        <Button asChild className="w-full bg-[#003366] hover:bg-[#004488]">
           <Link href="/membership">
             Try Again
           </Link>

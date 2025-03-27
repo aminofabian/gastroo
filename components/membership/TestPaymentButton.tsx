@@ -40,7 +40,7 @@ export default function TestPaymentButton() {
       <Button
         onClick={testPayment}
         disabled={isLoading}
-        className="w-full bg-[#c22f61] hover:bg-[#a02550] text-white"
+        className="w-full bg-[#003366] hover:bg-[#a02550] text-white"
       >
         {isLoading ? (
           <div className="flex items-center justify-center">

@@ -23,7 +23,7 @@ const ResearchHero = () => {
   }, [images.length]);
 
   return (
-    <div className="relative h-screen min-h-[600px] bg-[#c22f61]">
+    <div className="relative h-screen min-h-[600px] bg-[#003366]">
       {images.map((image, index) => (
         <div
           key={image}
@@ -40,7 +40,7 @@ const ResearchHero = () => {
           />
         </div>
       ))}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#c22f61]/80 to-[#c22f61]/95" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#003366]/80 to-[#003366]/95" />
       <div className="relative h-full max-w-7xl mx-auto px-4 flex items-center">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -68,7 +68,7 @@ const ResearchAreas = () => (
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         viewport={{ once: true }}
-        className="text-4xl font-serif font-bold text-[#c22f61] text-center mb-16"
+        className="text-4xl font-serif font-bold text-[#003366] text-center mb-16"
       >
         Our Research Focus Areas
       </motion.h2>
@@ -111,7 +111,7 @@ const ResearchAreas = () => (
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
             viewport={{ once: true }}
-            className="bg-gray-50 p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 border-t-4 border-[#c22f61]"
+            className="bg-gray-50 p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 border-t-4 border-[#003366]"
           >
             <div className="text-4xl mb-4">{item.icon}</div>
             <h3 className="text-2xl font-serif font-bold text-gray-800 mb-4">
@@ -138,7 +138,7 @@ const Publications = () => (
         viewport={{ once: true }}
         className="text-center mb-16"
       >
-        <h2 className="text-4xl font-serif font-bold text-[#c22f61] mb-4">
+        <h2 className="text-4xl font-serif font-bold text-[#003366] mb-4">
           Recent Publications
         </h2>
         <p className="text-gray-600 max-w-3xl mx-auto">
@@ -194,7 +194,7 @@ const Publications = () => (
             <p className="text-gray-600 mb-4">
               <span className="font-medium">{pub.journal}</span>, {pub.year}
             </p>
-            <Link href={pub.link} className="text-[#c22f61] hover:text-[#004488] transition-colors duration-300 font-medium">
+            <Link href={pub.link} className="text-[#003366] hover:text-[#004488] transition-colors duration-300 font-medium">
               Read Publication →
             </Link>
           </motion.div>
@@ -208,7 +208,7 @@ const Publications = () => (
         viewport={{ once: true }}
         className="mt-12 text-center"
       >
-        <Link href="/research/publications" className="inline-block bg-[#c22f61] text-white px-8 py-3 rounded-md hover:bg-[#004488] transition-colors duration-300 shadow-lg">
+        <Link href="/research/publications" className="inline-block bg-[#003366] text-white px-8 py-3 rounded-md hover:bg-[#004488] transition-colors duration-300 shadow-lg">
           View All Publications
         </Link>
       </motion.div>
@@ -235,10 +235,10 @@ const ResearchOpportunities = () => (
               fill
               className="object-cover transition-transform duration-700 hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#c22f61]/30 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#003366]/30 to-transparent" />
           </div>
           <div className="absolute -bottom-8 -right-8 w-48 h-48 animate-spin-slow">
-            <svg viewBox="0 0 100 100" className="w-full h-full text-[#c22f61]/10">
+            <svg viewBox="0 0 100 100" className="w-full h-full text-[#003366]/10">
               <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98" fill="none" stroke="currentColor" strokeWidth="2" />
             </svg>
           </div>
@@ -249,7 +249,7 @@ const ResearchOpportunities = () => (
           transition={{ duration: 0.6, delay: 0.2 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl font-serif font-bold text-[#c22f61] mb-8">
+          <h2 className="text-4xl font-serif font-bold text-[#003366] mb-8">
             Research Opportunities
           </h2>
           <p className="text-gray-600 text-lg mb-6 font-serif leading-relaxed">
@@ -271,7 +271,7 @@ const ResearchOpportunities = () => (
                 viewport={{ once: true }}
                 className="flex items-start"
               >
-                <span className="text-[#c22f61] mr-2">✓</span>
+                <span className="text-[#003366] mr-2">✓</span>
                 <span className="text-gray-600">{item}</span>
               </motion.li>
             ))}
@@ -285,7 +285,7 @@ const ResearchOpportunities = () => (
 
 // Call to Action Section
 const CallToAction = () => (
-  <section className="py-24 bg-[#c22f61]">
+  <section className="py-24 bg-[#003366]">
     <div className="max-w-7xl mx-auto px-4 text-center">
       <motion.div
         initial={{ opacity: 0, y: 20 }}

@@ -122,7 +122,7 @@ export default function PublicationsPage() {
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-[#c22f61] text-white py-16">
+      <div className="bg-[#003366] text-white py-16">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center mb-6">
             <Link href="/research" className="flex items-center text-white/80 hover:text-white transition-colors">
@@ -148,7 +148,7 @@ export default function PublicationsPage() {
               <input
                 type="text"
                 placeholder="Search publications by title, author, or keywords..."
-                className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#c22f61]/50"
+                className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366]/50"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -156,7 +156,7 @@ export default function PublicationsPage() {
             <div className="flex items-center gap-2">
               <Filter size={20} className="text-gray-600" />
               <select
-                className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#c22f61]/50"
+                className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366]/50"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
@@ -188,7 +188,7 @@ export default function PublicationsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border-l-4 border-[#c22f61]"
+                className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border-l-4 border-[#003366]"
               >
                 <div className="mb-1">
                   <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm inline-block mb-2">
@@ -208,7 +208,7 @@ export default function PublicationsPage() {
                 <p className="text-gray-600 mb-4 line-clamp-3">
                   {pub.abstract}
                 </p>
-                <Link href={pub.link} className="text-[#c22f61] hover:text-[#004488] transition-colors duration-300 font-medium">
+                <Link href={pub.link} className="text-[#003366] hover:text-[#004488] transition-colors duration-300 font-medium">
                   Read Full Publication →
                 </Link>
               </motion.div>
@@ -218,7 +218,7 @@ export default function PublicationsPage() {
               <p className="text-gray-500 text-lg">No publications match your search criteria.</p>
               <button 
                 onClick={() => {setSearchQuery(''); setSelectedCategory('All');}}
-                className="mt-4 text-[#c22f61] hover:text-[#004488] transition-colors duration-300"
+                className="mt-4 text-[#003366] hover:text-[#004488] transition-colors duration-300"
               >
                 Clear filters
               </button>

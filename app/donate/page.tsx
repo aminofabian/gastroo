@@ -73,7 +73,7 @@ export default function DonatePage() {
               transition={{ delay: index * 0.2 }}
               className="bg-white GSK p-6 shadow-md text-center"
             >
-              <h3 className="text-3xl font-bold text-[#c22f61] mb-2">{item.metric}</h3>
+              <h3 className="text-3xl font-bold text-[#003366] mb-2">{item.metric}</h3>
               <h4 className="text-xl font-semibold mb-2">{item.label}</h4>
               <p className="text-gray-600">{item.description}</p>
             </motion.div>
@@ -94,8 +94,8 @@ export default function DonatePage() {
                 }}
                 className={`p-6 GSK border-2 transition-all ${
                   selectedAmount === option.amount
-                    ? 'border-[#c22f61] bg-[#c22f61] text-white'
-                    : 'border-gray-200 hover:border-[#c22f61]'
+                    ? 'border-[#003366] bg-[#003366] text-white'
+                    : 'border-gray-200 hover:border-[#003366]'
                 }`}
               >
                 <div className="text-xl font-bold mb-2">{option.label}</div>
@@ -118,7 +118,7 @@ export default function DonatePage() {
                 setCustomAmount(e.target.value);
                 setSelectedAmount(null);
               }}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#c22f61] focus:border-[#c22f61]"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#003366] focus:border-[#003366]"
               placeholder="Enter amount"
             />
           </div>
@@ -130,7 +130,7 @@ export default function DonatePage() {
             className={`w-full py-4 px-6 rounded-md text-white font-semibold text-lg transition-all ${
               isProcessing || (!selectedAmount && !customAmount)
                 ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-[#c22f61] hover:bg-[#002244]'
+                : 'bg-[#003366] hover:bg-[#002244]'
             }`}
           >
             {isProcessing ? 'Processing...' : 'Donate Now'}

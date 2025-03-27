@@ -73,7 +73,7 @@ const MapPoint = ({ top, left, size = 'md', label = '', delay = 0 }: MapPointPro
         </div>
         {label && (
           <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-            <span className="text-white text-xs font-semibold bg-[#c22f61]/50 px-2 py-0.5">
+            <span className="text-white text-xs font-semibold bg-[#003366]/50 px-2 py-0.5">
               {label}
             </span>
           </div>

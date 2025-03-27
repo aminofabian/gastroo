@@ -49,7 +49,7 @@ const CPDPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       {/* Hero Section */}
-      <div className="relative bg-[#c22f61] text-white py-20">
+      <div className="relative bg-[#003366] text-white py-20">
         <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-10"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="max-w-3xl">
@@ -68,7 +68,7 @@ const CPDPage = () => {
         {/* Introduction Section */}
         <div className="mb-16">
           <div className="bg-white  p-8 shadow-xl">
-            <h2 className="text-2xl font-merriweather font-bold text-[#c22f61] mb-6">
+            <h2 className="text-2xl font-merriweather font-bold text-[#003366] mb-6">
               Understanding CPD Points
             </h2>
             <div className="prose prose-lg max-w-none">
@@ -86,7 +86,7 @@ const CPDPage = () => {
         <div className="grid md:grid-cols-2 gap-8 mb-16">
           {cpdCategories.map((category, index) => (
             <div key={index} className="bg-white  p-8 shadow-xl hover:shadow-2xl transition-shadow">
-              <h3 className="text-xl font-merriweather font-bold text-[#c22f61] mb-4">
+              <h3 className="text-xl font-merriweather font-bold text-[#003366] mb-4">
                 {category.title}
               </h3>
               <div className="mb-4">
@@ -112,7 +112,7 @@ const CPDPage = () => {
         </div>
 
         {/* Why CPD Points Matter */}
-        <div className="bg-gradient-to-br from-[#c22f61] to-[#002244]  p-8 text-white mb-16">
+        <div className="bg-gradient-to-br from-[#003366] to-[#002244]  p-8 text-white mb-16">
           <h2 className="text-2xl font-merriweather font-bold mb-6">
             Why CPD Points Matter
           </h2>
@@ -146,7 +146,7 @@ const CPDPage = () => {
 
         {/* How to Track Points */}
         <div className="bg-white  p-8 shadow-xl">
-          <h2 className="text-2xl font-merriweather font-bold text-[#c22f61] mb-6">
+          <h2 className="text-2xl font-merriweather font-bold text-[#003366] mb-6">
             How to Track Your CPD Points
           </h2>
           <div className="prose prose-lg max-w-none">
@@ -156,7 +156,7 @@ const CPDPage = () => {
             <div className="flex justify-center mt-8">
               <a 
                 href="/dashboard/cpd"
-                className="inline-flex items-center px-6 py-3 bg-[#c22f61] text-white  font-merriweather font-semibold hover:bg-[#002244] transition-colors"
+                className="inline-flex items-center px-6 py-3 bg-[#003366] text-white  font-merriweather font-semibold hover:bg-[#002244] transition-colors"
               >
                 Track Your Points
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

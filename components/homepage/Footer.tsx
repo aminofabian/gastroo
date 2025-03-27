@@ -8,7 +8,7 @@ import Logo from './Logo';
 
 const Footer = () => {
   return (
-    <footer className="relative bg-[#ce5981] text-white py-20">
+    <footer className="relative bg-[#001a35] text-white py-20">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Column 1: Logo & Brief Info */}

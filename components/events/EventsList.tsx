@@ -585,7 +585,7 @@ export default function EventsList() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h2 className="text-2xl font-bold text-[#c22f61]">
+                        <h2 className="text-2xl font-bold text-[#003366]">
                           {event.title}
                         </h2>
                         <Badge className={getEventTypeColor(event.type)}>
@@ -627,26 +627,26 @@ export default function EventsList() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div className="space-y-3">
                       <div className="flex items-center text-gray-600">
-                        <CalendarDays className="w-5 h-5 mr-2 text-[#c22f61]" />
+                        <CalendarDays className="w-5 h-5 mr-2 text-[#003366]" />
                         <span>
                           {format(new Date(event.startDate), "PPP")} - {format(new Date(event.endDate), "PPP")}
                         </span>
                       </div>
                       <div className="flex items-center text-gray-600">
-                        <Clock className="w-5 h-5 mr-2 text-[#c22f61]" />
+                        <Clock className="w-5 h-5 mr-2 text-[#003366]" />
                         <span>
                           {format(new Date(event.startDate), "p")} - {format(new Date(event.endDate), "p")}
                         </span>
                       </div>
                       <div className="flex items-center text-gray-600">
-                        <MapPin className="w-5 h-5 mr-2 text-[#c22f61]" />
+                        <MapPin className="w-5 h-5 mr-2 text-[#003366]" />
                         <span>{event.venue}</span>
                       </div>
                     </div>
 
                     <div className="space-y-3">
                       <div className="flex items-center text-gray-600">
-                        <Users className="w-5 h-5 mr-2 text-[#c22f61]" />
+                        <Users className="w-5 h-5 mr-2 text-[#003366]" />
                         <span>
                           {event.registrations?.length || 0} attendees
                           {event.capacity && ` / ${event.capacity} capacity`}
@@ -654,14 +654,14 @@ export default function EventsList() {
                       </div>
                       {event.registrationDeadline && (
                         <div className="flex items-center text-gray-600">
-                          <FileText className="w-5 h-5 mr-2 text-[#c22f61]" />
+                          <FileText className="w-5 h-5 mr-2 text-[#003366]" />
                           <span>
                             Registration deadline: {format(new Date(event.registrationDeadline), "PPP")}
                           </span>
                         </div>
                       )}
                       <div className="flex items-center text-gray-600">
-                        <UserCheck className="w-5 h-5 mr-2 text-[#c22f61]" />
+                        <UserCheck className="w-5 h-5 mr-2 text-[#003366]" />
                         <span>{event.speakers.length} speakers</span>
                       </div>
                     </div>
@@ -712,7 +712,7 @@ export default function EventsList() {
                     <Button
                       onClick={() => setExpandedEvent(isRegistered ? null : event.id)}
                       variant="ghost"
-                      className="text-[#c22f61]"
+                      className="text-[#003366]"
                     >
                       {isRegistered ? (
                         <>
@@ -733,7 +733,7 @@ export default function EventsList() {
                         className={`${
                           isRegistered 
                             ? "bg-green-600 hover:bg-green-700"
-                            : "bg-[#c22f61] hover:bg-[#004488]"
+                            : "bg-[#003366] hover:bg-[#004488]"
                         }`}
                       >
                         {isLoading === event.id ? (

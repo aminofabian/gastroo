@@ -14,7 +14,7 @@ const MembershipFeatures = () => {
       </div>
 
       {/* Main content */}
-      <div className="bg-gradient-to-b from-[#c22f61] to-[#af2a57] pt-40 pb-32 relative">
+      <div className="bg-gradient-to-b from-[#003366] to-[#002347] pt-40 pb-32 relative">
         {/* Animated background glow */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 opacity-30">
@@ -57,7 +57,7 @@ const MembershipFeatures = () => {
                 className="group relative"
               >
                 <div className="h-full bg-gradient-to-br from-white/[0.05] to-transparent p-1">
-                  <div className="relative h-full bg-gradient-to-br from-[#c22f61]/40 to-[#af2a57]/40 backdrop-blur-sm p-8">
+                  <div className="relative h-full bg-gradient-to-br from-[#003366]/40 to-[#002347]/40 backdrop-blur-sm p-8">
                     {/* Animated highlight line */}
                     <div className="absolute top-0 left-0 w-0 h-[2px] bg-gradient-to-r from-emerald-400 to-indigo-400 group-hover:w-full transition-all duration-700" />
                     

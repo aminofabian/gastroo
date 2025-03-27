@@ -69,23 +69,23 @@ export default function DashboardHeader() {
           {/* Left Section */}
           <div className="flex items-center gap-6">
             <div className="space-y-0.5">
-              <h1 className="text-xl sm:text-2xl font-display font-bold bg-gradient-to-r from-[#c22f61] to-[#004488] bg-clip-text text-transparent">
+              <h1 className="text-xl sm:text-2xl font-display font-bold bg-gradient-to-r from-[#003366] to-[#004488] bg-clip-text text-transparent">
                 Welcome back,
               </h1>
               <p className="text-sm sm:text-base text-gray-800 font-semibold tracking-wide">
                 {fullName}
               </p>
               {dashboardData?.user?.role === 'ADMIN' ? (
-                <Link href="/admin" className="text-xs font-medium text-[#c22f61] hover:text-[#004488] transition-colors">
+                <Link href="/admin" className="text-xs font-medium text-[#003366] hover:text-[#004488] transition-colors">
                   {userRole}
                 </Link>
               ) : (
-                <p className="text-xs font-medium text-[#c22f61]/70">
+                <p className="text-xs font-medium text-[#003366]/70">
                   {userRole}
                 </p>
               )}
               {formattedDesignation && (
-                <p className="text-xs font-medium text-[#c22f61]/70">
+                <p className="text-xs font-medium text-[#003366]/70">
                   {formattedDesignation}
                 </p>
               )}
@@ -101,7 +101,7 @@ export default function DashboardHeader() {
             >
               <div className={`absolute inset-0 bg-white  transition-all duration-200 ${
                 isSearchFocused 
-                  ? "shadow-lg ring-2 ring-[#c22f61]/20" 
+                  ? "shadow-lg ring-2 ring-[#003366]/20" 
                   : "shadow-sm ring-1 ring-gray-200/70"
               }`} />
               <input
@@ -116,7 +116,7 @@ export default function DashboardHeader() {
                 className="absolute left-4 top-1/2 -translate-y-1/2"
               >
                 <FaSearch className={`transition-colors duration-200 ${
-                  isSearchFocused ? "text-[#c22f61]" : "text-gray-400"
+                  isSearchFocused ? "text-[#003366]" : "text-gray-400"
                 }`} />
               </motion.div>
             </motion.div>
@@ -132,7 +132,7 @@ export default function DashboardHeader() {
                 onClick={() => setShowNotifications(!showNotifications)}
                 className={`relative p-3  transition-all duration-200 ${
                   showNotifications 
-                    ? "bg-[#c22f61] text-white shadow-lg" 
+                    ? "bg-[#003366] text-white shadow-lg" 
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
@@ -164,13 +164,13 @@ export default function DashboardHeader() {
                     : "hover:bg-gray-50"
                 }`}
               >
-                <div className="w-10 h-10  bg-gradient-to-br from-[#c22f61] to-[#004488] flex items-center justify-center text-white font-medium shadow-md">
+                <div className="w-10 h-10  bg-gradient-to-br from-[#003366] to-[#004488] flex items-center justify-center text-white font-medium shadow-md">
                   {userInitials}
                 </div>
                 <div className="hidden sm:block text-left">
                   <div className="text-sm font-medium text-gray-900">{fullName}</div>
                   {formattedDesignation && (
-                    <div className="text-xs font-medium text-[#c22f61]/70">{formattedDesignation}</div>
+                    <div className="text-xs font-medium text-[#003366]/70">{formattedDesignation}</div>
                   )}
                   <div className="text-xs text-gray-500">{dashboardData?.user?.role || 'Loading...'}</div>
                 </div>
@@ -199,7 +199,7 @@ export default function DashboardHeader() {
           >
             <div className={`absolute inset-0 bg-white  transition-all duration-200 ${
               isSearchFocused 
-                ? "shadow-lg ring-2 ring-[#c22f61]/20" 
+                ? "shadow-lg ring-2 ring-[#003366]/20" 
                 : "shadow-sm ring-1 ring-gray-200/70"
             }`} />
             <input
@@ -214,7 +214,7 @@ export default function DashboardHeader() {
               className="absolute left-4 top-1/2 -translate-y-1/2"
             >
               <FaSearch className={`transition-colors duration-200 ${
-                isSearchFocused ? "text-[#c22f61]" : "text-gray-400"
+                isSearchFocused ? "text-[#003366]" : "text-gray-400"
               }`} />
             </motion.div>
           </motion.div>

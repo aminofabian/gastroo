@@ -60,7 +60,7 @@ export default function MissionPage() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white GSK shadow-lg p-8 mb-12"
         >
-          <h2 className="text-3xl font-bold text-[#c22f61] mb-6">Our Mission</h2>
+          <h2 className="text-3xl font-bold text-[#003366] mb-6">Our Mission</h2>
           <p className="text-gray-700 leading-relaxed text-lg">
             The mission of the Gastroenterology Society of Kenya is to advance the practice of 
             gastroenterology through education, research, and the dissemination of knowledge. 
@@ -77,7 +77,7 @@ export default function MissionPage() {
           transition={{ delay: 0.2 }}
           className="bg-white GSK shadow-lg p-8 mb-12"
         >
-          <h2 className="text-3xl font-bold text-[#c22f61] mb-6">Our Vision</h2>
+          <h2 className="text-3xl font-bold text-[#003366] mb-6">Our Vision</h2>
           <p className="text-gray-700 leading-relaxed text-lg">
             The vision of the Gastroenterology Society of Kenya is to be a leading force in 
             improving gastrointestinal health in Kenya, ensuring that individuals have access 
@@ -90,7 +90,7 @@ export default function MissionPage() {
 
         {/* Values Section */}
         <div>
-          <h2 className="text-3xl font-bold text-[#c22f61] mb-8 text-center">Our Core Values</h2>
+          <h2 className="text-3xl font-bold text-[#003366] mb-8 text-center">Our Core Values</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {values.map((value, index) => (
               <motion.div
@@ -101,7 +101,7 @@ export default function MissionPage() {
                 className="bg-white GSK shadow-lg p-6 hover:shadow-xl transition-shadow"
               >
                 <span className="text-4xl mb-4 block">{value.icon}</span>
-                <h3 className="text-xl font-bold text-[#c22f61] mb-3">{value.title}</h3>
+                <h3 className="text-xl font-bold text-[#003366] mb-3">{value.title}</h3>
                 <p className="text-gray-600 leading-relaxed">{value.description}</p>
               </motion.div>
             ))}
@@ -115,7 +115,7 @@ export default function MissionPage() {
           transition={{ delay: 0.5 }}
           className="mt-20 text-center"
         >
-          <h2 className="text-3xl font-bold text-[#c22f61] mb-6">Join Us in Our Mission</h2>
+          <h2 className="text-3xl font-bold text-[#003366] mb-6">Join Us in Our Mission</h2>
           <p className="text-gray-700 text-lg mb-8 max-w-3xl mx-auto">
             Together, we can improve gastrointestinal healthcare in Kenya and make a lasting 
             impact on our community&apos;s health and well-being.
@@ -123,13 +123,13 @@ export default function MissionPage() {
           <div className="flex justify-center gap-4">
             <a
               href="/membership"
-              className="bg-[#c22f61] text-white px-8 py-3 rounded-md font-semibold hover:bg-[#002244] transition-colors"
+              className="bg-[#003366] text-white px-8 py-3 rounded-md font-semibold hover:bg-[#002244] transition-colors"
             >
               Become a Member
             </a>
             <a
               href="/volunteer"
-              className="bg-white text-[#c22f61] border-2 border-[#c22f61] px-8 py-3 rounded-md font-semibold hover:bg-gray-50 transition-colors"
+              className="bg-white text-[#003366] border-2 border-[#003366] px-8 py-3 rounded-md font-semibold hover:bg-gray-50 transition-colors"
             >
               Volunteer With Us
             </a>

@@ -12,7 +12,7 @@ const BackButton = ({ href, label }: BackButtonProps) => {
     <div className="w-full flex items-center justify-center">
       <Link
         href={href}
-        className="text-gray-500 hover:text-[#c22f61] text-sm font-display underline-offset-4 hover:underline transition-colors"
+        className="text-gray-500 hover:text-[#003366] text-sm font-display underline-offset-4 hover:underline transition-colors"
       >
         {label}
       </Link>

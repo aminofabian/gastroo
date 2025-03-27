@@ -29,7 +29,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50 pb-20 lg:pb-0">
       {/* Admin Header */}
-      <header className="bg-[#c22f61] text-white">
+      <header className="bg-[#003366] text-white">
         <div className="max-w-[2000px] mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-display font-bold">GSK Admin Panel</h1>
@@ -55,8 +55,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   href={item.href}
                   className={`relative flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
                     isActive
-                      ? "text-[#c22f61]"
-                      : "text-gray-600 hover:text-[#c22f61] hover:bg-gray-50"
+                      ? "text-[#003366]"
+                      : "text-gray-600 hover:text-[#003366] hover:bg-gray-50"
                   }`}
                 >
                   <item.icon className="text-lg" />
@@ -64,7 +64,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   {isActive && (
                     <motion.div
                       layoutId="desktopNavIndicator"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#c22f61]"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#003366]"
                       transition={{
                         type: "spring",
                         stiffness: 300,
@@ -98,8 +98,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   href={item.href}
                   className={`relative flex flex-col items-center justify-center py-3 text-xs font-medium transition-colors ${
                     isActive
-                      ? "text-[#c22f61]"
-                      : "text-gray-600 hover:text-[#c22f61]"
+                      ? "text-[#003366]"
+                      : "text-gray-600 hover:text-[#003366]"
                   }`}
                 >
                   <div className="relative">
@@ -107,7 +107,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     {isActive && (
                       <motion.div
                         layoutId="mobileNavIndicator"
-                        className="absolute -bottom-1 left-1/2 w-1 h-1 bg-[#c22f61]  -translate-x-1/2"
+                        className="absolute -bottom-1 left-1/2 w-1 h-1 bg-[#003366]  -translate-x-1/2"
                         transition={{
                           type: "spring",
                           stiffness: 300,

@@ -14,7 +14,7 @@ export default function TermsOfServicePage() {
           transition={{ duration: 0.5 }}
           className="mb-12 text-center"
         >
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-[#c22f61] mb-6">
+          <h1 className="text-4xl md:text-5xl font-serif font-bold text-[#003366] mb-6">
             Terms of Service
           </h1>
           <p className="text-gray-600 text-lg">
@@ -157,7 +157,7 @@ export default function TermsOfServicePage() {
         >
           <Link 
             href="/"
-            className="inline-block bg-[#c22f61] text-white px-8 py-3 rounded-md hover:bg-[#004488] transition-colors duration-300 shadow-lg"
+            className="inline-block bg-[#003366] text-white px-8 py-3 rounded-md hover:bg-[#004488] transition-colors duration-300 shadow-lg"
           >
             Return to Home
           </Link>

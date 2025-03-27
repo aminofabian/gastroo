@@ -13,7 +13,7 @@ export default function HepBVaccinationPublicationPage() {
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-[#c22f61] text-white py-16">
+      <div className="bg-[#003366] text-white py-16">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center mb-6">
             <Link href="/research/publications" className="flex items-center text-white/80 hover:text-white transition-colors">
@@ -47,16 +47,16 @@ export default function HepBVaccinationPublicationPage() {
           {/* Publication Info Bar */}
           <div className="bg-gray-50 p-6 border-b flex flex-wrap justify-between gap-4">
             <div className="flex items-center">
-              <span className="px-3 py-1 bg-[#c22f61]/10 text-[#c22f61] rounded-full text-sm font-medium">
+              <span className="px-3 py-1 bg-[#003366]/10 text-[#003366] rounded-full text-sm font-medium">
                 Hepatology
               </span>
             </div>
             <div className="flex gap-3">
-              <button className="flex items-center text-gray-600 hover:text-[#c22f61] transition-colors">
+              <button className="flex items-center text-gray-600 hover:text-[#003366] transition-colors">
                 <Download size={18} className="mr-1" />
                 <span className="text-sm">PDF</span>
               </button>
-              <button className="flex items-center text-gray-600 hover:text-[#c22f61] transition-colors">
+              <button className="flex items-center text-gray-600 hover:text-[#003366] transition-colors">
                 <Share2 size={18} className="mr-1" />
                 <span className="text-sm">Share</span>
               </button>
@@ -154,7 +154,7 @@ export default function HepBVaccinationPublicationPage() {
               <h2 className="text-2xl font-serif font-bold text-gray-800 mb-4">Policy Recommendations</h2>
               <div className="space-y-4">
                 <div className="flex gap-3">
-                  <div className="w-8 h-8 bg-[#c22f61] text-white rounded-full flex items-center justify-center flex-shrink-0">1</div>
+                  <div className="w-8 h-8 bg-[#003366] text-white rounded-full flex items-center justify-center flex-shrink-0">1</div>
                   <div>
                     <h3 className="font-medium text-gray-800">Mandatory Vaccination Programs</h3>
                     <p className="text-gray-600">
@@ -163,7 +163,7 @@ export default function HepBVaccinationPublicationPage() {
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <div className="w-8 h-8 bg-[#c22f61] text-white rounded-full flex items-center justify-center flex-shrink-0">2</div>
+                  <div className="w-8 h-8 bg-[#003366] text-white rounded-full flex items-center justify-center flex-shrink-0">2</div>
                   <div>
                     <h3 className="font-medium text-gray-800">Cost Reduction Strategies</h3>
                     <p className="text-gray-600">
@@ -172,7 +172,7 @@ export default function HepBVaccinationPublicationPage() {
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <div className="w-8 h-8 bg-[#c22f61] text-white rounded-full flex items-center justify-center flex-shrink-0">3</div>
+                  <div className="w-8 h-8 bg-[#003366] text-white rounded-full flex items-center justify-center flex-shrink-0">3</div>
                   <div>
                     <h3 className="font-medium text-gray-800">Post-Vaccination Serological Testing</h3>
                     <p className="text-gray-600">
@@ -181,7 +181,7 @@ export default function HepBVaccinationPublicationPage() {
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <div className="w-8 h-8 bg-[#c22f61] text-white rounded-full flex items-center justify-center flex-shrink-0">4</div>
+                  <div className="w-8 h-8 bg-[#003366] text-white rounded-full flex items-center justify-center flex-shrink-0">4</div>
                   <div>
                     <h3 className="font-medium text-gray-800">Education and Awareness</h3>
                     <p className="text-gray-600">
@@ -218,7 +218,7 @@ export default function HepBVaccinationPublicationPage() {
               <div className="grid md:grid-cols-2 gap-6">
                 <Link href="/research/publications/nafld-kenya" className="block group">
                   <div className="bg-gray-50 p-6 rounded-lg h-full hover:shadow-md transition-shadow">
-                    <h3 className="font-medium text-gray-800 mb-2 group-hover:text-[#c22f61] transition-colors">
+                    <h3 className="font-medium text-gray-800 mb-2 group-hover:text-[#003366] transition-colors">
                       Prevalence of Non-Alcoholic Fatty Liver Disease in Urban Kenya and Associated Metabolic Risk Factors
                     </h3>
                     <p className="text-gray-500 text-sm mb-2">Karanja J, et al. (2020)</p>
@@ -230,7 +230,7 @@ export default function HepBVaccinationPublicationPage() {
                 
                 <Link href="/research/publications/hpylori-infection-kenya" className="block group">
                   <div className="bg-gray-50 p-6 rounded-lg h-full hover:shadow-md transition-shadow">
-                    <h3 className="font-medium text-gray-800 mb-2 group-hover:text-[#c22f61] transition-colors">
+                    <h3 className="font-medium text-gray-800 mb-2 group-hover:text-[#003366] transition-colors">
                       Prevalence and Risk Factors of Helicobacter pylori Infection in Kenya: A Cross-Sectional Study
                     </h3>
                     <p className="text-gray-500 text-sm mb-2">Kimani J, et al. (2023)</p>

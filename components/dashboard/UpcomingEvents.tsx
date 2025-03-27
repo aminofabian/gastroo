@@ -63,7 +63,7 @@ export default function UpcomingEvents() {
     <section className="relative">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-display font-bold text-gray-900">Upcoming Events</h2>
-        <button className="text-sm text-[#c22f61] hover:text-[#004488] font-medium">
+        <button className="text-sm text-[#003366] hover:text-[#004488] font-medium">
           View All Events
         </button>
       </div>
@@ -89,7 +89,7 @@ export default function UpcomingEvents() {
             <div className="flex justify-between items-start gap-4">
               <div className="flex-1 min-w-0">
                 {/* Title */}
-                <h3 className="font-medium text-gray-900 group-hover:text-[#c22f61] transition-colors truncate">
+                <h3 className="font-medium text-gray-900 group-hover:text-[#003366] transition-colors truncate">
                   {event.title}
                 </h3>
 

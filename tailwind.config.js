@@ -14,7 +14,7 @@ module.exports = {
             a: {
               color: '#0f5a5e',
               '&:hover': {
-                color: '#c22f61',
+                color: '#003366',
               },
             },
             h2: {
@@ -26,7 +26,7 @@ module.exports = {
               fontWeight: '600',
             },
             blockquote: {
-              borderLeftColor: '#c22f61',
+              borderLeftColor: '#003366',
               color: '#64748b', // slate-500
             },
             'code::before': {
