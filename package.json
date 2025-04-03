@@ -34,7 +34,7 @@
     "@radix-ui/react-tooltip": "^1.1.7",
     "@tailwindcss/line-clamp": "^0.4.4",
     "@types/bcrypt": "^5.0.2",
-    "axios": "^1.8.2",
+    "axios": "^1.8.4",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",

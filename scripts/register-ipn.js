@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: '../.env' });
 const axios = require('axios');
 
 async function registerIPN() {
@@ -67,4 +67,5 @@ console.log('API URL:', process.env.PESAPAL_API_URL);
 console.log('Consumer Key:', process.env.PESAPAL_CONSUMER_KEY?.substring(0, 8) + '...');
 console.log('Consumer Secret:', process.env.PESAPAL_CONSUMER_SECRET?.substring(0, 8) + '...');
 
+// Run the registration
 registerIPN(); 

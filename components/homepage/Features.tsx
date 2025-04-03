@@ -330,7 +330,7 @@ const Features = () => {
                 ))}
               </div>
             ) : (
-              events.slice(0, 2).map((event) => {
+              (events || []).slice(0, 2).map((event) => {
                 const { date, month } = formatDate(event.startDate);
                 const isRegistered = session ? event.attendees?.some(
                   (attendee) => attendee.id === session?.user?.id

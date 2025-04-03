@@ -4,8 +4,8 @@ import axios from 'axios';
 // These should match the values in your .env file
 const FALLBACK_CREDENTIALS = {
   PESAPAL_ENV: 'live',
-  PESAPAL_CONSUMER_KEY: 'IdHbOun/pEBzs9qN5OH3UJTO/tqdNK8C',
-  PESAPAL_CONSUMER_SECRET: '2FFD4eRSDSlcCTBwWZZYUiYmkmo=',
+  PESAPAL_CONSUMER_KEY: 'YAsnVITI+SvGmnM1k9MEISyZvD0alJHd',
+  PESAPAL_CONSUMER_SECRET: '0r11yxJyP8UFTh4mgNaL0LiORfg=',
   PESAPAL_API_URL: 'https://pay.pesapal.com/v3',
   PESAPAL_IPN_ID: 'e77d03e4-50de-4a2d-9f84-dc11e7191a59'
 };
