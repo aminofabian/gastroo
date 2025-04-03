@@ -14,7 +14,6 @@ import { useRouter } from "next/navigation";
 import { Check, Loader2, AlertCircle } from "lucide-react";
 import { submitPayment } from '@/lib/pesapal';
 import { usePaymentStatus } from '@/lib/hooks/usePaymentStatus';
-import TestPaymentButton from './TestPaymentButton';
 
 // Form Schema
 const membershipSchema = z.object({
@@ -44,10 +43,8 @@ const membershipSchema = z.object({
   // Add payment information
   membershipType: z.enum(["new", "renewal"], {
     required_error: "Please select membership type",
-  }),
-  customAmount: z.string().optional(),
+  })
 }).refine((data) => {
-  // Remove the password validation refine
   return true;
 });
 
@@ -117,7 +114,6 @@ export default function MembershipForm() {
       county: "",
       postalCode: "",
       membershipType: "new",
-      customAmount: "",
       cvUrl: "",
       licenseUrl: "",
       otherDocumentsUrls: [],
@@ -327,15 +323,7 @@ export default function MembershipForm() {
 
     try {
       const membershipType = form.getValues("membershipType");
-      const customAmount = form.getValues("customAmount");
-      
-      // Calculate amount based on membership type or use custom amount if provided
-      let amount;
-      if (customAmount && parseInt(customAmount) > 0) {
-        amount = parseInt(customAmount);
-      } else {
-        amount = membershipType === "new" ? 6500 : 5000;
-      }
+      const amount = membershipType === "new" ? 30000 : 20000;
 
       const response = await submitPayment({
         email: form.getValues("email"),
@@ -883,7 +871,8 @@ export default function MembershipForm() {
                       >
                         <div className="flex flex-col items-center">
                           <span className="font-bold">New Membership</span>
-                          <span className="text-sm">KES 10,000/=</span>
+                          <span className="text-sm">KES 30,000/=</span>
+                          <span className="text-xs text-gray-600">(Registration + Annual Fee)</span>
                         </div>
                         {paymentStatus.paid && field.value === 'new' && (
                           <div className="absolute inset-0 bg-green-500/90 flex items-center justify-center">
@@ -912,34 +901,6 @@ export default function MembershipForm() {
                         )}
                       </Button>
                     </div>
-                    
-                    {/* Custom Amount Input */}
-                    <FormField
-                      control={form.control}
-                      name="customAmount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Custom Amount (Optional)</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="number" 
-                              placeholder="Enter custom amount in KES"
-                              className="h-12"
-                              {...field}
-                              onChange={(e) => {
-                                field.onChange(e);
-                                // Don't automatically trigger payment on input change
-                                // Let the user click the payment button instead
-                              }}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Enter a custom amount if you wish to contribute more than the standard fee.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                     
                     {/* Payment Button */}
                     <Button
@@ -997,14 +958,6 @@ export default function MembershipForm() {
                     {error && (
                       <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                         <p className="text-sm text-red-700">{error}</p>
-                      </div>
-                    )}
-                    
-                    {/* Admin Test Button */}
-                    {isAdmin && (
-                      <div className="mt-6 border-t pt-6">
-                        <h3 className="text-sm font-medium text-gray-500 mb-4">Admin Tools</h3>
-                        <TestPaymentButton />
                       </div>
                     )}
                   </FormItem>

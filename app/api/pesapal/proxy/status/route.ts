@@ -21,22 +21,16 @@ export async function OPTIONS() {
 
 export async function GET(req: Request) {
   try {
-    // Get query parameters
     const { searchParams } = new URL(req.url);
     const token = searchParams.get('token');
     const orderTrackingId = searchParams.get('orderTrackingId');
-    
+
     if (!token || !orderTrackingId) {
       return addCorsHeaders(Response.json({ 
-        error: { message: 'Missing token or orderTrackingId' } 
+        error: { message: 'Missing token or order tracking ID' } 
       }, { status: 400 }));
     }
-    
-    console.log('Proxy: Checking transaction status:', {
-      orderTrackingId,
-      env: PESAPAL_ENV
-    });
-    
+
     // Make the request to PesaPal API
     const response = await axios({
       method: 'GET',
@@ -47,20 +41,12 @@ export async function GET(req: Request) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      validateStatus: null // Allow any status code
+      validateStatus: null
     });
-    
-    console.log('Proxy: Status check response status:', response.status);
     
     // Return the response data with CORS headers
     return addCorsHeaders(Response.json(response.data));
   } catch (error: any) {
-    console.error('Proxy: Status Check Error:', {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status
-    });
-    
     return addCorsHeaders(Response.json({
       error: {
         message: error.message,

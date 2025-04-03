@@ -24,13 +24,6 @@ export async function POST(req: Request) {
     // Get credentials from request body
     const credentials = await req.json();
     
-    console.log('Proxy: Requesting auth token with credentials:', {
-      keyLength: credentials.consumer_key?.length,
-      secretLength: credentials.consumer_secret?.length,
-      env: PESAPAL_ENV,
-      url: `${BASE_URL}/api/Auth/RequestToken`
-    });
-    
     // Make the request to PesaPal API
     const response = await axios({
       method: 'POST',
@@ -40,20 +33,12 @@ export async function POST(req: Request) {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      validateStatus: null // Allow any status code
+      validateStatus: null
     });
-    
-    console.log('Proxy: Auth response status:', response.status);
     
     // Return the response data with CORS headers
     return addCorsHeaders(Response.json(response.data));
   } catch (error: any) {
-    console.error('Proxy: Auth Error:', {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status
-    });
-    
     return addCorsHeaders(Response.json({
       error: {
         message: error.message,
