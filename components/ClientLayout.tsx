@@ -4,20 +4,15 @@ import React, { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
 import Navigation from "@/components/homepage/Navigation";
-import AuthLoader from '@/components/AuthLoader';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, status } = useSession();
 
   useEffect(() => {
     const checkAuth = async () => {
-      const auth = localStorage.getItem('gsk-auth');
-      const localAuthValid = auth === 'true';
-      
       // For pages that require Next.js auth (like dashboard), check session
       const isAuthProtectedPage = pathname.includes('/dashboard');
       
@@ -27,7 +22,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         return;
       }
       
-      setIsAuthenticated(localAuthValid);
       setLoading(false);
     };
     
@@ -38,10 +32,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   if (loading || status === 'loading') {
     return null;
-  }
-
-  if (!isAuthenticated) {
-    return <AuthLoader onAuthenticated={() => setIsAuthenticated(true)} />;
   }
 
   return (
