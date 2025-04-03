@@ -941,23 +941,32 @@ export default function MembershipForm() {
                         </div>
                         {paymentStatusText && !isPaid && (
                           <p className="mt-2 text-xs text-yellow-700">
-                            Current status: {paymentStatusText}
+                            Status: {paymentStatusText === "PENDING" ? "Waiting for payment" : paymentStatusText}
                           </p>
                         )}
                       </div>
                     )}
                     
                     {paymentStatusError && !paymentStatus.paid && (
-                      <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-sm text-red-700">
-                          Error checking payment status: {paymentStatusError}
-                        </p>
+                      <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <AlertCircle className="w-4 h-4 text-yellow-700" />
+                          <p className="text-sm text-yellow-700">
+                            {paymentStatusError.includes("payment_details_not_found") || 
+                             paymentStatusError.includes("Pending Payment")
+                              ? "Your payment is still being processed. Please complete the payment in the PesaPal window."
+                              : "There was an issue checking your payment status. Please try again or contact support if the issue persists."}
+                          </p>
+                        </div>
                       </div>
                     )}
                     
                     {error && (
                       <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-sm text-red-700">{error}</p>
+                        <div className="flex items-center space-x-2">
+                          <AlertCircle className="w-4 h-4 text-red-700" />
+                          <p className="text-sm text-red-700">{error}</p>
+                        </div>
                       </div>
                     )}
                   </FormItem>
