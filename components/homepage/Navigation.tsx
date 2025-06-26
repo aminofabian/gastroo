@@ -41,6 +41,7 @@ interface BaseNavItem {
 interface StandardNavItem extends BaseNavItem {
   type?: never;
   children?: StandardNavItem[];
+  specialHighlight?: 'new' | 'featured' | 'updated';
 }
 
 interface FeaturedNavItem extends BaseNavItem {
@@ -100,9 +101,18 @@ const NavItem = ({ item }: { item: NavItem }) => {
                       <li key={subIdx} className="border-b border-gray-100 last:border-none">
                         <a 
                           href={subChild.link}
-                          className="block px-6 py-3 uppercase text-[14px] font-merriweather text-gray-700 hover:bg-[#0f5a5e]/5 hover:text-[#003366] transition-colors duration-200"
+                          className="block px-6 py-3 uppercase text-[14px] font-merriweather text-gray-700 hover:bg-[#0f5a5e]/5 hover:text-[#003366] transition-colors duration-200 relative flex items-center"
                         >
                           {subChild.title}
+                          {subChild.specialHighlight && (
+                            <span className={`ml-2 text-xs px-2 py-0.5 rounded-full font-sans font-medium uppercase tracking-wider ${
+                              subChild.specialHighlight === 'new' ? 'bg-gradient-to-r from-[#003366] to-[#0f5a5e] text-white animate-pulse' : 
+                              subChild.specialHighlight === 'featured' ? 'bg-amber-500 text-white' : 
+                              'bg-green-500 text-white'
+                            }`}>
+                              {subChild.specialHighlight}
+                            </span>
+                          )}
                         </a>
                       </li>
                     ))}
@@ -215,18 +225,36 @@ const MobileMenu = ({ navItems, isOpen, setIsOpen }: {
                   <div className="ml-4 mt-1 border-l-2 border-[#0f5a5e]/20">
                     {item.children.map((child, childIdx) => (
                       <div key={childIdx}>
-                              <a href={child.link} className="block px-4 py-2 font-merriweather text-[#003366] hover:bg-[#0f5a5e]/5 transition-colors">
-                          {child.title}
-                        </a>
+                              <a href={child.link} className="block px-4 py-2 font-merriweather text-[#003366] hover:bg-[#0f5a5e]/5 transition-colors flex items-center">
+                                {child.title}
+                                {isStandard(child) && child.specialHighlight && (
+                                  <span className={`ml-2 text-xs px-2 py-0.5 rounded-full font-sans font-medium uppercase tracking-wider ${
+                                    child.specialHighlight === 'new' ? 'bg-gradient-to-r from-[#003366] to-[#0f5a5e] text-white' : 
+                                    child.specialHighlight === 'featured' ? 'bg-amber-500 text-white' : 
+                                    'bg-green-500 text-white'
+                                  }`}>
+                                    {child.specialHighlight}
+                                  </span>
+                                )}
+                              </a>
                         {child.children && (
-                          <div className="ml-4 border-l-2 border-[#0f5a5e]/20">
+                          <div className="ml-4 pl-4 border-l border-gray-100">
                             {child.children.map((subChild, subIdx) => (
                               <a
                                 key={subIdx}
-                                      href={subChild.link}
-                                className="block px-4 py-2 font-merriweather text-[#003366] hover:bg-[#0f5a5e]/5 transition-colors"
+                                href={subChild.link}
+                                className="block px-4 py-2 text-sm text-gray-600 hover:text-[#003366] hover:bg-gray-50 transition-colors flex items-center"
                               >
                                 {subChild.title}
+                                {subChild.specialHighlight && (
+                                  <span className={`ml-2 text-xs px-2 py-0.5 rounded-full font-sans font-medium uppercase tracking-wider ${
+                                    subChild.specialHighlight === 'new' ? 'bg-gradient-to-r from-[#003366] to-[#0f5a5e] text-white animate-pulse' : 
+                                    subChild.specialHighlight === 'featured' ? 'bg-amber-500 text-white' : 
+                                    'bg-green-500 text-white'
+                                  }`}>
+                                    {subChild.specialHighlight}
+                                  </span>
+                                )}
                               </a>
                             ))}
                           </div>
@@ -426,7 +454,20 @@ const Navigation = () => {
       link: '/events',
       children: [
         { title: 'Upcoming Conferences', link: '/events' },
-        { title: 'Workshops', link: '/events' }
+        { title: 'Workshops', link: '/events' },
+        { 
+          title: 'May Symposium 2025', 
+          link: '/may-symposium',
+          children: [
+            { 
+              title: 'Past Events Gallery', 
+              link: '/may-symposium',
+              // This will be used to add a badge/highlight to this menu item
+              // We'll handle this special property in the NavItem component
+              specialHighlight: 'new'
+            }
+          ]
+        }
       ]
     } as StandardNavItem,
     // { title: 'News', link: '/news' } as StandardNavItem,
