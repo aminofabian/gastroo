@@ -10,7 +10,7 @@ const leaders = [
     image: "/doctors/dr erick murunga.avif",
     specialty: "Gastroenterology",
     experience: "15+ years",
-    hospital: "GSK Khan University Hospital",
+    hospital: "Doctors Park, 6th floor – Gastro liver centre",
     email: "chairman@gsk.or.ke",
     linkedin: "https://www.linkedin.com/in/dr-eric-murunga",
     bio: "Dr. Eric Murunga leads GSK with over 15 years of experience in gastroenterology. He has pioneered several innovative treatment approaches and is dedicated to advancing digestive healthcare in Kenya."
@@ -41,7 +41,7 @@ const leaders = [
     image: "/doctors/dr mirriam gatehi.jpg",
     specialty: "Gastroenterology",
     experience: "13+ years",
-    hospital: "MP Shah Hospital",
+    hospital: "KU Teaching Referral Hospital",
     email: "vicesecretary@gsk.or.ke",
     bio: "Dr. Mirriam Gatehi focuses on research and development, leading several key studies in gastroenterological care."
   },
@@ -61,7 +61,7 @@ const leaders = [
     image: "/doctors/dr rupal maru.jpg",
     specialty: "Gastroenterology",
     experience: "11+ years",
-    hospital: "Kisumu Specialist Hospital",
+    hospital: "Kenyatta National Hospital",
     email: "vicetreasurer@gsk.or.ke",
     bio: "Dr. Rupal Maru specializes in pediatric gastroenterology and has been vital in expanding GSK&apos;s services to younger patients."
   }

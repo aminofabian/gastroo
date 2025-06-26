@@ -17,7 +17,7 @@ const AboutGSK = () => {
                 className="object-cover"
               />
               <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-sm px-6 py-3 GSK">
-                <span className="text-4xl font-bold text-[#003366]">500+</span>
+                <span className="text-4xl font-bold text-[#003366]">100+</span>
                 <p className="text-[#003366]/80 font-medium">Active Members</p>
               </div>
             </div>
