@@ -6,134 +6,68 @@ import { motion } from 'framer-motion';
 
 const symposiumImages = [
   {
-    src: '/may-symposium/75B_1991.jpg',
+    src: '/may-symposium/75B_1820.jpg',
     alt: 'May Symposium 2025 - Image 1',
     width: 800,
     height: 600
   },
   {
-    src: '/may-symposium/75B_1992.jpg',
+    src: '/may-symposium/75B_1929.jpg',
     alt: 'May Symposium 2025 - Image 2',
     width: 800,
     height: 600
   },
   {
-    src: '/may-symposium/75B_1993.jpg',
+    src: '/may-symposium/75B_1945.jpg',
     alt: 'May Symposium 2025 - Image 3',
     width: 800,
     height: 600
   },
   {
-    src: '/may-symposium/75B_1994.jpg',
+    src: '/may-symposium/DSC_8778.jpg',
     alt: 'May Symposium 2025 - Image 4',
     width: 800,
     height: 600
   },
   {
-    src: '/may-symposium/75B_1995.jpg',
+    src: '/may-symposium/75B_1813.jpg',
     alt: 'May Symposium 2025 - Image 5',
     width: 800,
     height: 600
   },
   {
-    src: '/may-symposium/75B_1996.jpg',
+    src: '/may-symposium/75B_1800.jpg',
     alt: 'May Symposium 2025 - Image 6',
     width: 800,
     height: 600
   },
   {
-    src: '/may-symposium/75B_1997.jpg',
+    src: '/may-symposium/75B_1917.jpg',
     alt: 'May Symposium 2025 - Image 7',
     width: 800,
     height: 600
   },
   {
-    src: '/may-symposium/DSC_8777.jpg',
+    src: '/may-symposium/75B_1909.jpg',
     alt: 'May Symposium 2025 - Image 8',
     width: 800,
     height: 600
   },
   {
-    src: '/may-symposium/DSC_8778.jpg',
+    src: '/may-symposium/75B_1842.jpg',
     alt: 'May Symposium 2025 - Image 9',
     width: 800,
     height: 600
   },
   {
-    src: '/may-symposium/DSC_8780.jpg',
+    src: '/may-symposium/75B_1874.jpg',
     alt: 'May Symposium 2025 - Image 10',
     width: 800,
     height: 600
   },
   {
-    src: '/may-symposium/DSC_8781.jpg',
+    src: '/may-symposium/75B_1813.jpg',
     alt: 'May Symposium 2025 - Image 11',
-    width: 800,
-    height: 600
-  },
-  {
-    src: '/may-symposium/DSC_8783.jpg',
-    alt: 'May Symposium 2025 - Image 12',
-    width: 800,
-    height: 600
-  },
-  {
-    src: '/may-symposium/DSC_8784.jpg',
-    alt: 'May Symposium 2025 - Image 13',
-    width: 800,
-    height: 600
-  },
-  {
-    src: '/may-symposium/DSC_8785.jpg',
-    alt: 'May Symposium 2025 - Image 14',
-    width: 800,
-    height: 600
-  },
-  {
-    src: '/may-symposium/DSC_8786.jpg',
-    alt: 'May Symposium 2025 - Image 15',
-    width: 800,
-    height: 600
-  },
-  {
-    src: '/may-symposium/DSC_8787.jpg',
-    alt: 'May Symposium 2025 - Image 16',
-    width: 800,
-    height: 600
-  },
-  {
-    src: '/may-symposium/DSC_8788.jpg',
-    alt: 'May Symposium 2025 - Image 17',
-    width: 800,
-    height: 600
-  },
-  {
-    src: '/may-symposium/DSC_8789.jpg',
-    alt: 'May Symposium 2025 - Image 18',
-    width: 800,
-    height: 600
-  },
-  {
-    src: '/may-symposium/DSC_8790.jpg',
-    alt: 'May Symposium 2025 - Image 19',
-    width: 800,
-    height: 600
-  },
-  {
-    src: '/may-symposium/DSC_8792.jpg',
-    alt: 'May Symposium 2025 - Image 20',
-    width: 800,
-    height: 600
-  },
-  {
-    src: '/may-symposium/DSC_8793.jpg',
-    alt: 'May Symposium 2025 - Image 21',
-    width: 800,
-    height: 600
-  },
-  {
-    src: '/may-symposium/DSC_8794.jpg',
-    alt: 'May Symposium 2025 - Image 22',
     width: 800,
     height: 600
   }
