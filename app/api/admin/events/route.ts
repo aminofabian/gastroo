@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { uploadToS3 } from "@/lib/s3";
-import { generateSlug } from "@/lib/utils";
+import { generateEventSlug, generateUniqueSlug } from "@/lib/slug-utils";
 
 type EventType = "CONFERENCE" | "WORKSHOP" | "SEMINAR" | "MEETING";
 
@@ -113,21 +113,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Generate base slug
-    let baseSlug = generateSlug(title);
-    let slug = baseSlug;
-    let counter = 1;
-
-    // Check for existing slugs and generate a unique one
-    while (true) {
-      const existing = await db.event.findUnique({
-        where: { slug },
-      });
-
-      if (!existing) break;
-      slug = `${baseSlug}-${counter}`;
-      counter++;
-    }
+    // Generate unique slug
+    const baseSlug = generateEventSlug(title, type, new Date(startDate));
+    
+    // Get existing slugs to ensure uniqueness
+    const existingEvents = await db.event.findMany({
+      select: { slug: true },
+    });
+    const existingSlugs = existingEvents.map(event => event.slug);
+    
+    const slug = generateUniqueSlug(baseSlug, existingSlugs);
 
     // Validate prices
     if (memberPrice !== null && (isNaN(memberPrice) || memberPrice < 0)) {

@@ -38,6 +38,7 @@ import { Progress } from "@/components/ui/progress";
 import EventRegistrationModal from "./EventRegistrationModal";
 import PesapalPaymentModal from "./PesapalPaymentModal";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface Event {
   id: string;
@@ -47,6 +48,7 @@ interface Event {
   startDate: string;
   endDate: string;
   venue: string;
+  slug: string;
   objectives: string[];
   cpdPoints: number;
   speakers: string[];
@@ -795,9 +797,15 @@ export default function EventsList() {
                           </Badge>
                         )}
                       </div>
-                      <h2 className="text-2xl font-bold text-[#003366]">
-                        {event.title}
-                      </h2>
+                      <Link 
+                        href={`/events/${event.slug}`}
+                        className="block group"
+                      >
+                        <h2 className="text-2xl font-bold text-[#003366] group-hover:text-[#004488] transition-colors cursor-pointer">
+                          {event.title}
+                          <span className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                        </h2>
+                      </Link>
                     </div>
                     <Badge className={`text-sm px-3 py-1.5 rounded-full whitespace-nowrap bg-gradient-to-r ${getEventTypeColor(event.type)}`}>
                       {event.type}
@@ -1043,7 +1051,7 @@ export default function EventsList() {
                     </div>
                   )}
 
-                  {/* Footer with show more/less button */}
+                  {/* Footer with show more/less button and view details */}
                   <div className="mt-6 flex items-center justify-between">
                     <Button
                       onClick={() => setExpandedEvent(expandedEvent === event.id ? null : event.id)}
@@ -1062,6 +1070,15 @@ export default function EventsList() {
                         </>
                       )}
                     </Button>
+                    <Link href={`/events/${event.slug}`}>
+                      <Button
+                        variant="outline"
+                        className="text-[#003366] border-[#003366] hover:bg-[#003366] hover:text-white"
+                      >
+                        <Info className="w-4 h-4 mr-2" />
+                        View Full Details
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </div>
