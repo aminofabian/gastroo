@@ -76,8 +76,9 @@ export default function EventsList() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [userRegistrations, setUserRegistrations] = useState<Set<string>>(new Set());
   const [pollingEventId, setPollingEventId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<string>("all");
+  const [filter, setFilter] = useState<string>("active");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [showClosedEvents, setShowClosedEvents] = useState<boolean>(false);
   const [userDetails, setUserDetails] = useState<{
     firstName: string;
     lastName: string;
@@ -543,9 +544,23 @@ export default function EventsList() {
     return today >= eventStart && today <= eventEnd;
   };
 
+  // Check if an event is closed (past or registration closed)
+  const isEventClosed = (event: Event) => {
+    const isPast = isPastEvent(event);
+    const isRegistrationClosed = event.registrationDeadline
+      ? new Date(event.registrationDeadline) < new Date()
+      : false;
+    return isPast || isRegistrationClosed;
+  };
+
   // Get filtered events
   const getFilteredEvents = () => {
     let filteredEvents = events;
+    
+    // First filter by active/closed status
+    if (!showClosedEvents) {
+      filteredEvents = filteredEvents.filter(event => !isEventClosed(event));
+    }
     
     // Filter by search term
     if (searchTerm) {
@@ -561,6 +576,12 @@ export default function EventsList() {
       case "registered":
         filteredEvents = filteredEvents.filter(event => isUserRegistered(event.id));
         break;
+      case "active":
+        filteredEvents = filteredEvents.filter(event => !isEventClosed(event));
+        break;
+      case "closed":
+        filteredEvents = filteredEvents.filter(event => isEventClosed(event));
+        break;
       case "upcoming":
         filteredEvents = filteredEvents.filter(event => !isPastEvent(event));
         break;
@@ -571,7 +592,7 @@ export default function EventsList() {
         filteredEvents = filteredEvents.filter(event => isStartingSoon(event));
         break;
       default:
-        // "all" - no additional filtering
+        // No additional filtering
         break;
     }
     
@@ -659,55 +680,90 @@ export default function EventsList() {
   return (
     <div className="space-y-8">
       {/* Filter and search controls */}
-      <div className="bg-white rounded-xl p-4 shadow-sm border flex flex-col sm:flex-row gap-4 items-center justify-between sticky top-16 z-10">
-        <div className="flex overflow-x-auto pb-2 gap-2 w-full sm:w-auto">
-          <Badge 
-            onClick={() => setFilter("all")}
-            className={`cursor-pointer px-4 py-2 rounded-full ${filter === "all" ? "bg-[#003366]" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
-          >
-            All Events
-          </Badge>
-          <Badge 
-            onClick={() => setFilter("upcoming")}
-            className={`cursor-pointer px-4 py-2 rounded-full ${filter === "upcoming" ? "bg-[#003366]" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
-          >
-            <Calendar className="w-4 h-4 mr-1" />
-            Upcoming
-          </Badge>
-          <Badge 
-            onClick={() => setFilter("today")}
-            className={`cursor-pointer px-4 py-2 rounded-full ${filter === "today" ? "bg-[#003366]" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
-          >
-            <Clock className="w-4 h-4 mr-1" />
-            Today
-          </Badge>
-          <Badge 
-            onClick={() => setFilter("starting-soon")}
-            className={`cursor-pointer px-4 py-2 rounded-full ${filter === "starting-soon" ? "bg-[#003366]" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
-          >
-            <AlertCircle className="w-4 h-4 mr-1" />
-            Starting Soon
-          </Badge>
-          <Badge 
-            onClick={() => setFilter("registered")}
-            className={`cursor-pointer px-4 py-2 rounded-full ${filter === "registered" ? "bg-[#003366]" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
-          >
-            <Ticket className="w-4 h-4 mr-1" />
-            My Events
-          </Badge>
-        </div>
-        <div className="relative w-full sm:w-72">
-          <input
-            type="text"
-            placeholder="Search events..."
-            className="w-full pl-10 pr-4 py-2 border rounded-full"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <div className="absolute left-3 top-2.5 text-gray-400">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+      <div className="bg-white rounded-xl p-4 shadow-sm border sticky top-16 z-10">
+        <div className="flex flex-col gap-4">
+          {/* Main filters */}
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+            <div className="flex overflow-x-auto pb-2 gap-2 w-full sm:w-auto">
+              <Badge 
+                onClick={() => setFilter("active")}
+                className={`cursor-pointer px-4 py-2 rounded-full ${filter === "active" ? "bg-[#003366]" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+              >
+                <Calendar className="w-4 h-4 mr-1" />
+                Active Events
+              </Badge>
+              <Badge 
+                onClick={() => setFilter("today")}
+                className={`cursor-pointer px-4 py-2 rounded-full ${filter === "today" ? "bg-[#003366]" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+              >
+                <Clock className="w-4 h-4 mr-1" />
+                Today
+              </Badge>
+              <Badge 
+                onClick={() => setFilter("starting-soon")}
+                className={`cursor-pointer px-4 py-2 rounded-full ${filter === "starting-soon" ? "bg-[#003366]" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+              >
+                <AlertCircle className="w-4 h-4 mr-1" />
+                Starting Soon
+              </Badge>
+              <Badge 
+                onClick={() => setFilter("registered")}
+                className={`cursor-pointer px-4 py-2 rounded-full ${filter === "registered" ? "bg-[#003366]" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+              >
+                <Ticket className="w-4 h-4 mr-1" />
+                My Events
+              </Badge>
+            </div>
+            <div className="relative w-full sm:w-72">
+              <input
+                type="text"
+                placeholder="Search events..."
+                className="w-full pl-10 pr-4 py-2 border rounded-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <div className="absolute left-3 top-2.5 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          {/* Toggle for closed events */}
+          <div className="flex items-center justify-between border-t pt-3">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="showClosedEvents"
+                checked={showClosedEvents}
+                onChange={(e) => {
+                  setShowClosedEvents(e.target.checked);
+                  // If showing closed events, switch to closed filter
+                  if (e.target.checked && filter === "active") {
+                    setFilter("closed");
+                  }
+                  // If hiding closed events and on closed filter, switch to active
+                  if (!e.target.checked && filter === "closed") {
+                    setFilter("active");
+                  }
+                }}
+                className="rounded border-gray-300 text-[#003366] focus:ring-[#003366]"
+              />
+              <label htmlFor="showClosedEvents" className="text-sm text-gray-600 cursor-pointer">
+                Include closed/ended events
+              </label>
+            </div>
+            
+            {showClosedEvents && (
+              <Badge 
+                onClick={() => setFilter("closed")}
+                className={`cursor-pointer px-4 py-2 rounded-full ${filter === "closed" ? "bg-red-600" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+              >
+                <X className="w-4 h-4 mr-1" />
+                Closed Events
+              </Badge>
+            )}
           </div>
         </div>
       </div>
@@ -718,10 +774,22 @@ export default function EventsList() {
             <Calendar className="w-12 h-12 text-gray-400 mb-4" />
             <h3 className="text-xl font-medium text-gray-700 mb-2">No events found</h3>
             <p className="text-gray-500 max-w-md mx-auto">
-              {filter !== "all" 
-                ? "Try changing your filters or search criteria."
-                : "There are no upcoming events at the moment. Please check back later."}
+              {filter === "active" && !showClosedEvents
+                ? "There are no active events at the moment. Check the 'Include closed/ended events' option to see past events."
+                : filter === "closed"
+                ? "No closed or ended events found."
+                : "Try changing your filters or search criteria."}
             </p>
+            {filter === "active" && !showClosedEvents && (
+              <Button
+                onClick={() => setShowClosedEvents(true)}
+                variant="outline"
+                className="mt-4 text-[#003366] border-[#003366] hover:bg-[#003366] hover:text-white"
+              >
+                <Calendar className="w-4 h-4 mr-2" />
+                View Closed Events
+              </Button>
+            )}
           </div>
         </div>
       ) : (
@@ -766,7 +834,14 @@ export default function EventsList() {
                       <div className="flex flex-wrap items-center gap-2 mb-2">
                         {isPast && (
                           <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-300">
+                            <X className="w-3 h-3 mr-1" />
                             Past Event
+                          </Badge>
+                        )}
+                        {isEventClosed(event) && !isPast && (
+                          <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200">
+                            <X className="w-3 h-3 mr-1" />
+                            Registration Closed
                           </Badge>
                         )}
                         {isToday && (
@@ -774,7 +849,7 @@ export default function EventsList() {
                             Happening Today
                           </Badge>
                         )}
-                        {isSoon && !isToday && (
+                        {isSoon && !isToday && !isEventClosed(event) && (
                           <Badge className="bg-gradient-to-r from-amber-500 to-orange-600 text-white">
                             Starting Soon
                           </Badge>
@@ -789,11 +864,6 @@ export default function EventsList() {
                           <Badge variant="destructive">
                             <X className="w-3 h-3 mr-1" />
                             Fully Booked
-                          </Badge>
-                        )}
-                        {isRegistrationClosed && !isFull && !isRegistered && (
-                          <Badge variant="destructive">
-                            Registration Closed
                           </Badge>
                         )}
                       </div>
