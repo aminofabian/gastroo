@@ -467,6 +467,10 @@ const Navigation = () => {
               specialHighlight: 'new'
             }
           ]
+        },
+        { 
+          title: 'NAIROBI GASTRO FOURTH INTERNATIONAL CONFERENCE 2025', 
+          link: '/july-gastro-training'
         }
       ]
     } as StandardNavItem,
