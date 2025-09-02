@@ -7,7 +7,9 @@
     "build": "next build",
     "postinstall": "prisma generate",
     "lint": "next lint",
-    "start": "set NODE_OPTIONS=--no-deprecation && next start"
+    "start": "set NODE_OPTIONS=--no-deprecation && next start",
+    "generate-slugs": "npx tsx scripts/generate-event-slugs.ts",
+    "debug-slugs": "npx tsx scripts/debug-production-slugs.ts"
   },
   "dependencies": {
     "@apollo/client": "^3.12.11",

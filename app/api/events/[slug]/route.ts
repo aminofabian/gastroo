@@ -9,6 +9,26 @@ export async function GET(
 ) {
   try {
     console.log("[EVENT_SLUG_API] Starting to fetch event with slug:", params.slug);
+    console.log("[EVENT_SLUG_API] Request URL:", request.url);
+    console.log("[EVENT_SLUG_API] Environment:", process.env.NODE_ENV);
+    
+    // Validate slug parameter
+    if (!params.slug || params.slug.trim() === '') {
+      console.log("[EVENT_SLUG_API] Invalid slug parameter:", params.slug);
+      return new NextResponse(
+        JSON.stringify({ 
+          error: "Invalid slug parameter",
+          details: "Slug parameter is required and cannot be empty"
+        }), 
+        { 
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+          }
+        }
+      );
+    }
     
     // Test database connection
     try {
@@ -16,8 +36,22 @@ export async function GET(
       console.log("[EVENT_SLUG_API] Database connection successful");
     } catch (dbError) {
       console.error("[EVENT_SLUG_API] Database connection failed:", dbError);
-      throw new Error("Database connection failed");
+      throw new Error(`Database connection failed: ${dbError instanceof Error ? dbError.message : 'Unknown error'}`);
     }
+    
+    // For debugging: check all events and their slugs
+    const allEvents = await prisma.event.findMany({
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+      },
+      take: 10, // Limit to avoid too much logging
+    });
+    
+    console.log("[EVENT_SLUG_API] Available events and slugs:", 
+      allEvents.map(e => ({ id: e.id, title: e.title, slug: e.slug }))
+    );
     
     // Fetch event by slug with all related data
     const event = await prisma.event.findUnique({
@@ -49,10 +83,24 @@ export async function GET(
 
     if (!event) {
       console.log("[EVENT_SLUG_API] Event not found with slug:", params.slug);
+      
+      // Try to find by ID as fallback (in case slug is actually an ID)
+      let eventById = null;
+      try {
+        eventById = await prisma.event.findUnique({
+          where: { id: params.slug },
+          select: { id: true, title: true, slug: true },
+        });
+      } catch (error) {
+        console.log("[EVENT_SLUG_API] Not a valid ID either:", error);
+      }
+      
       return new NextResponse(
         JSON.stringify({ 
           error: "Event not found",
-          details: `No event found with slug: ${params.slug}`
+          details: `No event found with slug: ${params.slug}`,
+          availableEvents: allEvents.map(e => e.slug),
+          foundById: eventById ? `Found by ID: ${eventById.title} (${eventById.slug})` : null,
         }), 
         { 
           status: 404,

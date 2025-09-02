@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import EventDetails from "@/components/events/EventDetails";
+import { serverFetch } from "@/lib/api-utils";
 
 interface EventPageProps {
   params: {
@@ -13,9 +14,10 @@ export async function generateMetadata({
   params,
 }: EventPageProps): Promise<Metadata> {
   try {
-    const baseUrl = process.env.NEXTAUTH_URL || process.env.VERCEL_URL || 'http://localhost:3000';
-    const response = await fetch(
-      `${baseUrl}/api/events/${params.slug}`,
+    console.log("[METADATA] Fetching event with slug:", params.slug);
+    
+    const response = await serverFetch(
+      `/api/events/${params.slug}`,
       { cache: "no-store" }
     );
     
@@ -53,9 +55,10 @@ export async function generateMetadata({
 
 export default async function EventPage({ params }: EventPageProps) {
   try {
-    const baseUrl = process.env.NEXTAUTH_URL || process.env.VERCEL_URL || 'http://localhost:3000';
-    const response = await fetch(
-      `${baseUrl}/api/events/${params.slug}`,
+    console.log("[EVENT_PAGE] Fetching event with slug:", params.slug);
+    
+    const response = await serverFetch(
+      `/api/events/${params.slug}`,
       { cache: "no-store" }
     );
 
