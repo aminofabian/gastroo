@@ -59,7 +59,13 @@ export default function AdminResourceManagement() {
       const allowedTypes: Record<string, string[]> = {
         PDF: ['application/pdf'],
         VIDEO: ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm'],
-        ARTICLE: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        ARTICLE: [
+          'application/pdf', 
+          'application/msword', 
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.ms-powerpoint',
+          'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+        ],
         EBOOK: ['application/pdf', 'application/epub+zip']
       };
       
