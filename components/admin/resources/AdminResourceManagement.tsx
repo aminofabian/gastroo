@@ -9,7 +9,7 @@ type Resource = {
   id: string;
   title: string;
   description: string;
-  type: 'PDF' | 'VIDEO' | 'ARTICLE' | 'EBOOK';
+  type: 'PDF' | 'VIDEO' | 'ARTICLE' | 'EBOOK' | 'PRESENTATION';
   category: string;
   fileUrl: string;
 };
@@ -62,11 +62,13 @@ export default function AdminResourceManagement() {
         ARTICLE: [
           'application/pdf', 
           'application/msword', 
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ],
+        EBOOK: ['application/pdf', 'application/epub+zip'],
+        PRESENTATION: [
           'application/vnd.ms-powerpoint',
           'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-        ],
-        EBOOK: ['application/pdf', 'application/epub+zip']
+        ]
       };
       
       const currentType = formData.type;
@@ -237,6 +239,7 @@ export default function AdminResourceManagement() {
               <option value="VIDEO">Video</option>
               <option value="ARTICLE">Article</option>
               <option value="EBOOK">E-Book</option>
+              <option value="PRESENTATION">Presentation</option>
             </select>
           </div>
 
