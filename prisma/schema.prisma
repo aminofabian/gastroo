@@ -454,4 +454,5 @@ enum ResourceType {
   VIDEO
   ARTICLE
   EBOOK
+  PRESENTATION
 }
