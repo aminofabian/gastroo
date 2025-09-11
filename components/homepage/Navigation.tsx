@@ -493,7 +493,20 @@ const Navigation = () => {
         { title: 'Get Involved with GSK', link: '/membership', description: 'Help us achieve a world free from digestive diseases.' },
         { title: 'Advocacy & GSK PAC', link: '/membership', description: 'Advancing public policies that support gastroenterology.' }
       ]
-    } as FeaturedNavItem
+    } as FeaturedNavItem,
+
+   {
+    title: 'Presentations',
+    link: '/presentations',
+    children: [
+      { title: 'Acute Liver Failure', link: '/presentations/acute-liver-failure' },
+      { title: 'Esophageal Motility Disorders', link: '/presentations/esophageal-motility-disorders' },
+      { title: 'Gastroparesis Management', link: '/presentations/gastroparesis' },
+      { title: 'Premalignant and Malignant Lesions of Upper GI Tract', link: '/presentations/premalignant-lesions' },
+      { title: 'Surgical Management of Gastric Cancer', link: '/presentations/gastric-cancer-surgery' }
+    ]
+   } as StandardNavItem,
+   
   ];
 
   return (
