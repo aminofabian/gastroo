@@ -500,7 +500,7 @@ const Navigation = () => {
     link: '/presentations',
     children: [
       { title: 'Acute Liver Failure', link: '/presentations/acute-liver-failure' },
-      { title: 'Esophageal Motility Disorders', link: '/presentations/esophageal-motility-disorders' },
+      { title: 'Esophageal Motility Disorders', link: '/presentations/esophageal' },
       { title: 'Gastroparesis Management', link: '/presentations/gastroparesis' },
       { title: 'Premalignant and Malignant Lesions of Upper GI Tract', link: '/presentations/premalignant-lesions' },
       { title: 'Surgical Management of Gastric Cancer', link: '/presentations/gastric-cancer-surgery' }
